@@ -45,10 +45,10 @@
 	</contributors>
 
 	<scm>
-		<connection>scm:git:https://bitbucket.org/geneweaver/geneweaver-stream-io/src/master/</connection>
-		<developerConnection>scm:git:ssh://git@bitbucket.org:geneweaver/geneweaver-stream-io.git</developerConnection>
+		<connection>scm:git:https://bitbucket.org/geneweaver/gweaver-stream-io/src/master/</connection>
+		<developerConnection>scm:git:ssh://git@bitbucket.org:geneweaver/gweaver-stream-io.git</developerConnection>
 		<tag>HEAD</tag>
-		<url>https://bitbucket.org/geneweaver/geneweaver-stream-io/browse</url>
+		<url>https://bitbucket.org/geneweaver/gweaver-stream-io/browse</url>
 	</scm>
 	<ciManagement>
 		<system>None</system>
