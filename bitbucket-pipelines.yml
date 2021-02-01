@@ -14,7 +14,7 @@ pipelines:
             # see https://bitbucket.org/blog/cloning-another-bitbucket-repository-in-bitbucket-pipelines
          script:
             - cp settings.xml ~/.m2/
-            - git clone git@bitbucket.org:geneweaver/variant-orthology-data.git
+            - git clone git@bitbucket.org:geneweaver/gweaver-test-data.git
             - mvn -B deploy # -B batch mode makes Maven less verbose
             
          services:
