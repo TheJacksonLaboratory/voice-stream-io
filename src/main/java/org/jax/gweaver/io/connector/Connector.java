@@ -16,6 +16,7 @@
  */
 package org.jax.gweaver.io.connector;
 
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.jax.gweaver.domain.Entity;
@@ -34,8 +35,16 @@ import org.neo4j.ogm.session.Session;
  * 
  * Function<? super T, ? extends Stream<? extends R>>
  */
-public interface Connector<I extends Entity, T extends Entity>  {
+public interface Connector<I extends Entity, T extends Entity> extends Function<I, Stream<T>>  {
 
+	/**
+	 * Simply passes to stream method by default.
+	 */
+	default Stream<T> apply(I entity) {
+		return stream(entity, null);
+	}
+
+	
 	/**
 	 * Create a stream from the entity. Note that if threads and
 	 * multiple sessions are used the session should not be cached

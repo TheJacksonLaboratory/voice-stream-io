@@ -1,12 +1,13 @@
 package org.jax.gweaver.io.connector;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 import org.jax.gweaver.domain.Entity;
@@ -14,7 +15,6 @@ import org.jax.gweaver.domain.GeneticEntity;
 import org.jax.gweaver.domain.Variant;
 import org.jax.gweaver.io.reader.AbstractDataFileTest;
 import org.jax.gweaver.io.reader.AbstractReader;
-import org.jax.gweaver.io.reader.GeneReader;
 import org.jax.gweaver.io.reader.RepeatedLineReader;
 import org.jax.gweaver.io.reader.VariantReader;
 import org.junit.After;
@@ -23,11 +23,11 @@ import org.junit.Test;
 
 public class VariantConnectorTest extends AbstractDataFileTest {
 	
-	private VariantConnector connector;
+	private Connector<GeneticEntity, Entity> connector;
 	
 	@Before
 	public void before() throws Exception {
-		connector = new VariantConnector();
+		connector = new VariantConnector<>();
 	}
 	
 	@After
@@ -91,6 +91,22 @@ public class VariantConnectorTest extends AbstractDataFileTest {
 			assertEquals(6860, found.size());
 			assertEquals(1000, reader.linesProcessed());
 		}
+	}
+
+	/**
+	 * Simple variant read 3.
+	 *
+	 * @throws Exception the exception
+	 */
+	@Test
+	public void simpleVariantReadWithDefConnector() throws Exception {
+		
+		AbstractReader<Variant> reader = new VariantReader<>("Homo sapiens", getFile("data/gz/homo_sapiens_incl_consequences_2.gvf.gz"));
+		Function<Variant, Stream<Entity>> def = reader.getDefaultConnector();
+		List<Entity> found = reader.stream().flatMap(v->def.apply(v)).collect(Collectors.toList());
+		
+		assertEquals(6860, found.size());
+		assertEquals(1000, reader.linesProcessed());
 	}
 
 	/**

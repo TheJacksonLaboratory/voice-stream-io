@@ -42,9 +42,10 @@ import org.neo4j.ogm.session.Session;
  * is parsed. This is desirable because it makes parsing a large varient file or files fast.
  * 
  * @author gerrim
- *
+ * @param <N> type of entity in the file
+ * @param <E> type of entity after mapping using the connector.
  */
-public class VariantConnector implements Connector<GeneticEntity, Entity>, Function<GeneticEntity, Stream<Entity>>  {
+public class VariantConnector<N extends GeneticEntity, E extends Entity> implements Connector<N, E>, Function<N, Stream<E>>  {
 
 	/**
 	 * Soft reference cache to reduce memory leaks. Garbage collector will nullify them as needed.
@@ -70,13 +71,14 @@ public class VariantConnector implements Connector<GeneticEntity, Entity>, Funct
 	}
 
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Stream<Entity> apply(GeneticEntity ge) {
+	public Stream<E> apply(GeneticEntity ge) {
 
 		Variant v = (Variant)ge;
 		try {
 			if (v.getVariantEffect()==null || v.getVariantEffect().isEmpty()) {
-				return Stream.of(v);
+				return (Stream<E>) Stream.of(v);
 			}
 			Collection<VariantEffect> ve = v.getVariantEffect()
 					.stream()
@@ -89,7 +91,7 @@ public class VariantConnector implements Connector<GeneticEntity, Entity>, Funct
 			Collection<Entity> ret = new LinkedList<>();
 			ret.add(v);
 			ret.addAll(ve);
-			return ret.stream();
+			return (Stream<E>) ret.stream();
 
 		} finally {
 			// We never actually save the relationships inside the Variant.
@@ -100,8 +102,9 @@ public class VariantConnector implements Connector<GeneticEntity, Entity>, Funct
 	/**
 	 * @param session - not required if useSessions is false.
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public Stream<Entity> stream(GeneticEntity ge, Session session) {
+	public Stream<E> stream(N ge, Session session) {
 
 		if (!useSessions) {
 			return apply(ge);
@@ -110,7 +113,7 @@ public class VariantConnector implements Connector<GeneticEntity, Entity>, Funct
 			Variant v = (Variant)ge;
 			try {
 				if (v.getVariantEffect()==null || v.getVariantEffect().isEmpty()) {
-					return Stream.of(v);
+					return (Stream<E>) Stream.of(v);
 				}
 				
 				Set<String> transIds = v.getVariantEffect().stream()
@@ -121,7 +124,7 @@ public class VariantConnector implements Connector<GeneticEntity, Entity>, Funct
 						.collect(Collectors.toSet());
 
 				if (transIds.isEmpty()) {
-					return Stream.of(v); // It gets cleared on finally.
+					return (Stream<E>) Stream.of(v); // It gets cleared on finally.
 				}
 
 				Map<String, Transcript> allTranscripts = getCachedFilters(transIds, session);
@@ -134,7 +137,7 @@ public class VariantConnector implements Connector<GeneticEntity, Entity>, Funct
 				Collection<Entity> ret = new LinkedList<>();
 				ret.add(v);
 				ret.addAll(ve);
-				return ret.stream();
+				return (Stream<E>) ret.stream();
 
 			} finally {
 				// We never actually save the relationships inside the Variant.

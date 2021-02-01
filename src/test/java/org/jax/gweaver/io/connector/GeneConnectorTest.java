@@ -3,7 +3,9 @@ package org.jax.gweaver.io.connector;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jax.gweaver.domain.Entity;
 import org.jax.gweaver.domain.Gene;
@@ -19,11 +21,11 @@ import org.junit.Test;
 public class GeneConnectorTest extends AbstractDataFileTest {
 
 	
-	private GeneConnector connector;
+	private GeneConnector<GeneticEntity, Entity> connector;
 	
 	@Before
 	public void before() throws Exception {
-		connector = new GeneConnector();
+		connector = new GeneConnector<>();
 	}
 	
 	@After
@@ -101,6 +103,23 @@ public class GeneConnectorTest extends AbstractDataFileTest {
 		assertEquals(1059, reader.linesProcessed());
 	}
 
+	/**
+	 * Simple gene read 3.
+	 *
+	 * @throws Exception the exception
+	 */
+	@Test
+	public void simpleGeneReadWithDefConnector() throws Exception {
+		
+		AbstractReader<GeneticEntity> reader = new GeneReader<>("Homo sapiens", getFile("data/gz/hg38_2.gtf.gz"));
+		Function<GeneticEntity, Stream<Entity>> def = reader.getDefaultConnector();
+		List<Entity> found = reader.stream()
+				   .flatMap(n->def.apply(n))
+				   .collect(Collectors.toList());
+		
+		assertEquals(401, found.size());
+		assertEquals(1059, reader.linesProcessed());
+	}
 	/**
 	 * Parallel gene read 1.
 	 *

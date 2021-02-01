@@ -26,11 +26,15 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.BeanMap;
+import org.jax.gweaver.domain.Entity;
 import org.jax.gweaver.domain.GeneticEntity;
 import org.jax.gweaver.domain.Variant;
 import org.jax.gweaver.domain.VariantEffect;
+import org.jax.gweaver.io.connector.VariantConnector;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -165,6 +169,11 @@ public class VariantReader<N extends GeneticEntity> extends AbstractReader<N>{
 	 */
 	protected String getAssignmentChar() {
 		return "=";
+	}
+
+	@Override
+	public <U extends Entity> Function<N, Stream<U>> getDefaultConnector() {
+		return new VariantConnector<>();
 	}
 
 }

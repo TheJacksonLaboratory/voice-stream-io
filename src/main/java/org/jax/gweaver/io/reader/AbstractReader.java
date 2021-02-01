@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -33,12 +32,14 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Spliterator;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.apache.commons.beanutils.BeanMap;
+import org.jax.gweaver.domain.Entity;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -116,6 +117,13 @@ public abstract class AbstractReader<T> implements Spliterator<T> {
 		this(species, new ScannerIterator<String>(file));
 		this.file = file; // Used for estimation
 	}
+	
+	/**
+	 * Most reader types will have a default connector.
+	 * @param <U>
+	 * @return
+	 */
+	public abstract <U extends Entity> Function<T, Stream<U>> getDefaultConnector();
 	
 	/**
 	 * Instantiates a new abstract reader.

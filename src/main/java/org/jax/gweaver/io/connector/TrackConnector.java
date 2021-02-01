@@ -34,7 +34,7 @@ import org.neo4j.ogm.session.Session;
  * @author gerrim
  *
  */
-public class TrackConnector implements Connector<NamedEntity, Entity>, Function<NamedEntity, Stream<Entity>> {
+public class TrackConnector<N extends NamedEntity, E extends Entity> implements Connector<N, E>, Function<N, Stream<E>> {
 	
 	
 	private Track currentTrack;
@@ -43,26 +43,27 @@ public class TrackConnector implements Connector<NamedEntity, Entity>, Function<
 	 * @param session, not required.
 	 */
 	@Override
-	public Stream<Entity> stream(NamedEntity bean, Session session) {
+	public Stream<E> stream(N bean, Session session) {
 		return apply(bean);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Stream<Entity> apply(NamedEntity bean) {
+	public Stream<E> apply(N bean) {
 		String name = bean.getName();
 		if (bean instanceof Track && (name==null || name.isEmpty())) {
 			throw new ConnectorException("Tracks must have a name!");
 		}
         if (bean instanceof Track) {
         	currentTrack = (Track)bean;
-        	return Stream.of(bean);
+        	return (Stream<E>) Stream.of(bean);
         	
         } else if (bean instanceof Region) {
         	
         	if (currentTrack!=null) {
-        		return Stream.of(bean, new Tracked((Region)bean, currentTrack));
+        		return (Stream<E>)Stream.of(bean, new Tracked((Region)bean, currentTrack));
         	} else {
-        		return Stream.of(bean);
+        		return (Stream<E>)Stream.of(bean);
         	}
         }
         

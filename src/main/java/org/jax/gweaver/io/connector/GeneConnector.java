@@ -42,7 +42,7 @@ import com.google.common.cache.CacheBuilder;
  * @author gerrim
  *
  */
-public class GeneConnector implements Connector<GeneticEntity, Entity>, Function<GeneticEntity, Stream<Entity>> {
+public class GeneConnector<N extends GeneticEntity, E extends Entity> implements Connector<N, E>, Function<N, Stream<E>> {
 	
 	/**
 	 * We store recently created Genes by id. We look in this pool for the 
@@ -55,8 +55,9 @@ public class GeneConnector implements Connector<GeneticEntity, Entity>, Function
 	private Cache<String, Gene> recentGenes = createCache();
 
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Stream<Entity> apply(GeneticEntity bean) {
+	public Stream<E> apply(GeneticEntity bean) {
 		String geneId = bean.getGeneId();
 		if (geneId==null || geneId.isEmpty()) {
 			throw new ConnectorException("Genes and Transcripts must have a geneId!");
@@ -68,7 +69,7 @@ public class GeneConnector implements Connector<GeneticEntity, Entity>, Function
         	Gene gene = (Gene)bean;
         	recentGenes.put(geneId, gene);
         	
-        	return Stream.of(gene);
+        	return (Stream<E>) Stream.of(gene);
         	
         } else if (bean instanceof Transcript) {
         	
@@ -79,7 +80,7 @@ public class GeneConnector implements Connector<GeneticEntity, Entity>, Function
         	} 
         	
         	Produces produces = new Produces(gene, transcript);
-        	return Stream.of(transcript, produces);
+        	return (Stream<E>) Stream.of(transcript, produces);
         }
         
         throw new ConnectorException(getClass().getSimpleName()+" may not be used with "+bean.getClass().getSimpleName());
@@ -89,7 +90,7 @@ public class GeneConnector implements Connector<GeneticEntity, Entity>, Function
 	 * @param session - not required.
 	 */
 	@Override
-	public Stream<Entity> stream(GeneticEntity bean, Session session) {
+	public Stream<E> stream(GeneticEntity bean, Session session) {
 		return apply(bean);
 	}
 	

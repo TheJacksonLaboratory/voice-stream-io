@@ -7,14 +7,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jax.gweaver.domain.Entity;
-import org.jax.gweaver.domain.Gene;
 import org.jax.gweaver.domain.NamedEntity;
 import org.jax.gweaver.domain.Produces;
 import org.jax.gweaver.domain.Region;
 import org.jax.gweaver.domain.Region.Strand;
 import org.jax.gweaver.domain.Track;
 import org.jax.gweaver.domain.Tracked;
-import org.jax.gweaver.domain.Variant;
 import org.jax.gweaver.domain.VariantEffect;
 import org.jax.gweaver.io.reader.AbstractDataFileTest;
 import org.jax.gweaver.io.reader.AbstractReader;
@@ -27,11 +25,11 @@ import org.junit.Test;
 
 public class TrackConnectorTest extends AbstractDataFileTest {
 
-	private TrackConnector connector;
+	private TrackConnector<NamedEntity, Entity> connector;
 	
 	@Before
 	public void before() throws Exception {
-		connector = new TrackConnector();
+		connector = new TrackConnector<>();
 	}
 	
 	@After
@@ -97,6 +95,19 @@ public class TrackConnectorTest extends AbstractDataFileTest {
 	public void simpleTrack() throws ReaderException, IOException {
 		
 		AbstractReader<NamedEntity> reader = new BedReader<>("Homo sapiens", getFile("data/bed/track1.bed"));
+		List<Entity> lines = reader.stream().flatMap(b->connector.apply(b)).collect(Collectors.toList());
+
+		assertEquals(1, lines.stream().filter(e->e instanceof Track).count());
+		assertEquals(9, lines.stream().filter(e->e instanceof Region).count());
+		assertEquals(9, lines.stream().filter(e->e instanceof Tracked).count());
+		assertEquals(0, lines.stream().filter(e->e instanceof Produces).count());
+	}
+
+	@Test
+	public void simpleTrackFromReader() throws ReaderException, IOException {
+		
+		AbstractReader<NamedEntity> reader = ReaderFactory.getReader("Homo sapiens", getFile("data/bed/track1.bed"));
+		this.connector = (TrackConnector<NamedEntity, Entity>)reader.getDefaultConnector();
 		List<Entity> lines = reader.stream().flatMap(b->connector.apply(b)).collect(Collectors.toList());
 
 		assertEquals(1, lines.stream().filter(e->e instanceof Track).count());

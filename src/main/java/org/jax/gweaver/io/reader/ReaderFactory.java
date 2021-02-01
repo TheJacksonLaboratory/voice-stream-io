@@ -21,6 +21,8 @@ package org.jax.gweaver.io.reader;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,11 +45,22 @@ public class ReaderFactory {
 		Map<String, Class> tmp = new HashMap<>();
 		tmp.put("gtf", 			GeneReader.class);
 		tmp.put("gtf.gz", 		GeneReader.class);
+		tmp.put("gtf.zip", 		GeneReader.class);
 		tmp.put("gvf", 			VariantReader.class);
 		tmp.put("gvf.gz", 		VariantReader.class);
+		tmp.put("gvf.zip", 		VariantReader.class);
 		tmp.put("bed", 			BedReader.class);
 		tmp.put("bed.gz", 		BedReader.class);
-		classes = tmp;
+		tmp.put("bed.zip", 		BedReader.class);
+		classes = Collections.unmodifiableMap(tmp);
+	}
+	
+	/**
+	 * A list of supported file extensions.
+	 * @return
+	 */
+	public static Collection<String> extensions() {
+		return classes.keySet();
 	}
 	
 	/**

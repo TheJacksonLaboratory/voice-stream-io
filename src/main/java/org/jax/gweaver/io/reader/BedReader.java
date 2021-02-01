@@ -22,12 +22,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.BeanMap;
+import org.jax.gweaver.domain.Entity;
 import org.jax.gweaver.domain.NamedEntity;
 import org.jax.gweaver.domain.Region;
 import org.jax.gweaver.domain.Region.Strand;
 import org.jax.gweaver.domain.Track;
+import org.jax.gweaver.io.connector.TrackConnector;
 
 /**
  * Bed file format @see https://m.ensembl.org/info/website/upload/bed.html
@@ -120,6 +124,12 @@ public class BedReader<N extends NamedEntity> extends AbstractReader<N> {
 	@Override
 	protected String getAssignmentChar() {
 		return "=";
+	}
+
+	@Override
+	public <U extends Entity> Function<N, Stream<U>> getDefaultConnector() {
+		Function<N, Stream<U>> func = new TrackConnector<N, U>();
+		return func;
 	}
 
 }

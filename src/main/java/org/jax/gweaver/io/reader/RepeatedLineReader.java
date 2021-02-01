@@ -20,7 +20,10 @@ package org.jax.gweaver.io.reader;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
+import org.jax.gweaver.domain.Entity;
 import org.jax.gweaver.domain.GeneticEntity;
 
 // TODO: Auto-generated Javadoc
@@ -135,6 +138,12 @@ public class RepeatedLineReader<T extends GeneticEntity> extends AbstractReader<
 		} else {
 			throw new IllegalArgumentException("Cannot get example line for "+type);
 		}
+	}
+
+
+	@Override
+	public <U extends Entity> Function<T, Stream<U>> getDefaultConnector() {
+		throw new IllegalArgumentException("The repeated line reader is for testing and does not have a connector type!");
 	}
 
 }

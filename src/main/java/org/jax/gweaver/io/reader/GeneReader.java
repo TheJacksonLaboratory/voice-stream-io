@@ -22,11 +22,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.BeanMap;
+import org.jax.gweaver.domain.Entity;
 import org.jax.gweaver.domain.Gene;
 import org.jax.gweaver.domain.GeneticEntity;
 import org.jax.gweaver.domain.Transcript;
+import org.jax.gweaver.io.connector.GeneConnector;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -128,6 +132,11 @@ public class GeneReader<N extends GeneticEntity> extends AbstractReader<N>{
         }
         
         return (N)bean;
+	}
+
+	@Override
+	public <U extends Entity> Function<N, Stream<U>> getDefaultConnector() {
+		return new GeneConnector<>();
 	}
 
 }
