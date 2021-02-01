@@ -1,0 +1,253 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.jax.gweaver</groupId>
+	<artifactId>gweaver-stream-io</artifactId>
+	<packaging>jar</packaging>
+	<version>1.1.0-SNAPSHOT</version>
+	<name>Geneweaver Stream IO</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.source>11</maven.compiler.source>
+		<neo4j-ogm.version>3.2.18</neo4j-ogm.version>
+	</properties>
+
+	<description>The IO bundle for Geneweaver.</description>
+	<url>https://www.jax.org</url>
+	<inceptionYear>2020</inceptionYear>
+	<organization>
+		<name>Jackson Laboratory</name>
+		<url>http://www.jax.org</url>
+	</organization>
+	<licenses>
+		<license>
+			<name>Apache 2</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<id>gerrim</id>
+			<name>Matthew Gerring</name>
+			<url>https://www.jax.org/people/matthew-gerring</url>
+		</developer>
+	</developers>
+
+	<contributors>
+		<contributor>
+			<name>None</name>
+		</contributor>
+	</contributors>
+
+	<scm>
+		<connection>scm:git:https://bitbucket.org/geneweaver/geneweaver-stream-io/src/master/</connection>
+		<developerConnection>scm:git:ssh://git@bitbucket.org:geneweaver/geneweaver-stream-io.git</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://bitbucket.org/geneweaver/geneweaver-stream-io/browse</url>
+	</scm>
+	<ciManagement>
+		<system>None</system>
+	</ciManagement>
+
+	<dependencies>
+
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.7</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.9.4</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+		<dependency>
+		    <groupId>com.google.guava</groupId>
+		    <artifactId>guava</artifactId>
+		    <version>30.1-jre</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/junit/junit -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+		<dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-api</artifactId>
+			<version>1.7.21</version>
+		</dependency>
+		
+		<!-- NEEDED FOR DOMAIN -->
+		<!-- https://mvnrepository.com/artifact/org.neo4j/neo4j-ogm-core -->
+		<dependency>
+			<groupId>org.neo4j</groupId>
+			<artifactId>neo4j-ogm-core</artifactId>
+			<version>${neo4j-ogm.version}</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.6.0</version>
+				<configuration>
+					<fork>true</fork>
+					<compilerArgs>
+						<arg>-Xlint:unchecked</arg>
+					</compilerArgs>
+					<source>11</source>
+					<target>11</target>
+					<encoding>UTF-8</encoding>
+					<forceJavacCompilerUse>true</forceJavacCompilerUse>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.1</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>3.1.1</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+					<configLocation>src/main/resources/checkstyle/checkstyle-rules.xml</configLocation>
+					<!-- <suppressionsLocation>src/main/resources/checkstyle/suppressions.xml</suppressionsLocation> -->
+					<headerLocation>src/main/resources/checkstyle/header.txt</headerLocation>
+					<consoleOutput>true</consoleOutput>
+					<failsOnError>true</failsOnError>
+				</configuration>
+
+				<!-- <executions> <execution> <id>validate</id> <phase>validate</phase> 
+					<goals> <goal>check</goal> </goals> </execution> </executions> -->
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.0.1</version>
+				<configuration>
+					<additionalparam>-Xdoclint:none</additionalparam>
+					<doclint>none</doclint>
+					<failOnError>false</failOnError>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.6</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<!-- Threshold -->
+					
+					<execution>
+					    <id>jacoco-check</id>
+					    <goals>
+					        <goal>check</goal>
+					    </goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>PACKAGE</element>
+									<excludes>
+										<!-- Exceptions do not need tests usually. -->
+										<exclude>*Exception</exclude>
+
+										<!-- Exclude the beans for now. Later to serialization tests on 
+											them. -->
+										<exclude>org.jax.gweaver.domain</exclude>
+										<exclude>org.jax.gweaver.domain.*</exclude>
+										
+										<!--  This is tested throughly in geweaver-bulk-import -->
+										<exclude>org.jax.gweaver.io.connector</exclude>
+
+									</excludes>
+
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>80%</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
+	<distributionManagement>
+		<repository>
+			<id>centralgeneweaver</id>
+			<name>a0wwvwd37k5w5-artifactory-primary-0-releases</name>
+			<url>https://geneweaver.jfrog.io/artifactory/geneweaver</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshotsgeneweaver</id>
+			<name>a0wwvwd37k5w5-artifactory-primary-0-snapshots</name>
+			<url>https://geneweaver.jfrog.io/artifactory/geneweaver</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+</project>

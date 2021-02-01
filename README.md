@@ -27,3 +27,13 @@ This README would normally document whatever steps are necessary to get your app
 
 * Repo owner or admin
 * Other community or team contact
+
+
+# Creation
+This project was created using:
+
+	mvn archetype:generate \
+		-DgroupId=org.jax.gweaver \
+		-DartifactId=variant.orthology.io \
+		-DarchetypeArtifactId=maven-archetype-quickstart \
+		-DinteractiveMode=false
