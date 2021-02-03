@@ -33,7 +33,7 @@ try (BufferedWriter writer = new Files.newBufferedWriter("~/mygenes.csv")) {
 	writer.write(new Gene().getHeader());
 	writer.newLine();
 
-	# Do something with the stream of objects.
+	// Do something with the stream of objects.
 	reader.stream()								// Create a stream of types, e.g. Entity
 		.filter(filter)							// We only want a certain biotype
 		.flatMap(entity->connector.apply(entity))			// Use the connector to figure out what is connected to what e.g. Gene to Transcript via Produces
