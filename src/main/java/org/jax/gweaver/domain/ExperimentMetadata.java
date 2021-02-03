@@ -25,6 +25,18 @@ public class ExperimentMetadata extends AbstractEntity {
     
     private String reference;
 
+    public ExperimentMetadata() {
+    	
+    }
+    
+	public ExperimentMetadata(String cellType, String cellGroup, String assayTarget, String assay, String reference) {
+		this.cellType = cellType;
+		this.cellGroup = cellGroup;
+		this.assayTarget = assayTarget;
+		this.assay = assay;
+		this.reference = reference;
+	}
+
 	/**
 	 * @return the cellType
 	 */

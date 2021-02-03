@@ -1,8 +1,6 @@
 package org.jax.gweaver.io.reader;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -39,18 +37,23 @@ import org.jax.gweaver.domain.ExperimentMetadata;
  *
  * @param <N>
  */
-class ChiapetReader<N extends AnchoredEntity> extends AbstractXlsReader<N> {
+class ChiapetReader<N extends AnchoredEntity> extends AbstractXlsReader<N, ExperimentMetadata> {
 	
-	private ExperimentMetadata meta;
 
 	public ChiapetReader(ReaderRequest request) throws IOException {
 		super(request);
-		setConcreteClass(ChromatinInteraction.class); // User may override
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	protected N create(Row row) {
+		
+		Class<N> concrete = getConcreteClass();
+		try {
+			if (concrete==null) concrete  = (Class<N>)ChromatinInteraction.class;
+		} catch (RuntimeException ne) {
+			throw new IllegalArgumentException("Please set the concrete class on "+getClass().getSimpleName(), ne);
+		}
 		
 		Cell cell = row.getCell(0);
 		if (cell==null) return null;
@@ -58,9 +61,9 @@ class ChiapetReader<N extends AnchoredEntity> extends AbstractXlsReader<N> {
 		if (first==null) return null;
 		if (!first.matches("chr(\\d+|X|Y|M)")) return null; // Null is filtered from the stream.
 		
-		if (getConcreteClass() == ChromatinInteraction.class) {
+		if (concrete == ChromatinInteraction.class) {
 			ChromatinInteraction c = new ChromatinInteraction();
-			c.setMeta(meta);
+			c.setMeta(getMeta());
 			c.setLeft(createAnchor(row, 0,1,2));
 			c.setRight(createAnchor(row, 3,4,5));
 			c.setPetCount((int)Math.round(row.getCell(6).getNumericCellValue()));
@@ -71,7 +74,7 @@ class ChiapetReader<N extends AnchoredEntity> extends AbstractXlsReader<N> {
 			c.setOverlapDNAPET("Yes".equalsIgnoreCase(overlap));
 			
 			return (N)c;
-		} else if (getConcreteClass() == Anchor.class) {
+		} else if (concrete == Anchor.class) {
 			return (N)createAnchor(row, 0,1,2,3);
 		}
 		
@@ -89,20 +92,6 @@ class ChiapetReader<N extends AnchoredEntity> extends AbstractXlsReader<N> {
 		return new Anchor(row.getCell(i).getStringCellValue(),
 						  (int)Math.round(row.getCell(j).getNumericCellValue()),
 						  (int)Math.round(row.getCell(k).getNumericCellValue()));
-	}
-
-	/**
-	 * @return the meta
-	 */
-	protected ExperimentMetadata getMeta() {
-		return meta;
-	}
-
-	/**
-	 * @param meta the meta to set
-	 */
-	protected void setMeta(ExperimentMetadata meta) {
-		this.meta = meta;
 	}
 
 }

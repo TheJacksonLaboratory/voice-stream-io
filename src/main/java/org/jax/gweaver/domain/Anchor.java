@@ -10,7 +10,7 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 
 @Generated("POJO")
-public class Anchor implements AnchoredEntity {
+public class Anchor extends AbstractEntity implements AnchoredEntity {
 
 	/** The uid. */
 	@Id
@@ -123,14 +123,14 @@ public class Anchor implements AnchoredEntity {
 	/**
 	 * @return the intensity
 	 */
-	protected int getIntensity() {
+	public int getIntensity() {
 		return intensity;
 	}
 
 	/**
 	 * @param intensity the intensity to set
 	 */
-	protected void setIntensity(int intensity) {
+	public void setIntensity(int intensity) {
 		this.intensity = intensity;
 	}
 

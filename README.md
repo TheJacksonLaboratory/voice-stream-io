@@ -3,8 +3,8 @@
 ## Introduction
 This project is designed to be used as a library for reading different file formats. It is intended
 to be consumable as a maven artifact from artifactory or maven central. StreamReader is returned
-from ReaderFactory which finds the correct format for the user. The differences between this IO i
-mplementation and many other readers for the formats which it supports (gtf, gvf, bed, xls, etc.) is:
+from ReaderFactory which finds the correct format for the user. The differences between this IO 
+implementation and many other readers for the formats which it supports (gtf, gvf, bed, xls, etc.) is:
 1. It is stream based, designed to read the file into a stream of domain objects.
 2. It does not hold any file's data in memory so may be used for large files.
 3. It is designed to have flat map operations on the stream for connecting objects.

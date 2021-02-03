@@ -21,6 +21,8 @@ package org.jax.gweaver.domain;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 /**
  * Any node or edge in our graph.
@@ -44,6 +46,7 @@ public interface Entity {
 	 *
 	 * @return true if this node is a node..
 	 */
+	@JsonIgnore
 	public default boolean isRelationship() {
 		return getClass().isAnnotationPresent(RelationshipEntity.class);
 	}
@@ -53,6 +56,7 @@ public interface Entity {
 	 *
 	 * @return true if this node is a node..
 	 */
+	@JsonIgnore
 	public default boolean isNode() {
 		return getClass().isAnnotationPresent(NodeEntity.class);
 	}
@@ -64,6 +68,7 @@ public interface Entity {
 	 *
 	 * @return the header
 	 */
+	@JsonIgnore
 	default String getHeader() {
 		return null; // TODO
 	}
@@ -74,6 +79,7 @@ public interface Entity {
 	 *
 	 * @return the string
 	 */
+	@JsonIgnore
 	default String toCsv() {
 		return null; // TODO
 	}

@@ -12,7 +12,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
 
 @Generated("POJO")
 @NodeEntity(label="ChromatinInteraction")
-public class ChromatinInteraction implements AnchoredEntity {
+public class ChromatinInteraction extends AbstractEntity implements AnchoredEntity {
 
 	/** The uid. */
 	@Id
@@ -151,8 +151,9 @@ public class ChromatinInteraction implements AnchoredEntity {
 		if (!(obj instanceof ChromatinInteraction))
 			return false;
 		ChromatinInteraction other = (ChromatinInteraction) obj;
-		return fdr == other.fdr && Objects.equals(left, other.left) && Objects.equals(meta, other.meta)
-				&& overlapDNAPET == other.overlapDNAPET && p == other.p && petCount == other.petCount
+		return Double.doubleToLongBits(fdr) == Double.doubleToLongBits(other.fdr) && Objects.equals(left, other.left)
+				&& Objects.equals(meta, other.meta) && overlapDNAPET == other.overlapDNAPET
+				&& Double.doubleToLongBits(p) == Double.doubleToLongBits(other.p) && petCount == other.petCount
 				&& Objects.equals(right, other.right) && Objects.equals(uid, other.uid);
 	}
 

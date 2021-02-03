@@ -13,12 +13,21 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.jax.gweaver.domain.Entity;
 
-public abstract class AbstractXlsReader<T extends Entity> implements StreamReader<T> {
+/**
+ * 
+ * @author gerrim
+ *
+ * @param <T> Type we are parsing
+ * @param <M> Type of metadata
+ */
+public abstract class AbstractXlsReader<T extends Entity, M> implements StreamReader<T> {
+
+	private  M meta;
 
 	private ReaderRequest request;
 	private int sheetIndex = 0;
 	private int linesProcessed;
-	private Class concreteClass;
+	private Class<T> concreteClass;
 
 	public AbstractXlsReader(ReaderRequest request) throws IOException {
 		this.request = request;
@@ -111,7 +120,7 @@ public abstract class AbstractXlsReader<T extends Entity> implements StreamReade
 	/**
 	 * @return the concreteClass
 	 */
-	protected Class getConcreteClass() {
+	protected Class<T> getConcreteClass() {
 		return concreteClass;
 	}
 
@@ -120,6 +129,20 @@ public abstract class AbstractXlsReader<T extends Entity> implements StreamReade
 	 */
 	protected void setConcreteClass(Class concreteClass) {
 		this.concreteClass = concreteClass;
+	}
+
+	/**
+	 * @return the meta
+	 */
+	protected M getMeta() {
+		return meta;
+	}
+
+	/**
+	 * @param meta the meta to set
+	 */
+	protected void setMeta(M meta) {
+		this.meta = meta;
 	}
 
 }

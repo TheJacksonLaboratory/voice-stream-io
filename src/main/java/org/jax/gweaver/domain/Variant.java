@@ -18,6 +18,7 @@
  */
 package org.jax.gweaver.domain;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
@@ -277,7 +278,6 @@ public class Variant extends GeneticEntity {
 		return result;
 	}
 
-
 	/**
 	 * Equals.
 	 *
@@ -296,7 +296,16 @@ public class Variant extends GeneticEntity {
 		return Objects.equals(altAllele, other.altAllele) && Objects.equals(altAlleleFreq, other.altAlleleFreq)
 				&& Objects.equals(biotype, other.biotype) && Objects.equals(id, other.id)
 				&& Objects.equals(refAllele, other.refAllele) && Objects.equals(rsId, other.rsId)
-				&& Objects.equals(uuid, other.uuid) && Objects.equals(variantEffect, other.variantEffect);
+				&& Objects.equals(uuid, other.uuid) && 
+				equalsNullEmpty(variantEffect, other.variantEffect);
+	}
+
+	private boolean equalsNullEmpty(Collection<?> c1, Collection<?> c2) {
+		if (c1==c2) return true;
+		if (c1==null && c2 == null) return true;
+		if (c1==null && c2.isEmpty()) return true;
+		if (c1.isEmpty() && c2 == null) return true;
+		return Objects.equals(c1, c2);
 	}
 
 	/**

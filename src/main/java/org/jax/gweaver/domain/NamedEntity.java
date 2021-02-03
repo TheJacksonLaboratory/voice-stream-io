@@ -23,7 +23,7 @@ import java.util.Objects;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 
-public class NamedEntity implements Species, Entity {
+public class NamedEntity extends AbstractEntity implements Species {
 
 	/** The uid. */
 	@Id

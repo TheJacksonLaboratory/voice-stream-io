@@ -11,6 +11,8 @@ import javax.annotation.processing.Generated;
 
 import org.jax.gweaver.domain.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Get a reader for a given request. This object holds all the required information
  * for determining which concrete reader should be used for a given format.
@@ -24,7 +26,10 @@ public class ReaderRequest {
 	
 	private String species;
 	private File file;
+	
+	@JsonIgnore
 	private InputStream stream;
+	
 	private String name;
 	
 	/**
@@ -33,6 +38,11 @@ public class ReaderRequest {
 	private boolean includeAll = true;
 	
 	private int expectedSize;
+	
+	/**
+	 * objType is only used for test requests.
+	 */
+	@JsonIgnore
 	private Class<? extends Entity> objType;
 	
 	public ReaderRequest() {
@@ -64,76 +74,78 @@ public class ReaderRequest {
 	/**
 	 * @return the species
 	 */
-	protected String getSpecies() {
+	public String getSpecies() {
 		return species;
 	}
 
 	/**
 	 * @param species the species to set
 	 */
-	protected void setSpecies(String species) {
+	public void setSpecies(String species) {
 		this.species = species;
 	}
 
 	/**
 	 * @return the file
 	 */
-	protected File getFile() {
+	public File getFile() {
 		return file;
 	}
 
 	/**
 	 * @param file the file to set
 	 */
-	protected void setFile(File file) {
-		this.file = file;
+	public void setFile(File file) {
+		this.file = file!=null ? file.getAbsoluteFile() : null;
 	}
 
 	/**
 	 * @return the stream
 	 */
-	protected InputStream getStream() {
+	@JsonIgnore
+	public InputStream getStream() {
 		return stream;
 	}
 
 	/**
 	 * @param stream the stream to set
 	 */
-	protected void setStream(InputStream stream) {
+	@JsonIgnore
+	public void setStream(InputStream stream) {
 		this.stream = stream;
 	}
 
 	/**
 	 * @return the name
 	 */
-	protected String getName() {
+	public String getName() {
 		return name;
 	}
 
 	/**
 	 * @param name the name to set
 	 */
-	protected void setName(String name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 
 	/**
 	 * @return the includeAll
 	 */
-	protected boolean isIncludeAll() {
+	public boolean isIncludeAll() {
 		return includeAll;
 	}
 
 	/**
 	 * @param includeAll the includeAll to set
 	 */
-	protected void setIncludeAll(boolean includeAll) {
+	public void setIncludeAll(boolean includeAll) {
 		this.includeAll = includeAll;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(expectedSize, file, includeAll, name, objType, species, stream);
+		return Objects.hash(expectedSize, file, includeAll, name, species);
 	}
 
 	@Override
@@ -144,26 +156,29 @@ public class ReaderRequest {
 			return false;
 		ReaderRequest other = (ReaderRequest) obj;
 		return expectedSize == other.expectedSize && Objects.equals(file, other.file) && includeAll == other.includeAll
-				&& Objects.equals(name, other.name) && Objects.equals(objType, other.objType)
-				&& Objects.equals(species, other.species) && Objects.equals(stream, other.stream);
+				&& Objects.equals(name, other.name) && Objects.equals(species, other.species);
 	}
 
+	@JsonIgnore
 	String name() {
 		if (file!=null) return file.getName();
 		if (name!=null) return name;
 		throw new IllegalArgumentException("A reader request must have a name for the resource!");
 	}
 
+	@JsonIgnore
 	public InputStream stream() throws FileNotFoundException {
 		if (file!=null) return new FileInputStream(file);
 		if (stream!=null) return stream;
 		return null;
 	}
 
+	@JsonIgnore
 	public boolean isFileRequest() {
 		return file!=null;
 	}
 
+	@JsonIgnore
 	public void close() throws IOException {
 		if (stream!=null) stream.close();
 		stream = null;
@@ -172,6 +187,7 @@ public class ReaderRequest {
 	/**
 	 * @return the objType
 	 */
+	@JsonIgnore
 	protected Class<? extends Entity> getObjType() {
 		return objType;
 	}
@@ -179,6 +195,7 @@ public class ReaderRequest {
 	/**
 	 * @param objType the objType to set
 	 */
+	@JsonIgnore
 	protected void setObjType(Class<? extends Entity> objType) {
 		this.objType = objType;
 	}
@@ -186,14 +203,14 @@ public class ReaderRequest {
 	/**
 	 * @return the expectedSize
 	 */
-	protected int getExpectedSize() {
+	public int getExpectedSize() {
 		return expectedSize;
 	}
 
 	/**
 	 * @param expectedSize the expectedSize to set
 	 */
-	protected void setExpectedSize(int expectedSize) {
+	public void setExpectedSize(int expectedSize) {
 		this.expectedSize = expectedSize;
 	}
 	
