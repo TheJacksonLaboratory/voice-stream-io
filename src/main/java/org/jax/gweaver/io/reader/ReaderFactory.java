@@ -50,7 +50,10 @@ public class ReaderFactory {
 		// if it is applicable for a given format.
 		tmp.put("xls", 			ChiapetReader.class);
 		
-		
+		// If there are multiple tsv formats, we will have to ask the reader
+		// if it is applicable for a given format.
+		tmp.put("tsv", 			Fantom5EnsemblMapReader.class);
+
 		classes = Collections.unmodifiableMap(tmp);
 	}
 	
