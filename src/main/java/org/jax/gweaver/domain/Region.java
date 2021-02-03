@@ -23,8 +23,6 @@ import java.util.Objects;
 
 import javax.annotation.processing.Generated;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 /**
@@ -137,12 +135,12 @@ public class Region  extends NamedEntity {
 	/**
 	 * the size of these sub-elements
 	 */
-	private int blockSizes;
+	private int[] blockSizes;
 	
 	/**
 	 * the size of these sub-elements
 	 */
-	private int blockStarts;
+	private int[] blockStarts;
 	
 	
 	public enum Strand {
@@ -319,7 +317,7 @@ public class Region  extends NamedEntity {
 	/**
 	 * @return the blockSizes
 	 */
-	public int getBlockSizes() {
+	public int[] getBlockSizes() {
 		return blockSizes;
 	}
 
@@ -327,7 +325,7 @@ public class Region  extends NamedEntity {
 	/**
 	 * @param blockSizes the blockSizes to set
 	 */
-	public void setBlockSizes(int blockSizes) {
+	public void setBlockSizes(int... blockSizes) {
 		this.blockSizes = blockSizes;
 	}
 
@@ -335,7 +333,7 @@ public class Region  extends NamedEntity {
 	/**
 	 * @return the blockStarts
 	 */
-	public int getBlockStarts() {
+	public int[] getBlockStarts() {
 		return blockStarts;
 	}
 
@@ -343,7 +341,7 @@ public class Region  extends NamedEntity {
 	/**
 	 * @param blockStarts the blockStarts to set
 	 */
-	public void setBlockStarts(int blockStarts) {
+	public void setBlockStarts(int... blockStarts) {
 		this.blockStarts = blockStarts;
 	}
 

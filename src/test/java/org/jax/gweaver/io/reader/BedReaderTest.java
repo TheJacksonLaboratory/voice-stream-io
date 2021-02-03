@@ -99,4 +99,24 @@ public class BedReaderTest extends AbstractDataFileTest {
 		assertEquals(8, lines.stream().filter(e->e instanceof Region).count());
 	}
 
+	@Test
+	public void enhancerTss() throws ReaderException, IOException {
+		
+		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/enhancer_tss_associations_hg38.bed.gz")));
+		List<NamedEntity> lines = reader.stream().collect(Collectors.toList());
+
+		assertEquals(0, lines.stream().filter(e->e instanceof Track).count());
+		assertEquals(66752, lines.stream().filter(e->e instanceof Region).count());
+	}
+	
+	@Test
+	public void unmappedLocations() throws ReaderException, IOException {
+		
+		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/unmapped_locations_hg38.bed.gz")));
+		List<NamedEntity> lines = reader.stream().collect(Collectors.toList());
+
+		assertEquals(0, lines.stream().filter(e->e instanceof Track).count());
+		assertEquals(190, lines.stream().filter(e->e instanceof Region).count());
+	}
+
 }

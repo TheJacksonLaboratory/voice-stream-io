@@ -18,9 +18,10 @@
  */
 package org.jax.gweaver.io.reader;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -71,8 +72,7 @@ class BedReader<N extends NamedEntity> extends AbstractScanner<N> {
 			d.put("description", attr.get("description"));
 			if (attr.containsKey("priority")) d.put("priority", attr.get("priority"));
 			if (attr.containsKey("color")) {
-				String[] col = attr.get("color").split(",");
-				track.setColor(new int[] {Integer.parseInt(col[0]), Integer.parseInt(col[1]), Integer.parseInt(col[2])});
+				track.setColor(getIntArray(attr.get("color"), 3));
 			}
 			if (attr.containsKey("useScore")) d.put("useScore", attr.get("useScore"));
 			if (attr.containsKey("itemRgb")) {
@@ -95,12 +95,11 @@ class BedReader<N extends NamedEntity> extends AbstractScanner<N> {
 			if (rec.length>6) d.put("thickStart",  rec[6]);
 			if (rec.length>7) d.put("thickEnd",    rec[7]);
 			if (rec.length>8) {
-				String[] col = rec[8].split(",");
-				region.setItemRgb(new int[] {Integer.parseInt(col[0]), Integer.parseInt(col[1]), Integer.parseInt(col[2])});
+				region.setItemRgb(getIntArray(rec[8], 3));
 			}
 			if (rec.length>9) d.put("blockCount",  rec[9]);
-			if (rec.length>10) d.put("blockSizes",  rec[10]);
-			if (rec.length>11) d.put("blockStarts", rec[11]);
+			if (rec.length>10) d.put("blockSizes",  getIntArray(rec[10], 1));
+			if (rec.length>11) d.put("blockStarts", getIntArray(rec[11], 1));
 			
 			ret = (N)region;
 		}
@@ -109,6 +108,29 @@ class BedReader<N extends NamedEntity> extends AbstractScanner<N> {
 		return ret;
 	}
 	
+	private int[] getIntArray(String string, int min) {
+		String[] col = string.split(",");
+		Collection<Integer> ret = new LinkedList<>();
+		for (String c : col) {
+			ret.add(Integer.parseInt(c));
+		}
+		if (ret.size()<min) {
+			for (int i = ret.size(); i < min; i++) {
+				ret.add(0);
+			}
+		}
+		return toArray(ret);
+	}
+
+	private int[] toArray(Collection<Integer> ret) {
+		int[] ia = new int[ret.size()];
+		Iterator<Integer> it = ret.iterator();
+		for (int i = 0; i < ia.length; i++) {
+			ia[i] = it.next();
+		}
+		return ia;
+	}
+
 	@Override
 	protected String getAssignmentChar() {
 		return "=";
