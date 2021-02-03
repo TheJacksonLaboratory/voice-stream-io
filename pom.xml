@@ -100,6 +100,20 @@
 			<version>${neo4j-ogm.version}</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-csv -->
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-csv</artifactId>
+		    <version>1.8</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
+		<dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi</artifactId>
+		    <version>5.0.0</version>
+		</dependency>
+		
 	</dependencies>
 
 	<build>
@@ -208,11 +222,6 @@
 									<excludes>
 										<!-- Exceptions do not need tests usually. -->
 										<exclude>*Exception</exclude>
-
-										<!-- Exclude the beans for now. Later to serialization tests on 
-											them. -->
-										<exclude>org.jax.gweaver.domain</exclude>
-										<exclude>org.jax.gweaver.domain.*</exclude>
 										
 										<!--  This is tested throughly in geweaver-bulk-import -->
 										<exclude>org.jax.gweaver.io.connector</exclude>

@@ -19,6 +19,9 @@
 package org.jax.gweaver.domain;
 
 import java.util.Objects;
+
+import javax.annotation.processing.Generated;
+
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
@@ -29,8 +32,9 @@ import org.neo4j.ogm.annotation.StartNode;
 /**
  * The Class Produces.
  */
+@Generated("POJO")
 @RelationshipEntity(type = "PRODUCES")
-public class Produces implements Entity {
+public class Produces extends AbstractEntity {
 	
 	/** The uid. */
 	@Id
@@ -72,9 +76,9 @@ public class Produces implements Entity {
 	public String getHeader() {
 		StringBuilder buf = new StringBuilder();
 		buf.append(":START_ID(Gene-Id)");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(":END_ID(Transcript-Id)");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(":TYPE");
 		return buf.toString();
 	}
@@ -88,9 +92,9 @@ public class Produces implements Entity {
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
 		buf.append(gene.getGeneId());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(transcript.getTranscriptId());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getClass().getSimpleName().toUpperCase());
 		return buf.toString();
 	}

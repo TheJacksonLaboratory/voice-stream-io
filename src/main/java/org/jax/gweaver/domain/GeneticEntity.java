@@ -28,7 +28,7 @@ import org.neo4j.ogm.annotation.Index;
 /**
  * The Class GeneticEntity.
  */
-public abstract class GeneticEntity implements Entity, Species {
+public abstract class GeneticEntity extends AbstractEntity implements Species {
 	
 	/** The uid. */
 	@Id
@@ -87,27 +87,27 @@ public abstract class GeneticEntity implements Entity, Species {
 	public String getHeader() {
 		StringBuilder buf = new StringBuilder();
 		buf.append("active:boolean");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("chr");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("type");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("phase");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("strand");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("source");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("species");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("start:int");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("end:int");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("sequenceId");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("score");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(":LABEL");
 		return buf.toString();
 	}
@@ -121,27 +121,27 @@ public abstract class GeneticEntity implements Entity, Species {
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
 		buf.append(getActive().booleanValue());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getChr());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getType());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getPhase());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getStrand());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getSource());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getSpecies());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getStart());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getEnd());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getSequenceId());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getScore());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getClass().getSimpleName().toString());
 		return buf.toString();
 	}

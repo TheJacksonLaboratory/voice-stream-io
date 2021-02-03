@@ -23,6 +23,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.annotation.processing.Generated;
+
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
 
@@ -30,6 +32,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
 /**
  * The Class Variant.
  */
+@Generated("POJO")
 @NodeEntity(label="Variant")
 public class Variant extends GeneticEntity {
 
@@ -72,21 +75,21 @@ public class Variant extends GeneticEntity {
 	public String getHeader() {
 		StringBuilder buf = new StringBuilder();
 		buf.append("uuid:ID(Variant-Id)");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("rsId");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("dbxRef");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("id");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("refAllele");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("altAllele");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("altAlleleFreq:float");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("biotype");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(super.getHeader());
 		return buf.toString();
 	}
@@ -100,21 +103,21 @@ public class Variant extends GeneticEntity {
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
 		buf.append(getUuid());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getRsId());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getDbxRef());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getId());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getRefAllele());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getAltAllele());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getAltAlleleFreq());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getBiotype());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(super.toCsv());
 		return buf.toString();
 	}

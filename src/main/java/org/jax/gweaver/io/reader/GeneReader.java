@@ -18,7 +18,6 @@
  */
 package org.jax.gweaver.io.reader;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -41,47 +40,17 @@ import org.jax.gweaver.io.connector.GeneConnector;
  * @param <N>  A node entity, either a Gene or a Transcript related to a Gene.
  *
  */
-public class GeneReader<N extends GeneticEntity> extends AbstractReader<N>{
+class GeneReader<N extends GeneticEntity> extends AbstractScanner<N>{
 
 	/**
 	 * Instantiates a new gene reader.
 	 *
 	 * @param species the species
+	 * @throws IOException 
 	 */
-	// Used in RepeatedLineReader, do not delete.
-	protected GeneReader(String species) {
-		super(species);
-		init();
-	}
-	
-	/**
-	 * Instantiates a new gene reader.
-	 *
-	 * @param species the species
-	 * @param file the file
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 */
-	public GeneReader(String species, File file) throws IOException {
-		super(species, file); // Genes are not that dense maybe one gene / 10 lines
-		init();
-	}
-	
-	/**
-	 * Instantiates a new gene reader.
-	 *
-	 * @param species the species
-	 * @param in the in
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 */
-	public GeneReader(String species, InputStream in) throws IOException {
-		super(species, in); // Genes are not that dense maybe one gene / 10 lines
-		init();
-	}
-
-	/**
-	 * Inits the.
-	 */
-	private void init() {
+	GeneReader(ReaderRequest request) throws IOException {
+		super(request);
+		setDelimiter("\t+"); // Must be a tab only
 		setWindStopType("gene");
 		setChunkSize(10000); // We need quite a few lines because active objects in the data are sparse.
 	}

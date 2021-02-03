@@ -22,7 +22,6 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 
 
-// TODO: Auto-generated Javadoc
 /**
  * Any node or edge in our graph.
  * 
@@ -31,10 +30,6 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
  */
 public interface Entity {
 	
-	/** The Constant D. */
-	// We purposely use a character unlikely, the default character "," appears in some values.
-	public static final String D = System.getProperty("delimiter", "±"); // Character used for delimiter in csv files.
-
 	/**
 	 * The unique Id of the entity set by Neo4j
 	 * when the object is saved. Might be null if the 
@@ -81,5 +76,15 @@ public interface Entity {
 	 */
 	default String toCsv() {
 		return null; // TODO
+	}
+	
+	/**
+	 * Override to change delimiter for an object.
+	 * @return
+	 */
+	default String getDelimiter() {
+		// We purposely use a character unlikely, the default character "," appears in some values.
+		// You can override the delimier or set it if not writing bulk import files.
+		return System.getProperty("delimiter", "±");// Character used for delimiter in bulk import files.
 	}
 }

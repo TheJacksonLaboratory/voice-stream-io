@@ -15,10 +15,11 @@ import org.jax.gweaver.domain.Track;
 import org.jax.gweaver.domain.Tracked;
 import org.jax.gweaver.domain.VariantEffect;
 import org.jax.gweaver.io.reader.AbstractDataFileTest;
-import org.jax.gweaver.io.reader.AbstractReader;
-import org.jax.gweaver.io.reader.BedReader;
+import org.jax.gweaver.io.reader.AbstractScanner;
 import org.jax.gweaver.io.reader.ReaderException;
 import org.jax.gweaver.io.reader.ReaderFactory;
+import org.jax.gweaver.io.reader.ReaderRequest;
+import org.jax.gweaver.io.reader.StreamReader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,13 +55,13 @@ public class TrackConnectorTest extends AbstractDataFileTest {
 	
 	@Test
 	public void hg38() throws Exception {
-		AbstractReader<NamedEntity> reader = ReaderFactory.getReader("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed"));
+		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed")));
 		assertEquals(29598, reader.stream().flatMap(b->connector.apply(b)).count());	
 	}
 	
 	@Test
 	public void hg38First100() throws Exception {
-		AbstractReader<NamedEntity> reader = new BedReader<>("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed"));
+		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed")));
 		List<Entity> lines = reader.stream().flatMap(b->connector.apply(b)).limit(100).collect(Collectors.toList());
 		check04998(lines);
 	}
@@ -80,13 +81,13 @@ public class TrackConnectorTest extends AbstractDataFileTest {
 
 	@Test
 	public void hg38gz() throws Exception {
-		AbstractReader<NamedEntity> reader = ReaderFactory.getReader("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg381.bed.gz"));
+		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg381.bed.gz")));
 		assertEquals(29598, reader.stream().flatMap(b->connector.apply(b)).count());	
 	}
 	
 	@Test
 	public void hg38First100gz() throws Exception {
-		AbstractReader<NamedEntity> reader = ReaderFactory.getReader("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg381.bed.gz"));
+		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg381.bed.gz")));
 		List<Entity> lines = reader.stream().flatMap(b->connector.stream(b)).limit(100).collect(Collectors.toList());
 		check04998(lines);
 	}
@@ -94,7 +95,7 @@ public class TrackConnectorTest extends AbstractDataFileTest {
 	@Test
 	public void simpleTrack() throws ReaderException, IOException {
 		
-		AbstractReader<NamedEntity> reader = new BedReader<>("Homo sapiens", getFile("data/bed/track1.bed"));
+		AbstractScanner<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/track1.bed")));
 		List<Entity> lines = reader.stream().flatMap(b->connector.apply(b)).collect(Collectors.toList());
 
 		assertEquals(1, lines.stream().filter(e->e instanceof Track).count());
@@ -106,7 +107,7 @@ public class TrackConnectorTest extends AbstractDataFileTest {
 	@Test
 	public void simpleTrackFromReader() throws ReaderException, IOException {
 		
-		AbstractReader<NamedEntity> reader = ReaderFactory.getReader("Homo sapiens", getFile("data/bed/track1.bed"));
+		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/track1.bed")));
 		this.connector = (TrackConnector<NamedEntity, Entity>)reader.getDefaultConnector();
 		List<Entity> lines = reader.stream().flatMap(b->connector.apply(b)).collect(Collectors.toList());
 
@@ -119,7 +120,7 @@ public class TrackConnectorTest extends AbstractDataFileTest {
 	@Test
 	public void simpleGraphTrack() throws ReaderException, IOException {
 		
-		AbstractReader<NamedEntity> reader = ReaderFactory.getReader("Homo sapiens", getFile("data/bed/trackGraph1.bed"));
+		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/trackGraph1.bed")));
 		List<Entity> lines = reader.stream().flatMap(b->connector.stream(b, null)).collect(Collectors.toList());
 
 		assertEquals(1, lines.stream().filter(e->e instanceof Track).count());

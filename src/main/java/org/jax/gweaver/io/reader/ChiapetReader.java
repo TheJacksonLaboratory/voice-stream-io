@@ -1,0 +1,108 @@
+package org.jax.gweaver.io.reader;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.jax.gweaver.domain.Anchor;
+import org.jax.gweaver.domain.AnchoredEntity;
+import org.jax.gweaver.domain.ChromatinInteraction;
+import org.jax.gweaver.domain.ExperimentMetadata;
+
+/**
+ 	
+ 	Process the spreadsheet containing short/long range chromatin interactions in
+    human MCF7 and K562 cells from study PMID:22265404.
+    Threshold based on significance (FDR < 0.05), remove irrelevant fields, and return
+    a dataframe containing the results.
+
+    inputs
+        fp:    input filepath
+        sheet: optional value indicating what sheet in the excel file to parse
+               These are the sheets, name and indices, in the excel file:
+                    Summary                         0
+                    MCF7 pilot peaks                1
+                    All pilot peaks                 2
+                    K562 saturated peaks            3
+                    MCF7 saturated peaks            4
+                    MCF7 pilot interactions         5
+                    All pilot interactions          6
+                    K562 saturated interactions #1  7
+                    K562 saturated interactions #2  8
+                    MCF7 saturated interactions     9
+
+                We want sheets 5, 7, 8, 9.
+
+ * @author gerrim
+ *
+ * @param <N>
+ */
+class ChiapetReader<N extends AnchoredEntity> extends AbstractXlsReader<N> {
+	
+	private ExperimentMetadata meta;
+
+	public ChiapetReader(ReaderRequest request) throws IOException {
+		super(request);
+		setConcreteClass(ChromatinInteraction.class); // User may override
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	protected N create(Row row) {
+		
+		Cell cell = row.getCell(0);
+		if (cell==null) return null;
+		String first = cell.getStringCellValue();
+		if (first==null) return null;
+		if (!first.matches("chr(\\d+|X|Y|M)")) return null; // Null is filtered from the stream.
+		
+		if (getConcreteClass() == ChromatinInteraction.class) {
+			ChromatinInteraction c = new ChromatinInteraction();
+			c.setMeta(meta);
+			c.setLeft(createAnchor(row, 0,1,2));
+			c.setRight(createAnchor(row, 3,4,5));
+			c.setPetCount((int)Math.round(row.getCell(6).getNumericCellValue()));
+			c.setP(row.getCell(7).getNumericCellValue());
+			c.setFdr(row.getCell(8).getNumericCellValue());
+			
+			String overlap = row.getCell(9)!=null ? row.getCell(9).getStringCellValue() : null;
+			c.setOverlapDNAPET("Yes".equalsIgnoreCase(overlap));
+			
+			return (N)c;
+		} else if (getConcreteClass() == Anchor.class) {
+			return (N)createAnchor(row, 0,1,2,3);
+		}
+		
+		throw new IllegalArgumentException("Class "+getConcreteClass()+" cannot be pared using "+getClass().getSimpleName());
+	}
+
+	private Anchor createAnchor(Row row, int i, int j, int k, int l) {
+		return new Anchor(row.getCell(i).getStringCellValue(),
+				  (int)Math.round(row.getCell(j).getNumericCellValue()),
+				  (int)Math.round(row.getCell(k).getNumericCellValue()),
+				  (int)Math.round(row.getCell(l).getNumericCellValue()));
+	}
+
+	private Anchor createAnchor(Row row, int i, int j, int k) {
+		return new Anchor(row.getCell(i).getStringCellValue(),
+						  (int)Math.round(row.getCell(j).getNumericCellValue()),
+						  (int)Math.round(row.getCell(k).getNumericCellValue()));
+	}
+
+	/**
+	 * @return the meta
+	 */
+	protected ExperimentMetadata getMeta() {
+		return meta;
+	}
+
+	/**
+	 * @param meta the meta to set
+	 */
+	protected void setMeta(ExperimentMetadata meta) {
+		this.meta = meta;
+	}
+
+}

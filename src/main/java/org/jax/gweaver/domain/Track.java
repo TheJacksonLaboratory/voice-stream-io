@@ -21,6 +21,8 @@ package org.jax.gweaver.domain;
 import java.util.Arrays;
 import java.util.Objects;
 
+import javax.annotation.processing.Generated;
+
 import org.neo4j.ogm.annotation.NodeEntity;
 
 /**
@@ -69,6 +71,7 @@ chr1 59304100 59304400 0.75
  * @author gerrim
  *
  */
+@Generated("POJO")
 @NodeEntity(label="Track")
 public class Track  extends NamedEntity {
 	

@@ -18,9 +18,7 @@
  */
 package org.jax.gweaver.io.reader;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -32,7 +30,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Spliterator;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -52,30 +49,15 @@ import org.jax.gweaver.domain.Entity;
  * @author Matthew Gerring
  * @param <T> The type of thing this reader will read.
  */
-public abstract class AbstractReader<T> implements Spliterator<T> {
-
+public abstract class AbstractScanner<T extends Entity> implements Spliterator<T>, StreamReader<T> {
+	
 	/** The Constant build. */
 	private static final long build = generateBuildNumber(); // Once per vm execution
 
 	/**
 	 * The scanner for all the file(s) which we will parse. 
 	 */
-	protected final Iterator<String> scanner;
-	
-	/** The species. */
-	protected final String species;
-	
-	/**
-	 * The file, if any, which we will use for estimation.
-	 */
-	private File file;
-	
-	/**
-	 * Either a file or an input stream is provided. 
-	 * If an input stream that it or this reader must be closed.
-	 */
-	private InputStream inputStream;
-
+	protected Iterator<String> scanner;
 	
 	/**
 	 * Amount to wind forward when using multi-threading.
@@ -85,7 +67,7 @@ public abstract class AbstractReader<T> implements Spliterator<T> {
 	private int chunkSize = Integer.getInteger("org.jax.gweaver.io.windForward", 4096);
 
 	/** The count. */
-	private volatile int count;
+	protected volatile int count;
 	
 	/**
 	 * The type when winding to stop for. 
@@ -100,9 +82,14 @@ public abstract class AbstractReader<T> implements Spliterator<T> {
 	private String rejectedLine; 
 	
 	/**
-	 * delimiter used to split strings.
+	 * delimiter used to split strings. By default any whitespace.
 	 */
-	private String delimiter = System.getProperty("org.jax.gweaver.io.delimiter", "\t");
+	private String delimiter = System.getProperty("org.jax.gweaver.io.delimiter", "\\s+");
+
+	/**
+	 * The reader request holding the file or the stream of data.
+	 */
+	protected ReaderRequest request;
 
 	/**
 	 * Instantiates a new abstract reader.
@@ -111,62 +98,23 @@ public abstract class AbstractReader<T> implements Spliterator<T> {
 	 * @param file the file
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public AbstractReader(String species, File file) throws IOException {
+	public AbstractScanner(ReaderRequest request) throws IOException {
 		// Iterate the file with a Scanner which does not load the file to memory
 		// and gives each line at a time.
-		this(species, new ScannerIterator<String>(file));
-		this.file = file; // Used for estimation
-	}
-	
-	/**
-	 * Most reader types will have a default connector.
-	 * @param <U>
-	 * @return
-	 */
-	public abstract <U extends Entity> Function<T, Stream<U>> getDefaultConnector();
-	
-	/**
-	 * Instantiates a new abstract reader.
-	 *
-	 * @param species the species
-	 * @param in the in
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 * @see https://stackoverflow.com/questions/45037540/stream-file-from-google-cloud-storage
-	 * <br>
-	 * It is possible to read cloud storage blobs without downloading them using
-	 * Java:
-	 * <br>
-	 * <code>
-	 * InputStream in = InputStream.newInputStream(storage.reader(bucketName, blobName));
-	 * </code>
-	 */
-	public AbstractReader(String species, InputStream in) throws IOException {
-		// Iterate the file with a Scanner which does not load the file to memory
-		// and gives each line at a time.
-		this(species, new ScannerIterator<String>(in));
-		this.file = null; // Used for estimation
-		this.inputStream = in;
-	}
-
-	/**
-	 * Instantiates a new abstract reader.
-	 *
-	 * @param species the species
-	 * @param iterator the iterator
-	 */
-	protected AbstractReader(String species, Iterator<String> iterator) {
-		this.species = species;
-		this.scanner = iterator;
+		this.request = request;
+		if (request.isFileRequest()) {
+			this.scanner = new ScannerIterator<String>(request.getFile());
+		} else if (request.getStream()!=null){
+			this.scanner = new ScannerIterator<String>(request.getStream(), request.name());
+		}
 		this.count = 0;
 	}
 	
 	/**
-	 * Just used for RepeatedLineReader.
-	 *
-	 * @param species the species
+	 * Testing only.
 	 */
-	protected AbstractReader(String species) {
-		this(species, (Iterator<String>)null);
+	protected AbstractScanner() {
+		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -176,6 +124,15 @@ public abstract class AbstractReader<T> implements Spliterator<T> {
 	 * @return the stream
 	 */
 	public Stream<T> stream() {
+		if (isEmpty() && isDataSource()) {
+			try {
+				this.scanner = new ScannerIterator<String>(request.getFile());
+			} catch (IOException e) {
+				throw new IllegalArgumentException("The scanner iterator cannot be recreated from "+request.getFile(), e);
+			}
+		}
+		
+		// Will throw an exception if called when empty
 		return StreamSupport.stream(this, false);
 	}
 	
@@ -299,7 +256,7 @@ public abstract class AbstractReader<T> implements Spliterator<T> {
 	 * 
 	 * @return next line, thread safe.
 	 */
-	private synchronized String nextLine() {
+	protected synchronized String nextLine() {
 		
 		if (rejectedLine!=null) {
 			String ret = rejectedLine;
@@ -428,12 +385,12 @@ public abstract class AbstractReader<T> implements Spliterator<T> {
 	 */
 	@Override
 	public long estimateSize() {
-		if (file==null) return 10000;
+		if (request.getFile()==null) return 10000;
 		String typical = "1	havana	transcript	11869	14409	.	+	.	gene_id \"ENSG00000223972\"; gene_version \"5\"; transcript_id \"ENST00000456328\"; transcript_version "
 				+ "\"2\"; gene_name \"DDX11L1\"; gene_source \"havana\"; gene_biotype \"transcribed_unprocessed_pseudogene\"; transcript_name \"DDX11L1-202\"; transcript_source \""
 				+ "havana\"; transcript_biotype \"processed_transcript\"; tag \"basic\"; transcript_support_level \"1\"; cannot be parsed ";
 		int bytesPerLine = typical.getBytes().length;
-		return file.length()/bytesPerLine;
+		return request.getFile().length()/bytesPerLine;
 	}
 
 	/**
@@ -568,7 +525,7 @@ public abstract class AbstractReader<T> implements Spliterator<T> {
         // d.put("attributes", rec[8]);
         d.put("active", Boolean.TRUE);
         d.put("build", getBuild());
-        d.put("species", species);
+        d.put("species", getSpecies());
 	}
 
 	/**
@@ -620,8 +577,7 @@ public abstract class AbstractReader<T> implements Spliterator<T> {
 	 * @return the file name
 	 */
 	protected String getFileName() {
-		if (file!=null) return file.getName();
-		return null;
+		return request.name();
 	}
 	
 	/**
@@ -630,7 +586,7 @@ public abstract class AbstractReader<T> implements Spliterator<T> {
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public void close() throws IOException {
-		if (inputStream!=null) inputStream.close();
+		request.close();
 	}
 
 	/**
@@ -682,7 +638,14 @@ public abstract class AbstractReader<T> implements Spliterator<T> {
 	 * @return the species
 	 */
 	public String getSpecies() {
-		return species;
+		return request.getSpecies();
+	}
+
+	/**
+	 * @return the dataSource
+	 */
+	public boolean isDataSource() {
+		return request.isFileRequest();
 	}
 
 }

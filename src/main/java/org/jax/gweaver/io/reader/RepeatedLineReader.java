@@ -18,13 +18,19 @@
  */
 package org.jax.gweaver.io.reader;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import javax.print.attribute.HashPrintRequestAttributeSet;
+
 import org.jax.gweaver.domain.Entity;
+import org.jax.gweaver.domain.Gene;
 import org.jax.gweaver.domain.GeneticEntity;
+import org.jax.gweaver.domain.Transcript;
+import org.jax.gweaver.domain.Variant;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -37,11 +43,18 @@ import org.jax.gweaver.domain.GeneticEntity;
  * @param <T> the generic type
  */
 @SuppressWarnings("all")
-public class RepeatedLineReader<T extends GeneticEntity> extends AbstractReader<T> {
+public class RepeatedLineReader<T extends GeneticEntity> extends AbstractScanner<T> {
 
 	/** The reader. */
-	private AbstractReader<T> reader;
+	private AbstractScanner<T> reader;
 	
+	/** The gene count. */
+	private static int geneCount;
+	
+	/** The var count. */
+	private static int varCount;
+	
+
 	/**
 	 * Create a reader that just repeats a similar line 'size' number of times.
 	 * Used for testing mostly.
@@ -49,21 +62,21 @@ public class RepeatedLineReader<T extends GeneticEntity> extends AbstractReader<
 	 * @param species the species
 	 * @param size the size
 	 * @param type the type
-	 * @throws InstantiationException the instantiation exception
-	 * @throws IllegalAccessException the illegal access exception
-	 * @throws IllegalArgumentException the illegal argument exception
-	 * @throws InvocationTargetException the invocation target exception
-	 * @throws NoSuchMethodException the no such method exception
-	 * @throws SecurityException the security exception
+	 * @throws ReaderException 
 	 */
-	public RepeatedLineReader(String species, int size, Class<? extends AbstractReader> type) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-		super(species, createIterator(size, type));
+	public RepeatedLineReader(ReaderRequest request) throws ReaderException {
+		super();
+		this.request = request;
+		createIterator(request.getExpectedSize(), request.getObjType());
 		setChunkSize(1000);
-		this.reader = type.getDeclaredConstructor(String.class).newInstance(species);
+		
+		request.setName(getType(request.getObjType()));
+		this.reader = ReaderFactory.getReader(request);
 		
 		// We just start the counters somewhere representative.
 		geneCount = 223180;
 		varCount = 656;
+
 	}
 
 
@@ -97,7 +110,8 @@ public class RepeatedLineReader<T extends GeneticEntity> extends AbstractReader<
 	 * @param type the type
 	 * @return the iterator
 	 */
-	private static <T> Iterator<String> createIterator(final int size, Class<? extends AbstractReader> type) {
+	private static <T> Iterator<String> createIterator(final int size, Class<? extends Entity> objType) {
+		
 		return new Iterator<String>() {
 			int counted = 0;
 
@@ -108,20 +122,31 @@ public class RepeatedLineReader<T extends GeneticEntity> extends AbstractReader<
 
 			@Override
 			public String next() {
-				String line = nextLine(type);
+				String line = nextLine(objType);
 				counted++;
 				return line;
 			}
 			
 		};
 	}
+	
+	public boolean isEmpty() {
+		return count>=request.getExpectedSize();
+	}
 
-	/** The gene count. */
-	private static int geneCount;
+
+	private static String getType(Class<? extends Entity> objType) {
+		if (objType == Variant.class) return "file.gvf";
+		if (objType == Gene.class || objType==Transcript.class) return "file.gtf";
+		throw new IllegalArgumentException("Cannot repeat on type "+objType);
+	}
 	
-	/** The var count. */
-	private static int varCount;
-	
+	@Override
+	protected synchronized String nextLine() {
+		if (isEmpty()) return null;
+		count++;
+		return nextLine(request.getObjType());
+	}
 	/**
 	 * Next line.
 	 *
@@ -130,10 +155,10 @@ public class RepeatedLineReader<T extends GeneticEntity> extends AbstractReader<
 	 * @return the string
 	 * @throws IllegalArgumentException the illegal argument exception
 	 */
-	private static <T> String nextLine(Class<? extends AbstractReader> type) throws IllegalArgumentException {
-		if (type == GeneReader.class) {
+	private static <T> String nextLine(Class<? extends Entity> type) throws IllegalArgumentException {
+		if (type == Gene.class) {
 			return "1	ensembl	gene	758233	758336	.	-	.	gene_id \"ENSG00000"+(++geneCount)+"\"; gene_version \"1\"; gene_name \"RNU6-1199P\"; gene_source \"ensembl\"; gene_biotype \"snRNA\";";
-		} else if (type == VariantReader.class) {
+		} else if (type == Variant.class) {
 			return "19	dbSNP	SNV	92959	92959	.	+	.	ID="+(++varCount)+";Variant_seq=G;ancestral_allele=A;Variant_effect=upstream_gene_variant 0 transcript ENST00000633500;evidence_values=Frequency;Dbxref=dbSNP_150:rs1025620664;Reference_seq=A";
 		} else {
 			throw new IllegalArgumentException("Cannot get example line for "+type);

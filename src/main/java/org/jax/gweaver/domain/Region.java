@@ -21,6 +21,8 @@ package org.jax.gweaver.domain;
 import java.util.Arrays;
 import java.util.Objects;
 
+import javax.annotation.processing.Generated;
+
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -83,6 +85,7 @@ blockStarts
  * @author gerrim
  *
  */
+@Generated("POJO")
 @NodeEntity(label="Region")
 public class Region  extends NamedEntity {
 

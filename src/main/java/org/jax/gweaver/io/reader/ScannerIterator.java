@@ -34,6 +34,7 @@ import java.util.zip.GZIPInputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.jax.gweaver.io.reader.StreamUtil.unzip;
 
 
 // TODO: Auto-generated Javadoc
@@ -87,8 +88,8 @@ class ScannerIterator<T> implements Iterator<String> {
 	 * @param in the in
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public ScannerIterator(InputStream in) throws IOException {
-		List<Scanner> scans = Arrays.asList(new Scanner(in));
+	public ScannerIterator(InputStream in, String name) throws IOException {
+		List<Scanner> scans = Arrays.asList(new Scanner(unzip(in, name)));
 		this.scanners = scans.iterator();
 	}
 

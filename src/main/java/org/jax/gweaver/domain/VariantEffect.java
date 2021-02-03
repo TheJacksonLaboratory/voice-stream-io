@@ -20,6 +20,8 @@ package org.jax.gweaver.domain;
 
 import java.util.Objects;
 
+import javax.annotation.processing.Generated;
+
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
@@ -34,8 +36,9 @@ import org.neo4j.ogm.annotation.StartNode;
  * @see https://github.com/The-Sequence-Ontology/Specifications/blob/master/gvf.md
  * Section Variant Effect (Variant_eff)
  */
+@Generated("POJO")
 @RelationshipEntity(type = "VARIANT_EFFECT")
-public class VariantEffect implements Entity {
+public class VariantEffect extends AbstractEntity {
 	
 	/** The uid. */
 	@Id
@@ -72,17 +75,17 @@ public class VariantEffect implements Entity {
 	public String getHeader() {
 		StringBuilder buf = new StringBuilder();
 		buf.append(":START_ID(Variant-Id)");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("sequenceVariant");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("index:int");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("featureType");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("featureId");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(":END_ID(Transcript-Id)");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(":TYPE");
 		return buf.toString();
 	}
@@ -96,17 +99,17 @@ public class VariantEffect implements Entity {
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
 		buf.append(variant.getUuid());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getSequenceVariant());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getIndex());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getFeatureType());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getFeatureId());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getFeatureId()); // Transcript id is the feature id.
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("VARIANT_EFFECT");
 		return buf.toString();
 	}

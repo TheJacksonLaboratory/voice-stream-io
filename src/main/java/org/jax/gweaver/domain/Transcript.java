@@ -20,6 +20,8 @@ package org.jax.gweaver.domain;
 
 import java.util.Objects;
 
+import javax.annotation.processing.Generated;
+
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
 
@@ -27,6 +29,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
 /**
  * The Class Transcript.
  */
+@Generated("POJO")
 @NodeEntity(label="Transcript")
 public class Transcript extends GeneticEntity {
 
@@ -59,19 +62,19 @@ public class Transcript extends GeneticEntity {
 	public String getHeader() {
 		StringBuilder buf = new StringBuilder();
 		buf.append("transcriptId:ID(Transcript-Id)");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("transcriptName");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("geneId");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("geneName");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("geneVersion");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("geneBiotype");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("transcriptBiotype");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(super.getHeader());
 		return buf.toString();
 	}
@@ -85,19 +88,19 @@ public class Transcript extends GeneticEntity {
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
 		buf.append(getTranscriptId());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getTranscriptName());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getGeneId());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getGeneName());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getGeneVersion());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getGeneBiotype());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getTranscriptBiotype());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(super.toCsv());
 		return buf.toString();
 	}

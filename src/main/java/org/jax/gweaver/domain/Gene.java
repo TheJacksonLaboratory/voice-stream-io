@@ -20,6 +20,8 @@ package org.jax.gweaver.domain;
 
 import java.util.Objects;
 
+import javax.annotation.processing.Generated;
+
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
 
@@ -31,6 +33,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
  * @see https://dzone.com/articles/introduction-to-neo4j-ogm
  * @see https://neo4j.com/docs/ogm-manual/current/tutorial/
  */
+@Generated("POJO")
 @NodeEntity(label="Gene")
 public class Gene extends GeneticEntity {
 	
@@ -54,13 +57,13 @@ public class Gene extends GeneticEntity {
 	public String getHeader() {
 		StringBuilder buf = new StringBuilder();
 		buf.append("geneId:ID(Gene-Id)");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("geneName");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("geneVersion");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append("geneBiotype");
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(super.getHeader());
 		return buf.toString();
 	}
@@ -74,13 +77,13 @@ public class Gene extends GeneticEntity {
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
 		buf.append(getGeneId());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getGeneName());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getGeneVersion());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(getGeneBiotype());
-		buf.append(D);
+		buf.append(getDelimiter());
 		buf.append(super.toCsv());
 		return buf.toString();
 	}

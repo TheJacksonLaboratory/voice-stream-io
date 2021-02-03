@@ -40,7 +40,7 @@ import org.jax.gweaver.io.connector.TrackConnector;
  *
  * @param <N>
  */
-public class BedReader<N extends NamedEntity> extends AbstractReader<N> {
+class BedReader<N extends NamedEntity> extends AbstractScanner<N> {
 
 	/**
 	 * Instantiates a new gene reader.
@@ -49,20 +49,8 @@ public class BedReader<N extends NamedEntity> extends AbstractReader<N> {
 	 * @param file
 	 * @throws IOException
 	 */
-	public BedReader(String species, File file) throws IOException {
-		super(species, file);
-		setDelimiter("\\s+");
-	}
-	
-	/**
-	 * Instantiates a new gene reader.
-	 *
-	 * @param species the species
-	 * @param in the in
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 */
-	public BedReader(String species, InputStream in) throws IOException {
-		super(species, in); // Genes are not that dense maybe one gene / 10 lines
+	public BedReader(ReaderRequest request) throws IOException {
+		super(request);
 		setDelimiter("\\s+");
 	}
 

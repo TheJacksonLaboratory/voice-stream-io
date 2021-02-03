@@ -45,60 +45,23 @@ import org.jax.gweaver.io.connector.VariantConnector;
  * @param <N>  A node entity, either a Gene or a Transcript related to a Gene.
  *
  */
-public class VariantReader<N extends GeneticEntity> extends AbstractReader<N>{
+class VariantReader<N extends GeneticEntity> extends AbstractScanner<N>{
 	
 	/** The Constant VARIANTS. */
 	// TODO Are all invariant types a Variant or are some ignored?
 	public static final Collection<String> VARIANTS = Arrays.asList("snv", "deletion", "insertion", "indel", "substitution");
 
-	/** The read variant effects. */
-	private boolean readVariantEffects=true;
-
 	/**
 	 * Instantiates a new variant reader.
 	 *
 	 * @param species the species
+	 * @throws IOException 
 	 */
 	// Used in RepeatedLineReader, do not delete.
-	protected VariantReader(String species) {
-		super(species);
+	protected VariantReader(ReaderRequest request) throws IOException {
+		super(request);
+		setDelimiter("\t+"); // Must be a tab only
 	}
-
-	/**
-	 * Instantiates a new variant reader.
-	 *
-	 * @param species the species
-	 * @param file the file
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 */
-	public VariantReader(String species, File file) throws IOException {
-		super(species, file); // Variant every line in this file
-	}
-
-	/**
-	 * Instantiates a new variant reader.
-	 *
-	 * @param species the species
-	 * @param in the in
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 */
-	public VariantReader(String species, InputStream in) throws IOException {
-		super(species, in); // Variant every line in this file
-	}
-	
-	/**
-	 * Instantiates a new variant reader.
-	 *
-	 * @param species the species
-	 * @param file the file
-	 * @param readVariantEffects the read variant effects
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 */
-	public VariantReader(String species, File file, boolean readVariantEffects) throws IOException {
-		super(species, file); // Variant every line in this file
-		this.readVariantEffects = readVariantEffects;
-	}
-
 
 	/**
 	 * Creates the.
@@ -124,7 +87,7 @@ public class VariantReader<N extends GeneticEntity> extends AbstractReader<N>{
 	        d.put("dbxRef", attributes.get("Dbxref"));
 	        d.put("altAllele", attributes.get("Variant_seq"));
 	        d.put("refAllele", attributes.get("Reference_seq"));
-	        if (readVariantEffects ) { // Variant effects are used for connections. If we are not 
+	        if (request.isIncludeAll() ) { // Variant effects are used for connections. If we are not 
 	        						   // writing connections, then we do not need to parse them.
 	        	d.put("variantEffect", createVariantEffects(bean, attributes.get("Variant_effect")));
 	        }

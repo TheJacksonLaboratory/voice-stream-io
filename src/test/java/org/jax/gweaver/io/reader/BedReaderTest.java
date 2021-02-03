@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.jax.gweaver.domain.GeneticEntity;
 import org.jax.gweaver.domain.NamedEntity;
 import org.jax.gweaver.domain.Region;
 import org.jax.gweaver.domain.Region.Strand;
@@ -37,19 +36,19 @@ public class BedReaderTest extends AbstractDataFileTest {
 	@Test
 	public void chunkSize() throws Exception {
 		
-		AbstractReader<NamedEntity> reader = new BedReader<>("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed"));
+		AbstractScanner<NamedEntity> reader = new BedReader<>(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed")));
 		assertEquals(4096, reader.getChunkSize());
 	}
 
 	@Test
 	public void hg38() throws Exception {
-		AbstractReader<NamedEntity> reader = ReaderFactory.getReader("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed"));
+		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed")));
 		assertEquals(29598, reader.stream().count());	
 	}
 	
 	@Test
 	public void hg38First100() throws Exception {
-		AbstractReader<NamedEntity> reader = new BedReader<>("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed"));
+		StreamReader<NamedEntity> reader = new BedReader<>(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed")));
 		List<NamedEntity> lines = reader.stream().limit(100).collect(Collectors.toList());
 		check04998(lines);
 	}
@@ -69,13 +68,13 @@ public class BedReaderTest extends AbstractDataFileTest {
 
 	@Test
 	public void hg38gz() throws Exception {
-		AbstractReader<NamedEntity> reader = ReaderFactory.getReader("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg381.bed.gz"));
+		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg381.bed.gz")));
 		assertEquals(29598, reader.stream().count());	
 	}
 	
 	@Test
 	public void hg38First100gz() throws Exception {
-		AbstractReader<NamedEntity> reader = ReaderFactory.getReader("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg381.bed.gz"));
+		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg381.bed.gz")));
 		List<NamedEntity> lines = reader.stream().limit(100).collect(Collectors.toList());
 		check04998(lines);
 	}
@@ -83,7 +82,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 	@Test
 	public void simpleTrack() throws ReaderException, IOException {
 		
-		AbstractReader<NamedEntity> reader = new BedReader<>("Homo sapiens", getFile("data/bed/track1.bed"));
+		StreamReader<NamedEntity> reader = new BedReader<>(new ReaderRequest("Homo sapiens", getFile("data/bed/track1.bed")));
 		List<NamedEntity> lines = reader.stream().collect(Collectors.toList());
 
 		assertEquals(1, lines.stream().filter(e->e instanceof Track).count());
@@ -93,7 +92,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 	@Test
 	public void simpleGraphTrack() throws ReaderException, IOException {
 		
-		AbstractReader<NamedEntity> reader = ReaderFactory.getReader("Homo sapiens", getFile("data/bed/trackGraph1.bed"));
+		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/trackGraph1.bed")));
 		List<NamedEntity> lines = reader.stream().collect(Collectors.toList());
 
 		assertEquals(1, lines.stream().filter(e->e instanceof Track).count());
