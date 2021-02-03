@@ -129,7 +129,7 @@ public class ScannerIteratorTest extends AbstractDataFileTest {
 	 *
 	 * @throws Exception the exception
 	 */
-	@Test(timeout = 80000)
+	@Test(timeout = 120000)
 	public void filesZip() throws Exception {
 		// Active lines and comment lines in these files.
 		count("data/io/files.zip", (1173235+5)+(899084+5)+(1726211+31));
