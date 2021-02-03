@@ -18,13 +18,13 @@ implementation and many other readers for the formats which it supports (gtf, gv
 // The reader can have type Entity or a concrete class like 'Variant' if every line is the same type.
 StreamReader<Gene> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", new File(...));
 
-// Get a connector. The Reader will have a default connector in most cases or make your own
-Function<NamedEntity, Stream<Entity> connector = ... # e.g. GeneConnector  or reader.defaultConnector()
+// Optionally get a connector. The Reader will have a default connector in most cases or make your own
+Function<NamedEntity, Stream<Entity> connector = ... // e.g. GeneConnector  or reader.defaultConnector()
 
-// Create a filter, not all objects do we want perhaps
+// Optionally create a filter, not all objects do we want perhaps
 Predicate<Gene> filter = g->"protein_coding".equalsIgnoreCase(g.getBioType());
 
-// When writing domain objects we can override delimiter per object or system wide:
+// When writing domain objects to csv we can override delimiter per object or system wide:
 System.setProperty("delimiter", ",");
 
 // For the sake of a demonstration, we pipe the gene to a CSV file.
@@ -53,7 +53,7 @@ This is a pure maven project. Please check out using git and then use common mav
 * mvn deploy							# Set artifacts to repository for other projects to use.
 If you are deploying a new version, do not forget to change the version number which the jar is using.
 
-If you are planning on running the tests you will need to clone the large test data repository"
+If you are planning on running the tests you will need to clone the large test data repository:
 
 ```
 git clone https://bitbucket.org/geneweaver/gweaver-test-data.git
