@@ -85,4 +85,33 @@ public class ChiapetReaderTest extends AbstractDataFileTest {
 		assertEquals(50060-4, reader.stream().filter(ci->ci.getMeta()!=null).count());	
 	}
 
+	@Test
+	public void filterFdr() throws Exception {
+		
+		AbstractXlsReader<ChromatinInteraction, ExperimentMetadata> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/ChIA-PET/NIHMS345629-supplement-02.xls.gz")));
+		reader.setSheetIndex(7);
+		reader.setMeta(new ExperimentMetadata("MCF7", "breast", "Polr2a", "ChIA-PET", "PMID:22265404"));
+		
+		// All less than 0.05
+		assertEquals(65000-4, reader.stream().filter(c->c.getFdr()<0.05).count());	
+		
+		// Only a few greater than 0.00000085
+		assertEquals(800, reader.stream().filter(c->c.getFdr()>0.00000085).count());
+		
+		// Only a few more greater than 0.00000000032
+		assertEquals(9746, reader.stream().filter(c->c.getFdr()>0.00000000032).count());	
+
+	}
+	
+	@Test
+	public void filterBaseSpan() throws Exception {
+		
+		AbstractXlsReader<ChromatinInteraction, ExperimentMetadata> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/ChIA-PET/NIHMS345629-supplement-02.xls.gz")));
+		reader.setSheetIndex(7);
+		reader.setMeta(new ExperimentMetadata("MCF7", "breast", "Polr2a", "ChIA-PET", "PMID:22265404"));
+		
+		// Which span more than 5000
+		assertEquals(13800, reader.stream().filter(c->c.getLeft().span()>5000 && c.getRight().span()>5000).count());	
+	}
+
 }

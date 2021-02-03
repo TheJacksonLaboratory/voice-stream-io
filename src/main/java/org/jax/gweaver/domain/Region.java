@@ -350,9 +350,10 @@ public class Region  extends NamedEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
+		result = prime * result + Arrays.hashCode(blockSizes);
+		result = prime * result + Arrays.hashCode(blockStarts);
 		result = prime * result + Arrays.hashCode(itemRgb);
-		result = prime * result + Objects.hash(blockCount, blockSizes, blockStarts, chrom, end, score, start, strand,
-				thickEnd, thickStart);
+		result = prime * result + Objects.hash(blockCount, chrom, end, score, start, strand, thickEnd, thickStart);
 		return result;
 	}
 
@@ -366,9 +367,10 @@ public class Region  extends NamedEntity {
 		if (!(obj instanceof Region))
 			return false;
 		Region other = (Region) obj;
-		return blockCount == other.blockCount && blockSizes == other.blockSizes && blockStarts == other.blockStarts
-				&& Objects.equals(chrom, other.chrom) && end == other.end && Arrays.equals(itemRgb, other.itemRgb)
-				&& score == other.score && start == other.start && strand == other.strand && thickEnd == other.thickEnd
+		return blockCount == other.blockCount && Arrays.equals(blockSizes, other.blockSizes)
+				&& Arrays.equals(blockStarts, other.blockStarts) && Objects.equals(chrom, other.chrom)
+				&& end == other.end && Arrays.equals(itemRgb, other.itemRgb) && score == other.score
+				&& start == other.start && strand == other.strand && thickEnd == other.thickEnd
 				&& thickStart == other.thickStart;
 	}
 

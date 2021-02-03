@@ -161,6 +161,4 @@ public class ChromatinInteraction extends AbstractEntity implements AnchoredEnti
 	public Collection<Anchor> anchors() {
 		return Arrays.asList(getLeft(), getRight());
 	}
-
-	
 }

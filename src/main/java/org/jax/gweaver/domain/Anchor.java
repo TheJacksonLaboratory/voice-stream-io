@@ -9,6 +9,8 @@ import javax.annotation.processing.Generated;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Generated("POJO")
 public class Anchor extends AbstractEntity implements AnchoredEntity {
 
@@ -132,6 +134,15 @@ public class Anchor extends AbstractEntity implements AnchoredEntity {
 	 */
 	public void setIntensity(int intensity) {
 		this.intensity = intensity;
+	}
+
+	/**
+	 * Span between start and end of bases
+	 * @return
+	 */
+	@JsonIgnore
+	public int span() {
+		return end-start;
 	}
 
 
