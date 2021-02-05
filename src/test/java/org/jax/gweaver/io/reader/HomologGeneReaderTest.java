@@ -35,7 +35,7 @@ import org.jax.gweaver.domain.HomologGene;
 import org.jax.gweaver.domain.NamedEntity;
 import org.junit.Test;
 
-public class HomologeneReaderTest extends AbstractDataFileTest {
+public class HomologGeneReaderTest extends AbstractDataFileTest {
 
 	
 	@Test
