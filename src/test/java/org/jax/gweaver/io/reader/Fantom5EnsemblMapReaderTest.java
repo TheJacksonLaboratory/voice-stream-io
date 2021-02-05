@@ -11,7 +11,8 @@ public class Fantom5EnsemblMapReaderTest extends AbstractDataFileTest {
 	@Test
 	public void chunkSize() throws Exception {
 		
-		AbstractScanner<Fantom5Link> reader = new Fantom5EnsemblMapReader<>(new ReaderRequest("Homo sapiens", getFile("data/fantom5/fantom5-ensembl-map.tsv.gz")));
+		Fantom5EnsemblMapReader<Fantom5Link> reader = new Fantom5EnsemblMapReader<>();
+		reader.init(new ReaderRequest("Homo sapiens", getFile("data/fantom5/fantom5-ensembl-map.tsv.gz")));
 		assertEquals(4096, reader.getChunkSize());
 	}
 

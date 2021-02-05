@@ -20,6 +20,7 @@ package org.jax.gweaver.io.reader;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -81,8 +82,12 @@ public class ReaderFactory {
 	public static <R extends StreamReader<T>, T extends Entity> R getReader(ReaderRequest request) throws ReaderException {
 		Class<R> clazz = getClass(request);
 		try {
-			Constructor<R> constructor = clazz.getDeclaredConstructor(ReaderRequest.class);
-			return constructor.newInstance(request);
+			Constructor<R> constructor = clazz.getDeclaredConstructor();
+			R instance = constructor.newInstance();
+			Method init = clazz.getDeclaredMethod(StreamReader.INIT, ReaderRequest.class);
+			init.invoke(instance, request);
+			return instance;
+			
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
 			throw new ReaderException(e);

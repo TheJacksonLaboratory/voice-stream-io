@@ -51,16 +51,19 @@ class VariantReader<N extends GeneticEntity> extends AbstractScanner<N>{
 	// TODO Are all invariant types a Variant or are some ignored?
 	public static final Collection<String> VARIANTS = Arrays.asList("snv", "deletion", "insertion", "indel", "substitution");
 
+
 	/**
-	 * Instantiates a new variant reader.
-	 *
-	 * @param species the species
-	 * @throws IOException 
+	 * Create the reader by setting its data
+	 * 
+	 * @param reader
+	 * @throws ReaderException
 	 */
-	// Used in RepeatedLineReader, do not delete.
-	protected VariantReader(ReaderRequest request) throws IOException {
-		super(request);
+	@SuppressWarnings("unchecked")
+	@Override
+	public VariantReader<N> init(ReaderRequest request) throws ReaderException {
+		super.setup(request);
 		setDelimiter("\t+"); // Must be a tab only
+		return this;
 	}
 
 	/**

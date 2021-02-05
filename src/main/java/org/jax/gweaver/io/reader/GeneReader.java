@@ -42,17 +42,20 @@ import org.jax.gweaver.io.connector.GeneConnector;
  */
 class GeneReader<N extends GeneticEntity> extends AbstractScanner<N>{
 
+
 	/**
-	 * Instantiates a new gene reader.
-	 *
-	 * @param species the species
-	 * @throws IOException 
+	 * Create the reader by setting its data
+	 * 
+	 * @param reader
+	 * @throws ReaderException
 	 */
-	GeneReader(ReaderRequest request) throws IOException {
-		super(request);
+	@Override
+	public GeneReader<N> init(ReaderRequest request) throws ReaderException {
+		super.setup(request);
 		setDelimiter("\t+"); // Must be a tab only
 		setWindStopType("gene");
 		setChunkSize(10000); // We need quite a few lines because active objects in the data are sparse.
+		return this;
 	}
 
 	/**

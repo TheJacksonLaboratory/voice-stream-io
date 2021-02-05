@@ -55,6 +55,14 @@ public class RepeatedLineReader<T extends GeneticEntity> extends AbstractScanner
 	private static int varCount;
 	
 
+	public RepeatedLineReader() {
+		
+	}
+	
+	public RepeatedLineReader(ReaderRequest request) throws ReaderException {
+		init(request);
+	}
+	
 	/**
 	 * Create a reader that just repeats a similar line 'size' number of times.
 	 * Used for testing mostly.
@@ -64,8 +72,7 @@ public class RepeatedLineReader<T extends GeneticEntity> extends AbstractScanner
 	 * @param type the type
 	 * @throws ReaderException 
 	 */
-	public RepeatedLineReader(ReaderRequest request) throws ReaderException {
-		super();
+	public RepeatedLineReader<T> init(ReaderRequest request) throws ReaderException {
 		this.request = request;
 		createIterator(request.getExpectedSize(), request.getObjType());
 		setChunkSize(1000);
@@ -76,7 +83,8 @@ public class RepeatedLineReader<T extends GeneticEntity> extends AbstractScanner
 		// We just start the counters somewhere representative.
 		geneCount = 223180;
 		varCount = 656;
-
+		
+		return this;
 	}
 
 

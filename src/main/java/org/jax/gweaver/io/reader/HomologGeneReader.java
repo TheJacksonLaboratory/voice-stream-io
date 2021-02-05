@@ -68,12 +68,14 @@ class HomologGeneReader<T extends Entity> extends AbstractScanner<T> {
 	/**
 	 * Instantiates a new gene reader.
 	 *
-	 * @param species the species
+	 * @param request
 	 * @throws IOException 
 	 */
-	HomologGeneReader(ReaderRequest request) throws IOException {
-		super(request);
+	@Override
+	public HomologGeneReader<T> init(ReaderRequest request) throws ReaderException {
+		super.setup(request);
 		setDelimiter("\t+"); // Must be a tab only as spaces are allowed
+		return this;
 	}
 
 	@Override

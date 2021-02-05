@@ -36,7 +36,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 	@Test
 	public void chunkSize() throws Exception {
 		
-		AbstractScanner<NamedEntity> reader = new BedReader<>(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed")));
+		AbstractScanner<NamedEntity> reader = new BedReader<>().init(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed")));
 		assertEquals(4096, reader.getChunkSize());
 	}
 
@@ -48,7 +48,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 	
 	@Test
 	public void hg38First100() throws Exception {
-		StreamReader<NamedEntity> reader = new BedReader<>(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed")));
+		StreamReader<NamedEntity> reader = new BedReader<>().init(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed")));
 		List<NamedEntity> lines = reader.stream().limit(100).collect(Collectors.toList());
 		check04998(lines);
 	}
@@ -82,7 +82,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 	@Test
 	public void simpleTrack() throws ReaderException, IOException {
 		
-		StreamReader<NamedEntity> reader = new BedReader<>(new ReaderRequest("Homo sapiens", getFile("data/bed/track1.bed")));
+		StreamReader<NamedEntity> reader = new BedReader<>().init(new ReaderRequest("Homo sapiens", getFile("data/bed/track1.bed")));
 		List<NamedEntity> lines = reader.stream().collect(Collectors.toList());
 
 		assertEquals(1, lines.stream().filter(e->e instanceof Track).count());

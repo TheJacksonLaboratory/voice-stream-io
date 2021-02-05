@@ -14,6 +14,9 @@ import org.jax.gweaver.domain.Entity;
  * Class which reads large files as a stream which if they are processed
  * correctly will mean that the whole data is never in memory.
  * 
+ * All readers must have a no-argument constructor and an init(...) method
+ * to create the reader.
+ * 
  * @author gerrim
  *
  * @param <T>
@@ -21,8 +24,24 @@ import org.jax.gweaver.domain.Entity;
 public interface StreamReader<T extends Entity> {
 	
 	/**
+	 * The name of the init method.
+	 */
+	String INIT = "init";
+
+	/**
+	 * All readers must have a create method which is called
+	 * by the reader factory after the no-argument constructor.
+	 * @param request
+	 */
+	public <R extends StreamReader<T>> R init(ReaderRequest request) throws ReaderException;
+	
+	/**
 	 * Create a stream of domain objects which may be processed
-	 * into a datastructure without holding the data in memory.
+	 * into a data-structure without holding the data in memory.
+	 * For example make a stream from a variant file, set the connector
+	 * to find links using a VariantConnector and flat map on the stream 
+	 * then pipe each object to a row in a bulk import file.
+	 * 
 	 * @throws ReaderException
 	 * @return stream of type we are parsing.
 	 */

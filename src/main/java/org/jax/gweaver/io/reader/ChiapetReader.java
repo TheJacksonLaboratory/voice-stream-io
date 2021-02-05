@@ -1,7 +1,5 @@
 package org.jax.gweaver.io.reader;
 
-import java.io.IOException;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.jax.gweaver.domain.Anchor;
@@ -40,8 +38,13 @@ import org.jax.gweaver.domain.ExperimentMetadata;
 class ChiapetReader<N extends AnchoredEntity> extends AbstractXlsReader<N, ExperimentMetadata> {
 	
 
-	public ChiapetReader(ReaderRequest request) throws IOException {
-		super(request);
+	/**
+	 * By default the create method simply assigns the request.
+	 */
+	@SuppressWarnings("unchecked")
+	public ChiapetReader<N> init(ReaderRequest request) {
+		this.request = request;
+		return this;
 	}
 
 	@SuppressWarnings("unchecked")

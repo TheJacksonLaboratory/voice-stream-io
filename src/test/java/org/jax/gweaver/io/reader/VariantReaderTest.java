@@ -57,8 +57,8 @@ public class VariantReaderTest extends AbstractDataFileTest {
 	
 	@Test
 	public void chunkSize() throws Exception {
-		
-		AbstractScanner<GeneticEntity> reader = new VariantReader<>(new ReaderRequest("Homo sapiens", getFile("data/1000/hs_gvf/homo_sapiens_incl_consequences_2.gvf")));
+		VariantReader<GeneticEntity> reader = new VariantReader<>();
+		reader.init(new ReaderRequest("Homo sapiens", getFile("data/1000/hs_gvf/homo_sapiens_incl_consequences_2.gvf")));
 		assertEquals(4096, reader.getChunkSize());
 	}
 
@@ -70,7 +70,7 @@ public class VariantReaderTest extends AbstractDataFileTest {
 	@Test
 	public void simpleVariantRead1() throws Exception {
 		
-		StreamReader<Variant> reader = new VariantReader<>(new ReaderRequest("Homo sapiens", getFile("data/1000/hs_gvf/homo_sapiens_incl_consequences_2.gvf")));
+		StreamReader<Variant> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/1000/hs_gvf/homo_sapiens_incl_consequences_2.gvf")));
 		List<Variant> found = reader.stream().collect(Collectors.toList());
 		
 		assertEquals(1000, found.size());
@@ -86,7 +86,7 @@ public class VariantReaderTest extends AbstractDataFileTest {
 	@Test
 	public void simpleVariantRead2() throws Exception {
 		
-		StreamReader<Variant> reader = new VariantReader<>(new ReaderRequest("Homo sapiens", getFile("data/1000/mm_gvf/mus_musculus_incl_consequences_2.gvf")));
+		StreamReader<Variant> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/1000/mm_gvf/mus_musculus_incl_consequences_2.gvf")));
 		List<Variant> found = reader.stream().collect(Collectors.toList());
 		
 		assertEquals(1000, found.size());
@@ -102,7 +102,7 @@ public class VariantReaderTest extends AbstractDataFileTest {
 	@Test
 	public void simpleVariantRead3() throws Exception {
 		
-		StreamReader<Variant> reader = new VariantReader<>(new ReaderRequest("Homo sapiens", getFile("data/gz/homo_sapiens_incl_consequences_2.gvf.gz")));
+		StreamReader<Variant> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/gz/homo_sapiens_incl_consequences_2.gvf.gz")));
 		List<Variant> found = reader.stream().collect(Collectors.toList());
 		
 		assertEquals(1000, found.size());
@@ -120,7 +120,7 @@ public class VariantReaderTest extends AbstractDataFileTest {
 		
 		try (InputStream in = new FileInputStream(getFile("data/gz/homo_sapiens_incl_consequences_2.gvf.gz"))) {
 		
-			StreamReader<Variant> reader = new VariantReader<>(new ReaderRequest("Homo sapiens", in, "consequences_2.gvf.gz"));
+			StreamReader<Variant> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", in, "consequences_2.gvf.gz"));
 			List<Variant> found = reader.stream().collect(Collectors.toList());
 			
 			assertEquals(1000, found.size());
@@ -152,7 +152,7 @@ public class VariantReaderTest extends AbstractDataFileTest {
 	@Test
 	public void parallelVariantRead1() throws Exception {
 		
-		StreamReader<GeneticEntity> reader = new VariantReader<>(new ReaderRequest("Homo sapiens", getFile("data/1000/hs_gvf/homo_sapiens_incl_consequences_2.gvf")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/1000/hs_gvf/homo_sapiens_incl_consequences_2.gvf")));
 		List<GeneticEntity> found = reader.stream().parallel().collect(Collectors.toList());
 		
 		assertEquals(1000, found.size());
@@ -167,7 +167,7 @@ public class VariantReaderTest extends AbstractDataFileTest {
 	@Test
 	public void parallelVariantRead2() throws Exception {
 		
-		StreamReader<GeneticEntity> reader = new VariantReader<>(new ReaderRequest("Homo sapiens", getFile("data/1000/mm_gvf/mus_musculus_incl_consequences_2.gvf")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/1000/mm_gvf/mus_musculus_incl_consequences_2.gvf")));
 		List<GeneticEntity> found = reader.stream().parallel().collect(Collectors.toList());
 		
 		assertEquals(1000, found.size());
@@ -212,7 +212,7 @@ public class VariantReaderTest extends AbstractDataFileTest {
 	@Test
 	public void variantGZipRead1() throws Exception {
 		
-		StreamReader<GeneticEntity> reader = new VariantReader<>(new ReaderRequest("Homo sapiens", getFile("data/gz/homo_sapiens_incl_consequences_1.gvf.gz")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/gz/homo_sapiens_incl_consequences_1.gvf.gz")));
 		long count = reader.stream().count();
 		assertEquals(872993, count);
 		assertEquals(872993, reader.linesProcessed());
@@ -226,7 +226,7 @@ public class VariantReaderTest extends AbstractDataFileTest {
 	@Test
 	public void variantGZipRead2() throws Exception {
 		
-		StreamReader<GeneticEntity> reader = new VariantReader<>(new ReaderRequest("Mus musculus", getFile("data/gz/mus_musculus_incl_consequences_1.gvf.gz")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("data/gz/mus_musculus_incl_consequences_1.gvf.gz")));
 		long count = reader.stream().count();
 		assertEquals(1726211, count);
 		assertEquals(1726211, reader.linesProcessed());
@@ -240,7 +240,7 @@ public class VariantReaderTest extends AbstractDataFileTest {
 	@Test
 	public void parallelVariantZipRead1() throws Exception {
 		
-		StreamReader<GeneticEntity> reader = new VariantReader<>(new ReaderRequest("Homo sapiens", getFile("data/zip/hs_gvf/homo_sapiens_incl_consequences_1.gvf.zip")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/zip/hs_gvf/homo_sapiens_incl_consequences_1.gvf.zip")));
 		long count = reader.stream().parallel().count();
 		assertEquals(872993, count);
 		assertEquals(872993, reader.linesProcessed());
@@ -254,7 +254,7 @@ public class VariantReaderTest extends AbstractDataFileTest {
 	@Test
 	public void parallelVariantZipRead2() throws Exception {
 		
-		StreamReader<GeneticEntity> reader = new VariantReader<>(new ReaderRequest("Mus musculus", getFile("data/zip/mm_gvf/mus_musculus_incl_consequences_1.gvf.zip")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("data/zip/mm_gvf/mus_musculus_incl_consequences_1.gvf.zip")));
 		long count = reader.stream().parallel().count();
 		assertEquals(1726211, count);
 		assertEquals(1726211, reader.linesProcessed());

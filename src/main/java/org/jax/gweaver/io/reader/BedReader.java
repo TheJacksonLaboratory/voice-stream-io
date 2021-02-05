@@ -18,7 +18,6 @@
  */
 package org.jax.gweaver.io.reader;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -44,15 +43,17 @@ import org.jax.gweaver.io.connector.TrackConnector;
 class BedReader<N extends NamedEntity> extends AbstractScanner<N> {
 
 	/**
-	 * Instantiates a new gene reader.
+	 * Create the reader by setting its data
 	 * 
-	 * @param species
-	 * @param file
-	 * @throws IOException
+	 * @param request
+	 * @throws ReaderException
 	 */
-	public BedReader(ReaderRequest request) throws IOException {
-		super(request);
+	@SuppressWarnings("unchecked")
+	@Override
+	public BedReader<N> init(ReaderRequest request) throws ReaderException {
+		super.setup(request);
 		setDelimiter("\\s+");
+		return this;
 	}
 
 	@SuppressWarnings("unchecked")

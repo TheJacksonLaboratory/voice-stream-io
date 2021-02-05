@@ -41,7 +41,8 @@ public class HomologeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void chunkSize() throws Exception {
 		
-		AbstractScanner<NamedEntity> reader = new HomologGeneReader<>(new ReaderRequest(getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
+		HomologGeneReader<NamedEntity> reader = new HomologGeneReader<>();
+		reader.init(new ReaderRequest(getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
 		assertEquals(4096, reader.getChunkSize());
 	}
 	

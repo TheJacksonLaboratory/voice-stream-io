@@ -24,14 +24,10 @@ public abstract class AbstractXlsReader<T extends Entity, M> implements StreamRe
 
 	private  M meta;
 
-	private ReaderRequest request;
+	protected ReaderRequest request;
 	private int sheetIndex = 0;
 	private int linesProcessed;
 	private Class<T> concreteClass;
-
-	public AbstractXlsReader(ReaderRequest request) throws IOException {
-		this.request = request;
-	}
 	
 	/**
 	 * Create a stream of domain objects which may be processed

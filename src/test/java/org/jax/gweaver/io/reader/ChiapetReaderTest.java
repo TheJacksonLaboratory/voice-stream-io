@@ -11,7 +11,8 @@ public class ChiapetReaderTest extends AbstractDataFileTest {
 
 	@Test
 	public void countSheet1() throws Exception {
-		AbstractXlsReader<ChromatinInteraction, ?> reader = new ChiapetReader<>(new ReaderRequest("Homo sapiens", getFile("data/ChIA-PET/NIHMS345629-supplement-02.xls.gz")));
+		ChiapetReader<ChromatinInteraction> reader = new ChiapetReader<>();
+		reader.init(new ReaderRequest("Homo sapiens", getFile("data/ChIA-PET/NIHMS345629-supplement-02.xls.gz")));
 		reader.setSheetIndex(1);
 		reader.setConcreteClass(Anchor.class);
 		assertEquals(11162-3, reader.stream().count());	
@@ -27,7 +28,7 @@ public class ChiapetReaderTest extends AbstractDataFileTest {
 
 	@Test
 	public void countSheet3() throws Exception {
-		AbstractXlsReader<ChromatinInteraction, ?> reader = new ChiapetReader<>(new ReaderRequest("Homo sapiens", getFile("data/ChIA-PET/NIHMS345629-supplement-02.xls.gz")));
+		AbstractXlsReader<ChromatinInteraction, ?> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/ChIA-PET/NIHMS345629-supplement-02.xls.gz")));
 		reader.setSheetIndex(3);
 		reader.setConcreteClass(Anchor.class);
 		assertEquals(28977-3, reader.stream().count());	
@@ -50,7 +51,7 @@ public class ChiapetReaderTest extends AbstractDataFileTest {
 	
 	@Test
 	public void countSheet6() throws Exception {
-		AbstractXlsReader<ChromatinInteraction, ?> reader = new ChiapetReader<>(new ReaderRequest("Homo sapiens", getFile("data/ChIA-PET/NIHMS345629-supplement-02.xls.gz")));
+		AbstractXlsReader<ChromatinInteraction, ?> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/ChIA-PET/NIHMS345629-supplement-02.xls.gz")));
 		reader.setSheetIndex(6);
 		assertEquals(19860-4, reader.stream().count());	
 	}
@@ -78,7 +79,7 @@ public class ChiapetReaderTest extends AbstractDataFileTest {
 	
 	@Test
 	public void checkMetaReferenceInObjects() throws Exception {
-		AbstractXlsReader<ChromatinInteraction, ExperimentMetadata> reader = new ChiapetReader<>(new ReaderRequest("Homo sapiens", getFile("data/ChIA-PET/NIHMS345629-supplement-02.xls.gz")));
+		AbstractXlsReader<ChromatinInteraction, ExperimentMetadata> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/ChIA-PET/NIHMS345629-supplement-02.xls.gz")));
 		reader.setSheetIndex(9);
 		reader.setMeta(new ExperimentMetadata("MCF7", "breast", "Polr2a", "ChIA-PET", "PMID:22265404"));
 

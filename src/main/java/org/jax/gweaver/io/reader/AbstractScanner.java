@@ -98,16 +98,21 @@ public abstract class AbstractScanner<T extends Entity> implements Spliterator<T
 	 * @param file the file
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public AbstractScanner(ReaderRequest request) throws IOException {
-		// Iterate the file with a Scanner which does not load the file to memory
-		// and gives each line at a time.
-		this.request = request;
-		if (request.isFileRequest()) {
-			this.scanner = new ScannerIterator<String>(request.getFile());
-		} else if (request.getStream()!=null){
-			this.scanner = new ScannerIterator<String>(request.getStream(), request.name());
+	protected void setup(ReaderRequest request) throws ReaderException {
+		
+		try {
+			// Iterate the file with a Scanner which does not load the file to memory
+			// and gives each line at a time.
+			this.request = request;
+			if (request.isFileRequest()) {
+				this.scanner = new ScannerIterator<String>(request.getFile());
+			} else if (request.getStream()!=null){
+				this.scanner = new ScannerIterator<String>(request.getStream(), request.name());
+			}
+			this.count = 0;
+		} catch (IOException ne) {
+			throw new ReaderException(ne);
 		}
-		this.count = 0;
 	}
 	
 	/**

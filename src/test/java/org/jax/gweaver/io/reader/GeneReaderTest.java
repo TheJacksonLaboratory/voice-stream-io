@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
 
 import org.jax.gweaver.domain.GeneticEntity;
 import org.junit.Test;
@@ -53,8 +52,8 @@ public class GeneReaderTest extends AbstractDataFileTest {
 	
 	@Test
 	public void simpleGeneRead1() throws Exception {
-		
-		StreamReader<GeneticEntity> reader = new GeneReader<>(new ReaderRequest("Homo sapiens", getFile("data/1000/hs_gtf/hg38_2.gtf")));
+		GeneReader<GeneticEntity> reader = new GeneReader<>();
+		reader.init(new ReaderRequest("Homo sapiens", getFile("data/1000/hs_gtf/hg38_2.gtf")));
 		List<GeneticEntity> found = reader.stream().collect(Collectors.toList());
 		
 		assertEquals(230, found.size());
@@ -69,7 +68,7 @@ public class GeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void simpleGeneRead2() throws Exception {
 		
-		StreamReader<GeneticEntity> reader = new GeneReader<>(new ReaderRequest("Mus musculus", getFile("data/1000/mm_gtf/mm10_2.gtf")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("data/1000/mm_gtf/mm10_2.gtf")));
 		List<GeneticEntity> found = reader.stream().collect(Collectors.toList());
 		
 		assertEquals(168, found.size());
@@ -84,7 +83,7 @@ public class GeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void simpleGeneRead3() throws Exception {
 		
-		StreamReader<GeneticEntity> reader = new GeneReader<>(new ReaderRequest("Homo sapiens", getFile("data/gz/hg38_2.gtf.gz")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/gz/hg38_2.gtf.gz")));
 		List<GeneticEntity> found = reader.stream().collect(Collectors.toList());
 		
 		assertEquals(230, found.size());
@@ -100,7 +99,7 @@ public class GeneReaderTest extends AbstractDataFileTest {
 	public void simpleGeneRead4() throws Exception {
 		
 		InputStream in = new FileInputStream(getFile("data/gz/hg38_2.gtf.gz"));
-		StreamReader<GeneticEntity> reader = new GeneReader<>(new ReaderRequest("Homo sapiens", in, "hg38_2.gtf.gz"));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", in, "hg38_2.gtf.gz"));
 		try {
 			List<GeneticEntity> found = reader.stream().collect(Collectors.toList());
 			
@@ -122,14 +121,14 @@ public class GeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void chunkSize() throws Exception {
 		
-		AbstractScanner<GeneticEntity> reader = new GeneReader<>(new ReaderRequest("Homo sapiens", getFile("data/gz/hg38_2.gtf.gz")));
+		AbstractScanner<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/gz/hg38_2.gtf.gz")));
 		assertEquals(10000, reader.getChunkSize());
 	}
 
 	@Test
 	public void singleWind() throws Exception {
 		
-		AbstractScanner<GeneticEntity> reader = new GeneReader<>(new ReaderRequest("Homo sapiens", getFile("data/gz/hg38_2.gtf.gz")));
+		AbstractScanner<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/gz/hg38_2.gtf.gz")));
 		List<GeneticEntity> chunk = reader.wind();
 		assertEquals(230, chunk.size());
 	}
@@ -137,7 +136,7 @@ public class GeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void isEmpty() throws Exception {
 		
-		StreamReader<GeneticEntity> reader = new GeneReader<>(new ReaderRequest("Homo sapiens", getFile("data/gz/hg38_2.gtf.gz")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/gz/hg38_2.gtf.gz")));
 		reader.stream().count();
 		assertTrue(reader.isEmpty());
 	}
@@ -150,7 +149,7 @@ public class GeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void parallelGeneRead1() throws Exception {
 		
-		StreamReader<GeneticEntity> reader = new GeneReader<>(new ReaderRequest("Homo sapiens", getFile("data/1000/hs_gtf/hg38_2.gtf")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/1000/hs_gtf/hg38_2.gtf")));
 		List<GeneticEntity> found = reader.stream().parallel().collect(Collectors.toList());
 		
 		assertEquals(230, found.size());
@@ -165,7 +164,7 @@ public class GeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void parallelGeneRead2() throws Exception {
 		
-		StreamReader<GeneticEntity> reader = new GeneReader<>(new ReaderRequest("Mus musculus", getFile("data/1000/mm_gtf/mm10_2.gtf")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("data/1000/mm_gtf/mm10_2.gtf")));
 		List<GeneticEntity> found = reader.stream().parallel().collect(Collectors.toList());
 		
 		assertEquals(168, found.size());
@@ -180,7 +179,7 @@ public class GeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void geneZipRead1() throws Exception {
 		
-		StreamReader<GeneticEntity> reader = new GeneReader<>(new ReaderRequest("Homo sapiens", getFile("data/zip/hs_gtf/hg38_1.gtf.zip")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/zip/hs_gtf/hg38_1.gtf.zip")));
 		long count = reader.stream().count();
 		assertEquals(115709, count);
 		assertEquals(1173235, reader.linesProcessed());
@@ -194,7 +193,7 @@ public class GeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void geneZipRead2() throws Exception {
 		
-		StreamReader<GeneticEntity> reader = new GeneReader<>(new ReaderRequest("Mus musculus", getFile("data/zip/mm_gtf/mm10_1.gtf.zip")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("data/zip/mm_gtf/mm10_1.gtf.zip")));
 		long count = reader.stream().count();
 		assertEquals(95996, count);
 		assertEquals(899084, reader.linesProcessed());
@@ -207,7 +206,7 @@ public class GeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void parallelGeneZipRead1() throws Exception {
 		
-		StreamReader<GeneticEntity> reader = new GeneReader<>(new ReaderRequest("Homo sapiens", getFile("data/zip/hs_gtf/hg38_1.gtf.zip")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/zip/hs_gtf/hg38_1.gtf.zip")));
 		long count = reader.stream().parallel().count();
 		assertEquals(115709, count);
 		assertEquals(1173235, reader.linesProcessed());
@@ -221,7 +220,7 @@ public class GeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void parallelGeneZipRead2() throws Exception {
 		
-		StreamReader<GeneticEntity> reader = new GeneReader<>(new ReaderRequest("Mus musculus", getFile("data/zip/mm_gtf/mm10_1.gtf.zip")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("data/zip/mm_gtf/mm10_1.gtf.zip")));
 		long count = reader.stream().parallel().count();
 		assertEquals(95996, count);
 		assertEquals(899084, reader.linesProcessed());

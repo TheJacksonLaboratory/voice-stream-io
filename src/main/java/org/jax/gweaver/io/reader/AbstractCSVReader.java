@@ -1,10 +1,6 @@
 package org.jax.gweaver.io.reader;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -15,14 +11,10 @@ public abstract class AbstractCSVReader<T extends Entity> implements StreamReade
 
 	private ReaderRequest request;
 
-	public AbstractCSVReader(ReaderRequest request) throws FileNotFoundException {
+	@Override
+	public AbstractCSVReader<T> init(ReaderRequest request) {
 		this.request = request;
-		init(request.stream());
-	}
-
-	private void init(InputStream in) {
-		// TODO Auto-generated method stub
-		
+		return this;
 	}
 	
 	/**

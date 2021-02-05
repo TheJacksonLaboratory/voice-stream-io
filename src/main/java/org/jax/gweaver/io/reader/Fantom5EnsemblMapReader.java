@@ -26,15 +26,17 @@ Example:
 class Fantom5EnsemblMapReader<N extends NamedEntity> extends AbstractScanner<N> {
 
 	/**
-	 * Instantiates a new gene reader.
+	 * Create the reader by setting its data
 	 * 
-	 * @param species
-	 * @param file
-	 * @throws IOException
+	 * @param reader
+	 * @throws ReaderException
 	 */
-	public Fantom5EnsemblMapReader(ReaderRequest request) throws IOException {
-		super(request);
+	@SuppressWarnings("unchecked")
+	@Override
+	public Fantom5EnsemblMapReader<N> init(ReaderRequest request) throws ReaderException {
+		super.setup(request);
 		setDelimiter("\\t+");
+		return this;
 	}
 
 	@Override
