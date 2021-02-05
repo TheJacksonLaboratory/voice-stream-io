@@ -5,6 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 import javax.annotation.processing.Generated;
@@ -49,18 +52,27 @@ public class ReaderRequest {
 		
 	}
 	
-	public ReaderRequest(File file) {
+	public ReaderRequest(File file)  {
 		this(null, file, true);
+		checkUrl();
 	}
 
-	public ReaderRequest(String source, File file) {
+	public ReaderRequest(String source, File file)  {
 		this(source, file, true);
+		checkUrl();
 	}
 	
+	public ReaderRequest(String source, Path path){
+		this.source = source;
+		this.file = path.toFile();
+		checkUrl();
+	}
+
 	public ReaderRequest(String source, File file, boolean includeAll) {
 		this.source = source;
 		this.file = file;
 		this.includeAll = includeAll;
+		checkUrl();
 	}
 	
 	public ReaderRequest(String source, InputStream stream, String name) {
@@ -73,6 +85,10 @@ public class ReaderRequest {
 		this.source = source;
 		this.expectedSize = expectedSize;
 		this.objType = objType;
+	}
+
+	public ReaderRequest(String name) {
+		this.name = name;
 	}
 
 	/**
@@ -101,6 +117,23 @@ public class ReaderRequest {
 	 */
 	public void setFile(File file) {
 		this.file = file!=null ? file.getAbsoluteFile() : null;
+		checkUrl();
+	}
+	
+	private void checkUrl()  {
+		
+		if (file==null) return;
+		String path = file.toString();
+		try {
+			if (path.startsWith("http:/") || path.startsWith("ftp:/")) {
+				String spath = path.toString().replaceAll(":/", "://");
+				this.stream = new URI(spath).toURL().openStream();
+				this.name = Paths.get(path).getFileName().toString();
+				this.file = null; // It's not a file.
+			}
+		} catch (Exception ne) {
+			throw new IllegalArgumentException("Invalid path "+path, ne);
+		}
 	}
 
 	/**

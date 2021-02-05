@@ -102,11 +102,30 @@ public class ReaderFactory {
 	 * @return the class
 	 * @throws ReaderException the reader exception
 	 */
-	@SuppressWarnings("unchecked")
 	private static <R extends StreamReader<T>, T extends Entity> Class<R> getClass(ReaderRequest request) throws ReaderException {
 		
 		// Figure out reader from name. Later we may need more complex logic.
 		String name = request.name();
+		Class<R> clazz = getClassByName(name);
+		if (clazz!=null) return clazz;
+		throw new ReaderException("There is no reader for "+name);
+	}
+
+	/**
+	 * Check if a given reader request would result in a valid reader class.
+	 * @param request
+	 * @return true if we have a reader!
+	 * @throws ReaderException 
+	 */
+	public static boolean isSupported(ReaderRequest request) throws ReaderException {
+		String name = request.name();
+		Class<?> clazz = getClassByName(name);
+		return clazz!=null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static  <R extends StreamReader<T>, T extends Entity> Class<R> getClassByName(String name) throws ReaderException{
+		
 		String ext = FilenameUtils.getExtension(name);
 		if (ext==null) throw new ReaderException(name+" does not have an extension!");
 		ext = ext.toLowerCase();
@@ -122,7 +141,8 @@ public class ReaderFactory {
 				}
 			}
 		}
-		
-		throw new ReaderException("There is no reader for "+name);
+		return null;
 	}
+
+
 }

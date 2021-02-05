@@ -180,6 +180,31 @@ public class HomologGeneReaderTest extends AbstractDataFileTest {
 		assertEquals("10090:Gstp-ps±660±Homologene±9606:GSTP1±HOMOLOG", tnt.get(5).toCsv());
 	}
 	
+	
+	@Test
+	public void checkHomologs3() throws Exception {
+
+		AbstractScanner<HomologGene> reader = ReaderFactory.getReader(new ReaderRequest("Homologene", getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
+		
+		Function<HomologGene,Stream<Entity>> connector = reader.getDefaultConnector();
+		
+		List<Entity> tnt = reader.stream()
+									.limit(1000)
+									.filter(h->h.getHid()==660L)
+									.flatMap(h->connector.apply(h))
+									.filter(h->h instanceof Homolog)
+									.collect(Collectors.toList());
+		assertEquals(3, tnt.size());
+		assertEquals("10090:Gstp1-[HOMOLOG]->9606:GSTP1", tnt.get(0).toString());
+		assertEquals("10090:Gstp2-[HOMOLOG]->9606:GSTP1", tnt.get(1).toString());
+		assertEquals("10090:Gstp-ps-[HOMOLOG]->9606:GSTP1", tnt.get(2).toString());
+		
+		// Providing delimiter is set to ±
+		assertEquals("10090:Gstp1±660±Homologene±9606:GSTP1±HOMOLOG", tnt.get(0).toCsv());
+		assertEquals("10090:Gstp2±660±Homologene±9606:GSTP1±HOMOLOG", tnt.get(1).toCsv());
+		assertEquals("10090:Gstp-ps±660±Homologene±9606:GSTP1±HOMOLOG", tnt.get(2).toCsv());
+	}
+
 	private void equals(HomologGene g, Long i, String name, Long l, String gene) {
 		assertEquals(i, g.getHid());
 		assertEquals(name, g.getOrganismName());
