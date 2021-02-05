@@ -37,22 +37,26 @@ import org.jax.gweaver.domain.Entity;
 public class ReaderFactory {
 
 	/** The Constant classes. */
-	@SuppressWarnings({ "rawtypes" }) // Intentionally we avoid generics here
-	private static final Map<String, Class> classes;
+	private static final Map<String, Class<? extends StreamReader<?>>> classes;
 	static {
 		@SuppressWarnings("rawtypes")
 		Map<String, Class> tmp = new HashMap<>();
+		
 		tmp.put("gtf", 			GeneReader.class);
 		tmp.put("gvf", 			VariantReader.class);
 		tmp.put("bed", 			BedReader.class);
 		
-		// If there are multiple xls formats, we will have to ask the reader
-		// if it is applicable for a given format.
+		// If there are multiple xls formats, we will have to ask 
+		// if it is applicable for a given format and reader request.
 		tmp.put("xls", 			ChiapetReader.class);
 		
-		// If there are multiple tsv formats, we will have to ask the reader
-		// if it is applicable for a given format.
+		// If there are multiple tsv formats, we will have to ask 
+		// if it is applicable for a given format and reader request.
 		tmp.put("tsv", 			Fantom5EnsemblMapReader.class);
+
+		// If there are multiple rpt formats, we will have to ask 
+		// if it is applicable for a given format and reader request.
+		tmp.put("rpt", 			HomologGeneReader.class);
 
 		classes = Collections.unmodifiableMap(tmp);
 	}

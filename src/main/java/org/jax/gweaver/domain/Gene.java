@@ -25,9 +25,8 @@ import javax.annotation.processing.Generated;
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
 
-// TODO: Auto-generated Javadoc
 /**
- * The Class Gene.
+ * The Class Gene. A class which holds the gene data in from the Ensembl data files.
  *
  * @author Matthew Gerring
  * @see https://dzone.com/articles/introduction-to-neo4j-ogm
@@ -38,7 +37,6 @@ import org.neo4j.ogm.annotation.NodeEntity;
 public class Gene extends GeneticEntity {
 	
 	/** The gene name. */
-	@Index(unique=true)
     private String geneName;
     
     /** The gene version. */
@@ -46,7 +44,13 @@ public class Gene extends GeneticEntity {
 	
 	/** The gene biotype. */
 	private String geneBiotype;
-	   	   
+	
+	/**
+	 * Of the form $taxon:$geneName
+	 * this is designed to be a key 
+	 */
+	@Index(unique=true)
+	private String geneTaxon;
 	
 	/**
 	 * Gets the header.
@@ -59,6 +63,8 @@ public class Gene extends GeneticEntity {
 		buf.append("geneId:ID(Gene-Id)");
 		buf.append(getDelimiter());
 		buf.append("geneName");
+		buf.append(getDelimiter());
+		buf.append("geneTaxon:ID(Gene-Taxon)");
 		buf.append(getDelimiter());
 		buf.append("geneVersion");
 		buf.append(getDelimiter());
@@ -79,6 +85,8 @@ public class Gene extends GeneticEntity {
 		buf.append(getGeneId());
 		buf.append(getDelimiter());
 		buf.append(getGeneName());
+		buf.append(getDelimiter());
+		buf.append(getGeneTaxon());
 		buf.append(getDelimiter());
 		buf.append(getGeneVersion());
 		buf.append(getDelimiter());
@@ -106,6 +114,7 @@ public class Gene extends GeneticEntity {
 	 */
 	public void setGeneName(String gene_name) {
 		this.geneName = gene_name;
+		this.geneTaxon = taxon()+":"+geneName;
 	}
 
 	/**
@@ -175,6 +184,20 @@ public class Gene extends GeneticEntity {
 	 */
 	public void setGeneVersion(String geneVersion) {
 		this.geneVersion = geneVersion;
+	}
+
+	/**
+	 * @return the geneTaxon
+	 */
+	public String getGeneTaxon() {
+		return geneTaxon;
+	}
+
+	/**
+	 * @param geneTaxon the geneTaxon to set
+	 */
+	public void setGeneTaxon(String geneTaxon) {
+		this.geneTaxon = geneTaxon;
 	}
 
 

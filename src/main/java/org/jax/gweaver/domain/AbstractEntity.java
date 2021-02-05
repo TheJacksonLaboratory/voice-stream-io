@@ -1,5 +1,7 @@
 package org.jax.gweaver.domain;
 
+import java.util.Objects;
+
 public abstract class AbstractEntity implements Entity {
 
 	// We purposely use a character unlikely, the default character "," appears in some values.
@@ -20,5 +22,20 @@ public abstract class AbstractEntity implements Entity {
 	 */
 	public void setDelimiter(String delimiter) {
 		this.delimiter = delimiter;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(delimiter);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof AbstractEntity))
+			return false;
+		AbstractEntity other = (AbstractEntity) obj;
+		return Objects.equals(delimiter, other.delimiter);
 	}
 }

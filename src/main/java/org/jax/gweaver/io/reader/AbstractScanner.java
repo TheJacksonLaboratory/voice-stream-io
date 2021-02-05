@@ -638,7 +638,7 @@ public abstract class AbstractScanner<T extends Entity> implements Spliterator<T
 	 * @return the species
 	 */
 	public String getSpecies() {
-		return request.getSpecies();
+		return request.getSource();
 	}
 
 	/**

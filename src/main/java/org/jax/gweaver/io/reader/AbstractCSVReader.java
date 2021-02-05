@@ -74,7 +74,7 @@ public abstract class AbstractCSVReader<T extends Entity> implements StreamReade
 	 * @return the species
 	 */
 	protected String getSpecies() {
-		return request.getSpecies();
+		return request.getSource();
 	}
 
 }

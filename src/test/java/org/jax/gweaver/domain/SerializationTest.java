@@ -88,6 +88,7 @@ public class SerializationTest {
 			Class clazz = getClass().getClassLoader().loadClass(classInfo.getName());
 			if (clazz.isInterface()) continue;
 			if (Modifier.isAbstract( clazz.getModifiers())) continue;
+			if (!Modifier.isPublic(clazz.getModifiers())) continue;
 
 			testClasses.add(clazz);
 		}

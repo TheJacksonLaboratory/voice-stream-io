@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class ReaderRequest {
 
 	
-	private String species;
+	private String source;
 	private File file;
 	
 	@JsonIgnore
@@ -49,24 +49,28 @@ public class ReaderRequest {
 		
 	}
 	
-	public ReaderRequest(String species, File file) {
-		this(species, file, true);
+	public ReaderRequest(File file) {
+		this(null, file, true);
+	}
+
+	public ReaderRequest(String source, File file) {
+		this(source, file, true);
 	}
 	
-	public ReaderRequest(String species, File file, boolean includeAll) {
-		this.species = species;
+	public ReaderRequest(String source, File file, boolean includeAll) {
+		this.source = source;
 		this.file = file;
 		this.includeAll = includeAll;
 	}
 	
-	public ReaderRequest(String species, InputStream stream, String name) {
-		this.species = species;
+	public ReaderRequest(String source, InputStream stream, String name) {
+		this.source = source;
 		this.stream = stream;
 		this.name = name;
 	}
 	
-	public ReaderRequest(String species, int expectedSize, Class<? extends Entity> objType) {
-		this.species = species;
+	public ReaderRequest(String source, int expectedSize, Class<? extends Entity> objType) {
+		this.source = source;
 		this.expectedSize = expectedSize;
 		this.objType = objType;
 	}
@@ -74,15 +78,15 @@ public class ReaderRequest {
 	/**
 	 * @return the species
 	 */
-	public String getSpecies() {
-		return species;
+	public String getSource() {
+		return source;
 	}
 
 	/**
 	 * @param species the species to set
 	 */
-	public void setSpecies(String species) {
-		this.species = species;
+	public void setSource(String species) {
+		this.source = species;
 	}
 
 	/**
@@ -145,7 +149,7 @@ public class ReaderRequest {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(expectedSize, file, includeAll, name, species);
+		return Objects.hash(expectedSize, file, includeAll, name, source);
 	}
 
 	@Override
@@ -156,7 +160,7 @@ public class ReaderRequest {
 			return false;
 		ReaderRequest other = (ReaderRequest) obj;
 		return expectedSize == other.expectedSize && Objects.equals(file, other.file) && includeAll == other.includeAll
-				&& Objects.equals(name, other.name) && Objects.equals(species, other.species);
+				&& Objects.equals(name, other.name) && Objects.equals(source, other.source);
 	}
 
 	@JsonIgnore

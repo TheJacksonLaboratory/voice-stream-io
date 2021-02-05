@@ -21,4 +21,9 @@ package org.jax.gweaver.domain;
 public interface Species {
 
 	String getSpecies();
+	
+	default Long taxon() {
+		return SpeciesData.get(getSpecies());
+	}
 }
+
