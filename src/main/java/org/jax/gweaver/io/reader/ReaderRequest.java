@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.zip.GZIPInputStream;
 
 import javax.annotation.processing.Generated;
 
@@ -86,6 +87,14 @@ public class ReaderRequest {
 	private boolean noInputStream = false;
 	
 	/**
+	 * Normallly we would like to close the input stream
+	 * as we read from it. In the case of reading from a tar or
+	 * zip, we do not want to close the stream at reader time because
+	 * other files will be read from it.
+	 */
+	private boolean closeInputStream = true;
+	
+	/**
 	 * objType is only used for test requests.
 	 */
 	@JsonIgnore
@@ -134,7 +143,21 @@ public class ReaderRequest {
 		checkUrl();
 	}
 	
+	public ReaderRequest(InputStream stream, String name) {
+		if (stream instanceof GZIPInputStream) throw new IllegalArgumentException("There is no need to wrap inputstream in compressed streams!");
+		this.stream = stream;
+		this.name = name;
+	}
+	
+	public ReaderRequest(InputStream stream, String name, boolean close) {
+		if (stream instanceof GZIPInputStream) throw new IllegalArgumentException("There is no need to wrap inputstream in compressed streams!");
+		this.stream = stream;
+		this.name = name;
+		this.closeInputStream = close;
+	}
+	
 	public ReaderRequest(String source, InputStream stream, String name) {
+		if (stream instanceof GZIPInputStream) throw new IllegalArgumentException("There is no need to wrap inputstream in compressed streams!");
 		this.source = source;
 		this.stream = stream;
 		this.name = name;
@@ -148,6 +171,11 @@ public class ReaderRequest {
 
 	public ReaderRequest(String name) {
 		this.name = name;
+	}
+
+	public ReaderRequest(String name, boolean noInputStream) {
+		this.name = name;
+		this.noInputStream = noInputStream;
 	}
 
 	/**
@@ -246,7 +274,8 @@ public class ReaderRequest {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(expectedSize, file, fileFilter, includeAll, mapping, name, noInputStream, source);
+		return Objects.hash(closeInputStream, expectedSize, file, fileFilter, includeAll, mapping, name, noInputStream,
+				source);
 	}
 
 	@Override
@@ -256,10 +285,11 @@ public class ReaderRequest {
 		if (!(obj instanceof ReaderRequest))
 			return false;
 		ReaderRequest other = (ReaderRequest) obj;
-		return expectedSize == other.expectedSize && Objects.equals(file, other.file)
-				&& Objects.equals(fileFilter, other.fileFilter) && includeAll == other.includeAll
-				&& Objects.equals(mapping, other.mapping) && Objects.equals(name, other.name)
-				&& noInputStream == other.noInputStream && Objects.equals(source, other.source);
+		return closeInputStream == other.closeInputStream && expectedSize == other.expectedSize
+				&& Objects.equals(file, other.file) && Objects.equals(fileFilter, other.fileFilter)
+				&& includeAll == other.includeAll && Objects.equals(mapping, other.mapping)
+				&& Objects.equals(name, other.name) && noInputStream == other.noInputStream
+				&& Objects.equals(source, other.source);
 	}
 
 	@JsonIgnore
@@ -283,6 +313,7 @@ public class ReaderRequest {
 
 	@JsonIgnore
 	public void close() throws IOException {
+		if (!isCloseInputStream()) return;
 		if (stream!=null) stream.close();
 		stream = null;
 	}
@@ -377,6 +408,20 @@ public class ReaderRequest {
 	 */
 	public void setNoInputStream(boolean noInputStream) {
 		this.noInputStream = noInputStream;
+	}
+
+	/**
+	 * @return the closeInputStream
+	 */
+	public boolean isCloseInputStream() {
+		return closeInputStream;
+	}
+
+	/**
+	 * @param closeInputStream the closeInputStream to set
+	 */
+	public void setCloseInputStream(boolean closeInputStream) {
+		this.closeInputStream = closeInputStream;
 	}
 	
 }

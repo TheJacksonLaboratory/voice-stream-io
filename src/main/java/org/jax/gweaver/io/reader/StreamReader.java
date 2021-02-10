@@ -84,4 +84,16 @@ public interface StreamReader<T extends Entity> {
 	 */
 	void close() throws IOException;
 
+	/**
+	 * Chunk size to use with this reader
+	 * @return
+	 */
+	int getChunkSize();
+	
+	/**
+	 * Set the chunk size.
+	 * @param chunkSize
+	 */
+	void setChunkSize(int chunkSize);
+
 }

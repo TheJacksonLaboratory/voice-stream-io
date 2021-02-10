@@ -21,12 +21,13 @@ package org.jax.gweaver.io.reader;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
+import org.jax.gweaver.domain.Entity;
 import org.junit.Test;
 
 // TODO: Auto-generated Javadoc
@@ -34,7 +35,6 @@ import org.junit.Test;
  * The Class ScannerIteratorTest.
  */
 public class ZipTest extends AbstractDataFileTest {
-	
 	
 	/**
 	 * Clear.
@@ -47,7 +47,6 @@ public class ZipTest extends AbstractDataFileTest {
 			FileUtils.deleteQuietly(dir.toFile());
 		}
 	}
-
 	
 	/**
 	 * Variant zip read 1.
@@ -56,8 +55,7 @@ public class ZipTest extends AbstractDataFileTest {
 	 */
 	@Test
 	public void variantZipRead1() throws Exception {
-		// 34 comment lines
-		count("data/zip/hs_gvf/homo_sapiens_incl_consequences_1.gvf.zip", 872993+34);
+		count("data/zip/hs_gvf/homo_sapiens_incl_consequences_1.gvf.zip", 872993);
 	}
 
 	/**
@@ -67,8 +65,7 @@ public class ZipTest extends AbstractDataFileTest {
 	 */
 	@Test
 	public void variantZipRead2() throws Exception {
-		// 31 comment lines
-		count("data/zip/mm_gvf/mus_musculus_incl_consequences_1.gvf.zip", 1726211+31);
+		count("data/zip/mm_gvf/mus_musculus_incl_consequences_1.gvf.zip", 1726211);
 	}
 	
 	/**
@@ -78,8 +75,7 @@ public class ZipTest extends AbstractDataFileTest {
 	 */
 	@Test
 	public void geneZipRead1() throws Exception {
-		// 5 comment lines
-		count("data/zip/hs_gtf/hg38_1.gtf.zip", 1173235+5);
+		count("data/zip/hs_gtf/hg38_1.gtf.zip", 115709);
 	}
 
 	/**
@@ -89,8 +85,7 @@ public class ZipTest extends AbstractDataFileTest {
 	 */
 	@Test
 	public void geneZipRead2() throws Exception {
-		// 5 comment lines
-		count("data/zip/mm_gtf/mm10_1.gtf.zip", 899084+5);
+		count("data/zip/mm_gtf/mm10_1.gtf.zip", 95996);
 	}
 	
 	
@@ -102,7 +97,7 @@ public class ZipTest extends AbstractDataFileTest {
 	@Test(timeout = 120000)
 	public void filesZip() throws Exception {
 		// Active lines and comment lines in these files.
-		count("data/io/files.zip", (1173235+5)+(899084+5)+(1726211+31));
+		count("data/io/files.zip", (115709)+(95996)+(1726211));
 	}
 
 	/**
@@ -112,12 +107,12 @@ public class ZipTest extends AbstractDataFileTest {
 	 * @param expected the expected
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public void count(String path, long expected) throws IOException {
+	public void count(String path, long expected) throws Exception {
 		
-		Iterator<String> iterator = StreamUtil.createScanner(getPath(path));
+		StreamReader<Entity> reader = ReaderFactory.getReader(new ReaderRequest("Unknown Species", getFile(path)));
 		
 		try(TimeInfo info = new TimeInfo()) {
-			iterator.forEachRemaining(info::increment);
+			reader.stream().forEach(info::increment);
 			
 			assertEquals(expected, info.getCount());
 			

@@ -1,0 +1,52 @@
+package org.jax.gweaver.io.reader;
+
+import org.jax.gweaver.domain.Entity;
+
+/**
+ * Base class for all reader implementations.
+ * @author gerrim
+ *
+ * @param <T>
+ */
+public abstract class AbstractStreamReader<T extends Entity> implements StreamReader<T> {
+
+	protected ReaderRequest request;
+
+	/**
+	 * Amount to wind forward when using multi-threading.
+	 * This is the maximum amount which one thread will tackle
+	 * in a single job.
+	 */
+	protected int chunkSize = Integer.getInteger("org.jax.gweaver.io.windForward", 4096);
+
+	/**
+	 * All readers must have a create method which is called
+	 * by the reader factory after the no-argument constructor.
+	 * @param request
+	 */
+	@SuppressWarnings("unchecked")
+	public <R extends StreamReader<T>> R init(ReaderRequest request) throws ReaderException {
+		this.request = request;
+		return (R)this;
+	}
+
+	/**
+	 * Gets the chunk size.
+	 *
+	 * @return the windForwardAmount
+	 */
+	public int getChunkSize() {
+		return chunkSize;
+	}
+	
+	/**
+	 * Set the amount each thread will attempt to wind forward for
+	 * its chunk. Adjusting this affects execution time for larhge runs.
+	 *
+	 * @param windForwardAmount the new chunk size
+	 */
+	public void setChunkSize(int windForwardAmount) {
+		this.chunkSize = windForwardAmount;
+	}
+
+}

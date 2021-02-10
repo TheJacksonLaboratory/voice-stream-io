@@ -39,10 +39,10 @@ import org.jax.gweaver.domain.Variant;
  * @param <T> the generic type
  */
 @SuppressWarnings("all")
-public class RepeatedLineReader<T extends GeneticEntity> extends AbstractScanner<T> {
+public class RepeatedLineReader<T extends GeneticEntity> extends LineIteratorReader<T> {
 
 	/** The reader. */
-	private AbstractScanner<T> reader;
+	private LineIteratorReader<T> reader;
 	
 	/** The gene count. */
 	private static int geneCount;

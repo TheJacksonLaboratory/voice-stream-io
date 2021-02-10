@@ -70,6 +70,11 @@ public class ReaderFactory {
 		tmp.put("^.+\\.sqtl_allpairs\\.txt(\\.gz)?$",				GTExEQTLReader.class);
 		tmp.put("^.+\\.lookup_table\\.txt(\\.gz)?$",				GTExEQTLReader.class);
 
+		// Archive Reader just calls back this reader with each entry
+		tmp.put("tar", 			ArchiveReader.class);
+		tmp.put("zip", 			ArchiveReader.class);
+
+		
 		classes = Collections.unmodifiableMap(tmp);
 	}
 	
@@ -95,7 +100,7 @@ public class ReaderFactory {
 		try {
 			Constructor<R> constructor = clazz.getDeclaredConstructor();
 			R instance = constructor.newInstance();
-			Method init = clazz.getDeclaredMethod(StreamReader.INIT, ReaderRequest.class);
+			Method init = clazz.getMethod(StreamReader.INIT, ReaderRequest.class);
 			init.invoke(instance, request);
 			return instance;
 			
@@ -143,7 +148,7 @@ public class ReaderFactory {
 		if (classes.containsKey(ext)) {
 			return (Class<R>)classes.get(ext);
 		}
-		if ("gz".equals(ext) || "zip".equals(ext)) {
+		if ("gz".equals(ext)) {
 			String alt = name.substring(name.indexOf('.')+1);
 			if (alt.contains(".")) {
 				ext = alt.substring(0, alt.indexOf('.'));

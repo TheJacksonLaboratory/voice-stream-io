@@ -49,14 +49,14 @@ public class HomologGeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void chunkSizeFromFactory() throws Exception {
 		
-		AbstractScanner<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest(getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
+		LineIteratorReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest(getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
 		assertEquals(4096, reader.getChunkSize());
 	}
 
 	@Test
 	public void count1() throws Exception {
 		
-		AbstractScanner<HomologGene> reader = ReaderFactory.getReader(new ReaderRequest(getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
+		LineIteratorReader<HomologGene> reader = ReaderFactory.getReader(new ReaderRequest(getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
 		assertEquals(40015, reader.stream().count());
 		assertEquals(20891, reader.stream().filter(h->h.getOrganismName().toLowerCase().startsWith("mouse")).count());
 		assertEquals(19124, reader.stream().filter(h->h.getOrganismName().toLowerCase().startsWith("human")).count());
@@ -65,7 +65,7 @@ public class HomologGeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void findHomologs() throws Exception {
 		
-		AbstractScanner<HomologGene> reader = ReaderFactory.getReader(new ReaderRequest(getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
+		LineIteratorReader<HomologGene> reader = ReaderFactory.getReader(new ReaderRequest(getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
 		
 		Function<HomologGene,Stream<Entity>> connector = reader.getDefaultConnector();
 		
@@ -79,7 +79,7 @@ public class HomologGeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void checkValues() throws Exception {
 		
-		AbstractScanner<HomologGene> reader = ReaderFactory.getReader(new ReaderRequest("Homologene", getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
+		LineIteratorReader<HomologGene> reader = ReaderFactory.getReader(new ReaderRequest("Homologene", getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
 		
 		Map<Long,List<HomologGene>> mhomols = new HashMap<>();
 		Map<Long,List<HomologGene>> hhomols = new HashMap<>();
@@ -140,7 +140,7 @@ public class HomologGeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void checkHomologs1() throws Exception {
 
-		AbstractScanner<HomologGene> reader = ReaderFactory.getReader(new ReaderRequest("Homologene", getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
+		LineIteratorReader<HomologGene> reader = ReaderFactory.getReader(new ReaderRequest("Homologene", getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
 		
 		Function<HomologGene,Stream<Entity>> connector = reader.getDefaultConnector();
 		
@@ -160,7 +160,7 @@ public class HomologGeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void checkHomologs2() throws Exception {
 
-		AbstractScanner<HomologGene> reader = ReaderFactory.getReader(new ReaderRequest("Homologene", getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
+		LineIteratorReader<HomologGene> reader = ReaderFactory.getReader(new ReaderRequest("Homologene", getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
 		
 		Function<HomologGene,Stream<Entity>> connector = reader.getDefaultConnector();
 		
@@ -184,7 +184,7 @@ public class HomologGeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void checkHomologs3() throws Exception {
 
-		AbstractScanner<HomologGene> reader = ReaderFactory.getReader(new ReaderRequest("Homologene", getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
+		LineIteratorReader<HomologGene> reader = ReaderFactory.getReader(new ReaderRequest("Homologene", getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
 		
 		Function<HomologGene,Stream<Entity>> connector = reader.getDefaultConnector();
 		

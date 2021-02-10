@@ -38,15 +38,6 @@ import org.jax.gweaver.domain.ExperimentMetadata;
 class ChiapetReader<N extends AnchoredEntity> extends AbstractXlsReader<N, ExperimentMetadata> {
 	
 
-	/**
-	 * By default the create method simply assigns the request.
-	 */
-	@SuppressWarnings("unchecked")
-	public ChiapetReader<N> init(ReaderRequest request) {
-		this.request = request;
-		return this;
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	protected N create(Row row) {

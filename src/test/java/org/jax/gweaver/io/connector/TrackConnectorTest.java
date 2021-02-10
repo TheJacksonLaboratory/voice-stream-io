@@ -15,7 +15,7 @@ import org.jax.gweaver.domain.Track;
 import org.jax.gweaver.domain.Tracked;
 import org.jax.gweaver.domain.VariantEffect;
 import org.jax.gweaver.io.reader.AbstractDataFileTest;
-import org.jax.gweaver.io.reader.AbstractScanner;
+import org.jax.gweaver.io.reader.LineIteratorReader;
 import org.jax.gweaver.io.reader.ReaderException;
 import org.jax.gweaver.io.reader.ReaderFactory;
 import org.jax.gweaver.io.reader.ReaderRequest;
@@ -95,7 +95,7 @@ public class TrackConnectorTest extends AbstractDataFileTest {
 	@Test
 	public void simpleTrack() throws ReaderException, IOException {
 		
-		AbstractScanner<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/track1.bed")));
+		LineIteratorReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/track1.bed")));
 		List<Entity> lines = reader.stream().flatMap(b->connector.apply(b)).collect(Collectors.toList());
 
 		assertEquals(1, lines.stream().filter(e->e instanceof Track).count());

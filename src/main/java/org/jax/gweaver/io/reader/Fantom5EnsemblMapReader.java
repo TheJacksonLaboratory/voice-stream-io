@@ -22,7 +22,7 @@ Example:
  *
  * @param <N>
  */
-class Fantom5EnsemblMapReader<N extends NamedEntity> extends AbstractScanner<N> {
+class Fantom5EnsemblMapReader<N extends NamedEntity> extends LineIteratorReader<N> {
 
 	/**
 	 * Create the reader by setting its data

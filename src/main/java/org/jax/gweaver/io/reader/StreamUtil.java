@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FilenameUtils;
@@ -31,11 +30,11 @@ public class StreamUtil {
 	 * @param request
 	 * @return
 	 */
-	public static Iterator<String> createScanner(ReaderRequest request) throws IOException {
+	public static Iterator<String> createStream(ReaderRequest request) throws IOException {
 		if (request.isFileRequest()) {
-			return StreamUtil.createScanner(request.getFile());
+			return StreamUtil.createStream(request.getFile(), request.isCloseInputStream());
 		} else if (request.getStream()!=null) {
-			return StreamUtil.createScanner(request.getStream(), request.name());
+			return StreamUtil.createStream(request.getStream(), request.name(), request.isCloseInputStream());
 		}
 		throw new IOException("Cannot create scanner from request "+request);
 	}
@@ -46,9 +45,8 @@ public class StreamUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	@SuppressWarnings("resource")
-	public static Iterator<String> createScanner(File file) throws IOException {
-		return createScanner(new FileInputStream(file), file.getName());
+	public static Iterator<String> createStream(File file, boolean shouldClose) throws IOException {
+		return createStream(new FileInputStream(file), file.getName(), shouldClose);
 	}
 
 	/**
@@ -57,9 +55,9 @@ public class StreamUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	public static Iterator<String> createScanner(Path path) throws IOException {
+	public static Iterator<String> createStream(Path path, boolean shouldClose) throws IOException {
 		String name = path.getFileName().toString();
-		return createScanner(Files.newInputStream(path), name);
+		return createStream(Files.newInputStream(path), name, shouldClose);
 	}
 	
 	/**
@@ -68,8 +66,8 @@ public class StreamUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	public static Iterator<String> createScanner(URL url) throws IOException {
-		return createScanner(url.openStream(), FilenameUtils.getName(url.toString()));
+	public static Iterator<String> createStream(URL url, boolean shouldClose) throws IOException {
+		return createStream(url.openStream(), FilenameUtils.getName(url.toString()), shouldClose);
 	}
 
 
@@ -80,17 +78,13 @@ public class StreamUtil {
 	 * @return the iterator
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public static Iterator<String> createScanner(InputStream in, String name) throws IOException {
+	public static Iterator<String> createStream(InputStream in, String name, boolean shouldClose) throws IOException {
 
-
-		if (name.toLowerCase().endsWith(".zip")) {
-			return new ZipIterator(in);
-
-		} else if (name.toLowerCase().endsWith(".gz")) {
-			return new StreamIterator(new GZIPInputStream(in));
+		if (name.toLowerCase().endsWith(".gz")) {
+			return new LineIterator(new GZIPInputStream(in), shouldClose);
 
 		} else {
-			return new StreamIterator(in);
+			return new LineIterator(in, shouldClose);
 		}
 	}
 	
@@ -100,16 +94,18 @@ public class StreamUtil {
 	 * @author gerrim
 	 *
 	 */
-	private static class StreamIterator implements Iterator<String>, Closeable {
+	private static class LineIterator implements Iterator<String>, Closeable {
 
-		private String nextLine;
-		private BufferedReader reader;
-		public StreamIterator(InputStream in) throws IOException {
+		protected String nextLine;
+		protected BufferedReader reader;
+		protected boolean shouldClose;
+		protected boolean shouldReadNext = true;
+		protected boolean isNext;
+
+		public LineIterator(InputStream in, boolean shouldClose) throws IOException {
+			this.shouldClose = shouldClose;
 			this.reader = new BufferedReader(new InputStreamReader(in));
 		}
-
-		private boolean shouldReadNext = true;
-		private boolean isNext;
 		
 		@Override
 		public boolean hasNext() {
@@ -126,7 +122,7 @@ public class StreamUtil {
 			return nextLine;
 		}
 		
-		private String line() {
+		protected String line() {
 			
 			String line = null;
 			try {
@@ -142,73 +138,10 @@ public class StreamUtil {
 		}
 
 		public void close() throws IOException {
-			reader.close();
+			if (shouldClose) reader.close();
 		}
 	}
 	
-	/**
-	 * Kind of an interator but remove() does not work.
-	 * 
-	 * @author gerrim
-	 *
-	 */
-	private static class ZipIterator implements Iterator<String>, Closeable {
-
-		private String nextLine;
-		private BufferedReader reader;
-		private ZipInputStream zstream;
-		public ZipIterator(InputStream in) throws IOException {
-			this.zstream = new ZipInputStream(in);
-			this.reader = new BufferedReader(new InputStreamReader(zstream));
-			zstream.getNextEntry();
-		}
-
-		private boolean shouldReadNext = true;
-		private boolean isNext;
-		
-		@Override
-		public boolean hasNext() {
-			if (!shouldReadNext) return isNext;
-			nextLine = line();
-			isNext = nextLine!=null;
-			shouldReadNext = false;
-			return isNext;
-		}
-
-		@Override
-		public String next() {
-			shouldReadNext = true; // They had it!
-			return nextLine;
-		}
-		
-		private String line() {
-			
-			String line = null;
-			try {
-				line = reader.readLine();
-				if (line == null) {
-					ZipEntry entry = zstream.getNextEntry();
-					if (entry == null) return null;
-					line = reader.readLine();
-				}
-				
-				if (line==null) {
-					close();
-				}
-				return line;
-				
-			} catch (IOException ne) {
-				throw new IllegalArgumentException(ne);
-			}
-		}
-
-		public void close() throws IOException {
-			reader.close();
-			zstream.close();
-		}
-
-	}
-
 	/**
 	 * Makes sure the input stream is dealt with if zipped.
 	 * If not zipped, returns stream, if gzip returns gz stream,

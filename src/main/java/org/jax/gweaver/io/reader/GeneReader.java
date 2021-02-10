@@ -38,7 +38,7 @@ import org.jax.gweaver.io.connector.GeneConnector;
  * @param <N>  A node entity, either a Gene or a Transcript related to a Gene.
  *
  */
-class GeneReader<N extends GeneticEntity> extends AbstractScanner<N>{
+class GeneReader<N extends GeneticEntity> extends LineIteratorReader<N>{
 
 
 	/**

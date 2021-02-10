@@ -19,35 +19,35 @@ public class Fantom5EnsemblMapReaderTest extends AbstractDataFileTest {
 	@Test
 	public void parseSimpleTestFile1() throws Exception {
 		
-		AbstractScanner<Fantom5Link> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/fantom5/fantom5-ensembl-map.tsv.gz")));
+		LineIteratorReader<Fantom5Link> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/fantom5/fantom5-ensembl-map.tsv.gz")));
 		assertEquals(48700-5, reader.stream().count());
 	}
 
 	@Test
 	public void countGeneReferences() throws Exception {
 		
-		AbstractScanner<Fantom5Link> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/fantom5/fantom5-ensembl-map.tsv.gz")));
+		LineIteratorReader<Fantom5Link> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/fantom5/fantom5-ensembl-map.tsv.gz")));
 		assertEquals(5084105, reader.stream().mapToInt(f->f.getEnsemblIds().size()).sum());
 	}
 
 	@Test
 	public void countObjectsWithSpanGt5000() throws Exception {
 		
-		AbstractScanner<Fantom5Link> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/fantom5/fantom5-ensembl-map.tsv.gz")));
+		LineIteratorReader<Fantom5Link> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/fantom5/fantom5-ensembl-map.tsv.gz")));
 		assertEquals(48592, reader.stream().mapToInt(f->f.span()).filter(i->i>5000).count());
 	}
 
 	@Test
 	public void countObjectsWithSpanGt100000() throws Exception {
 		
-		AbstractScanner<Fantom5Link> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/fantom5/fantom5-ensembl-map.tsv.gz")));
+		LineIteratorReader<Fantom5Link> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/fantom5/fantom5-ensembl-map.tsv.gz")));
 		assertEquals(36332, reader.stream().mapToInt(f->f.span()).filter(i->i>100000).count());
 	}
 
 	@Test
 	public void countObjectsWithSpanGt1000000() throws Exception {
 		
-		AbstractScanner<Fantom5Link> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/fantom5/fantom5-ensembl-map.tsv.gz")));
+		LineIteratorReader<Fantom5Link> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/fantom5/fantom5-ensembl-map.tsv.gz")));
 		assertEquals(43, reader.stream().mapToInt(f->f.span()).filter(i->i>1000000).count());
 	}
 

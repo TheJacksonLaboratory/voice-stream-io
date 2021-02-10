@@ -49,7 +49,7 @@ import org.jax.gweaver.domain.Entity;
  * @author Matthew Gerring
  * @param <T> The type of thing this reader will read.
  */
-public abstract class AbstractScanner<T extends Entity> implements Spliterator<T>, StreamReader<T> {
+public abstract class LineIteratorReader<T extends Entity> extends AbstractStreamReader<T> implements Spliterator<T> {
 	
 	/** The Constant build. */
 	private static final long build = generateBuildNumber(); // Once per vm execution
@@ -57,14 +57,7 @@ public abstract class AbstractScanner<T extends Entity> implements Spliterator<T
 	/**
 	 * The scanner for all the file(s) which we will parse. 
 	 */
-	protected Iterator<String> scanner;
-	
-	/**
-	 * Amount to wind forward when using multi-threading.
-	 * This is the maximum amount which one thread will tackle
-	 * in a single job.
-	 */
-	private int chunkSize = Integer.getInteger("org.jax.gweaver.io.windForward", 4096);
+	protected Iterator<String> iterator;
 
 	/** The count. */
 	protected volatile int count;
@@ -87,11 +80,6 @@ public abstract class AbstractScanner<T extends Entity> implements Spliterator<T
 	private String delimiter = System.getProperty("org.jax.gweaver.io.delimiter", "\\s+");
 
 	/**
-	 * The reader request holding the file or the stream of data.
-	 */
-	protected ReaderRequest request;
-
-	/**
 	 * Instantiates a new abstract reader.
 	 *
 	 * @param species the species
@@ -101,13 +89,13 @@ public abstract class AbstractScanner<T extends Entity> implements Spliterator<T
 	protected void setup(ReaderRequest request) throws ReaderException {
 		
 		try {
-			// Iterate the file with a Scanner which does not load the file to memory
-			// and gives each line at a time.
-			this.request = request;
+			super.init(request);
+			
 			if (request.isNoInputStream()) {
-				scanner = null;
+				iterator = null;
 			} else {
-				this.scanner = StreamUtil.createScanner(request);
+				// Iterate the file with a stream
+				this.iterator = StreamUtil.createStream(request);
 			}
 			this.count = 0;
 			
@@ -119,7 +107,7 @@ public abstract class AbstractScanner<T extends Entity> implements Spliterator<T
 	/**
 	 * Testing only.
 	 */
-	protected AbstractScanner() {
+	protected LineIteratorReader() {
 		// TODO Auto-generated constructor stub
 	}
 
@@ -132,7 +120,7 @@ public abstract class AbstractScanner<T extends Entity> implements Spliterator<T
 	public Stream<T> stream() {
 		if (isEmpty() && isDataSource()) {
 			try {
-				this.scanner = StreamUtil.createScanner(request.getFile());
+				this.iterator = StreamUtil.createStream(request.getFile(), request.isCloseInputStream());
 			} catch (IOException e) {
 				throw new IllegalArgumentException("The scanner iterator cannot be recreated from "+request.getFile(), e);
 			}
@@ -272,16 +260,16 @@ public abstract class AbstractScanner<T extends Entity> implements Spliterator<T
 		
 		String line = null;
 		try { 
-			if (!scanner.hasNext()) {
+			if (!iterator.hasNext()) {
 				return line;
 			}
 
-			line = scanner.next();
+			line = iterator.next();
 			if (line==null) return line;
 			line = line.trim();
 			if (!line.startsWith("#")) ++count;
-			while((line.isEmpty() || line.startsWith("#")) && scanner.hasNext()) {
-				line = scanner.next();
+			while((line.isEmpty() || line.startsWith("#")) && iterator.hasNext()) {
+				line = iterator.next();
 				if (line==null) return line;
 				line = line.trim();
 				if (! line.startsWith("#")) ++count;
@@ -294,9 +282,11 @@ public abstract class AbstractScanner<T extends Entity> implements Spliterator<T
 		
 		} finally {
 	 		if (line == null) {
-	 			if (scanner instanceof Closeable) {
+	 			if (iterator instanceof Closeable) {
 	 				try {
-						((Closeable)scanner).close();
+	 					if (request.isCloseInputStream()) {
+	 						((Closeable)iterator).close();
+	 					}
 					} catch (IOException e) {
 						throw new IllegalArgumentException("The scanner closeable cannot close!", e);
 					}
@@ -314,7 +304,7 @@ public abstract class AbstractScanner<T extends Entity> implements Spliterator<T
 	@Override
 	public Spliterator<T> trySplit() {
 		try {
-			if (!scanner.hasNext()) {
+			if (!iterator.hasNext()) {
 				return null;
 			}
 		} catch (IndexOutOfBoundsException | IllegalStateException | IllegalArgumentException i) {
@@ -384,7 +374,7 @@ public abstract class AbstractScanner<T extends Entity> implements Spliterator<T
 	 * @return true, if is empty
 	 */
 	public boolean isEmpty() {
-		return !scanner.hasNext();
+		return !iterator.hasNext();
 	}
 
 	/**
@@ -481,25 +471,6 @@ public abstract class AbstractScanner<T extends Entity> implements Spliterator<T
 			return lines.characteristics();
 		}
 		
-	}
-
-	/**
-	 * Gets the chunk size.
-	 *
-	 * @return the windForwardAmount
-	 */
-	public int getChunkSize() {
-		return chunkSize;
-	}
-	
-	/**
-	 * Set the amount each thread will attempt to wind forward for
-	 * its chunk. Adjusting this affects execution time for larhge runs.
-	 *
-	 * @param windForwardAmount the new chunk size
-	 */
-	public void setChunkSize(int windForwardAmount) {
-		this.chunkSize = windForwardAmount;
 	}
 
 	/**

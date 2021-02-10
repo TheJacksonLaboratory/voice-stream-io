@@ -40,7 +40,7 @@ import org.jax.gweaver.io.connector.TrackConnector;
  *
  * @param <N>
  */
-class BedReader<N extends NamedEntity> extends AbstractScanner<N> {
+class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 
 	/**
 	 * Create the reader by setting its data

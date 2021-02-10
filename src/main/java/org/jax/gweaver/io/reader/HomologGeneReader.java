@@ -63,7 +63,7 @@ SWISS_PROT IDs									P82350
  * @author gerrim
  *
  */
-class HomologGeneReader<T extends Entity> extends AbstractScanner<T> {
+class HomologGeneReader<T extends Entity> extends LineIteratorReader<T> {
 
 	/**
 	 * Instantiates a new gene reader.

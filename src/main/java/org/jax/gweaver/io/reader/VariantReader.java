@@ -42,7 +42,7 @@ import org.jax.gweaver.io.connector.VariantConnector;
  * @param <N>  A node entity, either a Gene or a Transcript related to a Gene.
  *
  */
-class VariantReader<N extends GeneticEntity> extends AbstractScanner<N>{
+class VariantReader<N extends GeneticEntity> extends LineIteratorReader<N>{
 	
 	/** The Constant VARIANTS. */
 	// TODO Are all invariant types a Variant or are some ignored?

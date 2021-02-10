@@ -121,14 +121,14 @@ public class GeneReaderTest extends AbstractDataFileTest {
 	@Test
 	public void chunkSize() throws Exception {
 		
-		AbstractScanner<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/gz/hg38_2.gtf.gz")));
+		LineIteratorReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/gz/hg38_2.gtf.gz")));
 		assertEquals(10000, reader.getChunkSize());
 	}
 
 	@Test
 	public void singleWind() throws Exception {
 		
-		AbstractScanner<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/gz/hg38_2.gtf.gz")));
+		LineIteratorReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/gz/hg38_2.gtf.gz")));
 		List<GeneticEntity> chunk = reader.wind();
 		assertEquals(230, chunk.size());
 	}

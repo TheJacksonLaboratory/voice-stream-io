@@ -20,11 +20,10 @@ import org.jax.gweaver.domain.Entity;
  * @param <T> Type we are parsing
  * @param <M> Type of metadata
  */
-public abstract class AbstractXlsReader<T extends Entity, M> implements StreamReader<T> {
+public abstract class AbstractXlsReader<T extends Entity, M> extends AbstractStreamReader<T> {
 
 	private  M meta;
 
-	protected ReaderRequest request;
 	private int sheetIndex = 0;
 	private int linesProcessed;
 	private Class<T> concreteClass;

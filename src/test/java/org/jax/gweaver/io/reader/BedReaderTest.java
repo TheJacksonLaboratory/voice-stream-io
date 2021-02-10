@@ -36,7 +36,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 	@Test
 	public void chunkSize() throws Exception {
 		
-		AbstractScanner<NamedEntity> reader = new BedReader<>().init(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed")));
+		LineIteratorReader<NamedEntity> reader = new BedReader<>().init(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed")));
 		assertEquals(4096, reader.getChunkSize());
 	}
 
