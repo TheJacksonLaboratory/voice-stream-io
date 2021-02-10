@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
 import org.jax.gweaver.domain.Entity;
@@ -43,6 +44,7 @@ public class ReaderFactory {
 		@SuppressWarnings("rawtypes")
 		Map<String, Class> tmp = new HashMap<>();
 		
+		// These guys are fairly standard I think.
 		tmp.put("gtf", 			GeneReader.class);
 		tmp.put("gvf", 			VariantReader.class);
 		tmp.put("bed", 			BedReader.class);
@@ -58,6 +60,15 @@ public class ReaderFactory {
 		// If there are multiple rpt formats, we will have to ask 
 		// if it is applicable for a given format and reader request.
 		tmp.put("rpt", 			HomologGeneReader.class);
+		
+		// @see https://storage.googleapis.com/gtex_analysis_v8/single_tissue_qtl_data/README_eQTL_v8.txt
+		tmp.put("^.+\\.egenes\\.txt(\\.gz)?$", 						GTExEQTLReader.class);
+		tmp.put("^.+\\.sgenes\\.txt(\\.gz)?$", 						GTExEQTLReader.class);
+		tmp.put("^.+\\.signif_variant_gene_pairs\\.txt(\\.gz)?$",	GTExEQTLReader.class);
+		tmp.put("^.+\\.sqtl_signifpairs\\.txt(\\.gz)?$", 			GTExEQTLReader.class);
+		tmp.put("^.+\\.allpairs\\.txt(\\.gz)?$", 					GTExEQTLReader.class);
+		tmp.put("^.+\\.sqtl_allpairs\\.txt(\\.gz)?$",				GTExEQTLReader.class);
+		tmp.put("^.+\\.lookup_table\\.txt(\\.gz)?$",				GTExEQTLReader.class);
 
 		classes = Collections.unmodifiableMap(tmp);
 	}
@@ -141,6 +152,14 @@ public class ReaderFactory {
 				}
 			}
 		}
+		
+		// Try matching the name with the keys
+		for (String key : classes.keySet()) {
+			if (Pattern.compile(key).matcher(name).matches()) {
+				return (Class<R>)classes.get(key);
+			}
+		}
+		
 		return null;
 	}
 

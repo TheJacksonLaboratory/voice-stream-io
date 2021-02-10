@@ -18,13 +18,9 @@
  */
 package org.jax.gweaver.io.reader;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import javax.print.attribute.HashPrintRequestAttributeSet;
 
 import org.jax.gweaver.domain.Entity;
 import org.jax.gweaver.domain.Gene;
@@ -78,6 +74,7 @@ public class RepeatedLineReader<T extends GeneticEntity> extends AbstractScanner
 		setChunkSize(1000);
 		
 		request.setName(getType(request.getObjType()));
+		request.setNoInputStream(true); // We do not read the stream
 		this.reader = ReaderFactory.getReader(request);
 		
 		// We just start the counters somewhere representative.
@@ -86,7 +83,6 @@ public class RepeatedLineReader<T extends GeneticEntity> extends AbstractScanner
 		
 		return this;
 	}
-
 
 	/**
 	 * Creates the.

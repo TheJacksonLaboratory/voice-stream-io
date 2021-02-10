@@ -29,7 +29,6 @@ import javax.annotation.processing.Generated;
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Variant.
  */

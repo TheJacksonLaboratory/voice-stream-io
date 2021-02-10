@@ -5,13 +5,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
+import java.io.Serializable;
+import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
 import javax.annotation.processing.Generated;
 
+import org.apache.commons.io.FilenameUtils;
 import org.jax.gweaver.domain.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -26,13 +29,34 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Generated("POJO")
 public class ReaderRequest {
 
-	
+	/**
+	 * Name of the source e.g. species or name of data source.
+	 */
 	private String source;
+	
+	/**
+	 * The file in which the data is in.
+	 */
 	private File file;
 	
+	/**
+	 * If a request needs an additional file to 
+	 * provide a mapping, for instance to the default connector,
+	 * then it should be set here.
+	 * 
+	 * This is usually a URL or a file.
+	 */
+	private Serializable mapping;
+	
+	/**
+	 * Instead of file, the data may be an input stream.
+	 */
 	@JsonIgnore
 	private InputStream stream;
 	
+	/**
+	 * Name of the data, usually the file name.
+	 */
 	private String name;
 	
 	/**
@@ -40,7 +64,26 @@ public class ReaderRequest {
 	 */
 	private boolean includeAll = true;
 	
+	/**
+	 * If the reader is reading a tar file, setting the filter
+	 * means that if the tar has more files in than required,
+	 * those not matching the filter can be ignored when the reader
+	 * streams the data from the file.
+	 * e.g. "^.+\\.egenes\\.txt(\\.gz)?$"
+	 */
+	private String fileFilter;
+	
+	/**
+	 * Used only testing, this field marks size for RepeatedLineReader which
+	 * pumps the same line through the stream in order to test it.
+	 */
 	private int expectedSize;
+	
+	/**
+	 * Set to allow no inputstream request. In which case the file source will not
+	 * setup an input stream. 
+	 */
+	private boolean noInputStream = false;
 	
 	/**
 	 * objType is only used for test requests.
@@ -54,6 +97,22 @@ public class ReaderRequest {
 	
 	public ReaderRequest(File file)  {
 		this(null, file, true);
+		checkUrl();
+	}
+	
+	public ReaderRequest(URL data) throws IOException  {
+		createStream(data);
+	}
+	
+	public ReaderRequest(File file, File mapping)  {
+		this(null, file, true);
+		this.mapping = mapping;
+		checkUrl();
+	}
+
+	public ReaderRequest(File file, URL mapping)  {
+		this(null, file, true);
+		this.mapping = mapping;
 		checkUrl();
 	}
 
@@ -127,13 +186,18 @@ public class ReaderRequest {
 		try {
 			if (path.startsWith("http:/") || path.startsWith("ftp:/")) {
 				String spath = path.toString().replaceAll(":/", "://");
-				this.stream = new URI(spath).toURL().openStream();
-				this.name = Paths.get(path).getFileName().toString();
-				this.file = null; // It's not a file.
+				URL url =  new URL(spath);
+				createStream(url);
 			}
 		} catch (Exception ne) {
 			throw new IllegalArgumentException("Invalid path "+path, ne);
 		}
+	}
+
+	private void createStream(URL url) throws IOException {
+		this.stream = url.openStream();
+		this.name = Paths.get(url.toString()).getFileName().toString();
+		this.file = null; // It's not a file.
 	}
 
 	/**
@@ -182,7 +246,7 @@ public class ReaderRequest {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(expectedSize, file, includeAll, name, source);
+		return Objects.hash(expectedSize, file, fileFilter, includeAll, mapping, name, noInputStream, source);
 	}
 
 	@Override
@@ -192,8 +256,10 @@ public class ReaderRequest {
 		if (!(obj instanceof ReaderRequest))
 			return false;
 		ReaderRequest other = (ReaderRequest) obj;
-		return expectedSize == other.expectedSize && Objects.equals(file, other.file) && includeAll == other.includeAll
-				&& Objects.equals(name, other.name) && Objects.equals(source, other.source);
+		return expectedSize == other.expectedSize && Objects.equals(file, other.file)
+				&& Objects.equals(fileFilter, other.fileFilter) && includeAll == other.includeAll
+				&& Objects.equals(mapping, other.mapping) && Objects.equals(name, other.name)
+				&& noInputStream == other.noInputStream && Objects.equals(source, other.source);
 	}
 
 	@JsonIgnore
@@ -249,6 +315,68 @@ public class ReaderRequest {
 	 */
 	public void setExpectedSize(int expectedSize) {
 		this.expectedSize = expectedSize;
+	}
+
+	/**
+	 * @return the mapping
+	 */
+	@JsonIgnore
+	public Serializable getMapping() {
+		return mapping;
+	}
+
+	/**
+	 * @param mapping the mapping to set
+	 */
+	@JsonIgnore
+	public void setMapping(Serializable mapping) {
+		this.mapping = mapping;
+	}
+
+	/**
+	 * Create an input stream for the mapping or none if no mapping file.
+	 * @return
+	 * @throws IOException
+	 */
+	@JsonIgnore
+	public InputStream mappingInputStream() throws IOException {
+		if (mapping==null) return null;
+		if (mapping instanceof File) return new FileInputStream((File)mapping);
+		if (mapping instanceof URL) return ((URL)mapping).openStream();
+		if (mapping instanceof Path) return Files.newInputStream((Path)mapping);
+		return null;
+	}
+	
+	/**
+	 * Get the name from the mapping or null if no mapping.
+	 * @return
+	 * @throws IOException
+	 */
+	@JsonIgnore
+	public String mappingName() throws IOException {
+		if (mapping==null) return null;
+		return FilenameUtils.getName(mapping.toString());
+	}
+
+	@Override
+	public String toString() {
+		return "ReaderRequest [source=" + source + ", file=" + file + ", mapping=" + mapping + ", stream=" + stream
+				+ ", name=" + name + ", includeAll=" + includeAll + ", fileFilter=" + fileFilter + ", expectedSize="
+				+ expectedSize + ", noInputStream=" + noInputStream + ", objType=" + objType + "]";
+	}
+
+	/**
+	 * @return the noInputStream
+	 */
+	public boolean isNoInputStream() {
+		return noInputStream;
+	}
+
+	/**
+	 * @param noInputStream the noInputStream to set
+	 */
+	public void setNoInputStream(boolean noInputStream) {
+		this.noInputStream = noInputStream;
 	}
 	
 }

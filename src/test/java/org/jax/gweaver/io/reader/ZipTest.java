@@ -24,47 +24,17 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class ScannerIteratorTest.
  */
-public class ScannerIteratorTest extends AbstractDataFileTest {
+public class ZipTest extends AbstractDataFileTest {
 	
-	/** The iterator. */
-	private ScannerIterator<String>  iterator;
-
-	/**
-	 * Creates the.
-	 *
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 */
-	@Before
-	public void create() throws IOException {
-		Path parent = Paths.get("tmp/scannerIteratorTest");
-		parent.toFile().mkdirs();
-		Path dir = Files.createTempDirectory(parent, "test_");
-		clear(dir);
-		dir.toFile().mkdirs();
-		this.iterator = new ScannerIterator<>();
-		iterator.setDir(dir);
-	}
-
-	/**
-	 * After.
-	 *
-	 * @throws Exception the exception
-	 */
-	@After
-	public void after() throws Exception {
-		clear(iterator.getDir());
-	}
 	
 	/**
 	 * Clear.
@@ -144,7 +114,7 @@ public class ScannerIteratorTest extends AbstractDataFileTest {
 	 */
 	public void count(String path, long expected) throws IOException {
 		
-		iterator.init(getFile(path));
+		Iterator<String> iterator = StreamUtil.createScanner(getPath(path));
 		
 		try(TimeInfo info = new TimeInfo()) {
 			iterator.forEachRemaining(info::increment);

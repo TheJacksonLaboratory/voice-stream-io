@@ -18,6 +18,7 @@
  */
 package org.jax.gweaver.io.reader;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,7 +28,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -104,12 +104,13 @@ public abstract class AbstractScanner<T extends Entity> implements Spliterator<T
 			// Iterate the file with a Scanner which does not load the file to memory
 			// and gives each line at a time.
 			this.request = request;
-			if (request.isFileRequest()) {
-				this.scanner = new ScannerIterator<String>(request.getFile());
-			} else if (request.getStream()!=null){
-				this.scanner = new ScannerIterator<String>(request.getStream(), request.name());
+			if (request.isNoInputStream()) {
+				scanner = null;
+			} else {
+				this.scanner = StreamUtil.createScanner(request);
 			}
 			this.count = 0;
+			
 		} catch (IOException ne) {
 			throw new ReaderException(ne);
 		}
@@ -131,7 +132,7 @@ public abstract class AbstractScanner<T extends Entity> implements Spliterator<T
 	public Stream<T> stream() {
 		if (isEmpty() && isDataSource()) {
 			try {
-				this.scanner = new ScannerIterator<String>(request.getFile());
+				this.scanner = StreamUtil.createScanner(request.getFile());
 			} catch (IOException e) {
 				throw new IllegalArgumentException("The scanner iterator cannot be recreated from "+request.getFile(), e);
 			}
@@ -270,9 +271,8 @@ public abstract class AbstractScanner<T extends Entity> implements Spliterator<T
 		}
 		
 		String line = null;
-		try {
+		try { 
 			if (!scanner.hasNext()) {
-				line = null;
 				return line;
 			}
 
@@ -294,8 +294,12 @@ public abstract class AbstractScanner<T extends Entity> implements Spliterator<T
 		
 		} finally {
 	 		if (line == null) {
-	 			if (scanner instanceof Scanner) {
-	 				((Scanner)scanner).close();
+	 			if (scanner instanceof Closeable) {
+	 				try {
+						((Closeable)scanner).close();
+					} catch (IOException e) {
+						throw new IllegalArgumentException("The scanner closeable cannot close!", e);
+					}
 	 			}
 	 		}
 		}

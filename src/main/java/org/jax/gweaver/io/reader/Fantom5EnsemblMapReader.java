@@ -1,6 +1,5 @@
 package org.jax.gweaver.io.reader;
 
-import java.io.IOException;
 import java.util.function.Function;
 import java.util.stream.Stream;
 

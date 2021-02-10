@@ -1,11 +1,8 @@
 package org.jax.gweaver.io.reader;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipInputStream;
 
 import org.jax.gweaver.domain.Entity;
 
