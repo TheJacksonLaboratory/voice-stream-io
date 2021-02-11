@@ -39,7 +39,7 @@ import org.jax.gweaver.domain.Entity;
 public class ReaderFactory {
 
 	/** The Constant classes. */
-	private static final Map<String, Class<? extends StreamReader<?>>> classes;
+	private static final Map<String, Class> classes;
 	static {
 		@SuppressWarnings("rawtypes")
 		Map<String, Class> tmp = new HashMap<>();
