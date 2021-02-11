@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,6 +56,19 @@ public class GeneReaderTest extends AbstractDataFileTest {
 		GeneReader<GeneticEntity> reader = new GeneReader<>();
 		reader.init(new ReaderRequest("Homo sapiens", getFile("data/1000/hs_gtf/hg38_2.gtf")));
 		List<GeneticEntity> found = reader.stream().collect(Collectors.toList());
+		
+		assertEquals(230, found.size());
+		assertEquals(1059, reader.linesProcessed());
+	}
+	
+	@Test
+	public void simpleGeneRead1Wind() throws Exception {
+		GeneReader<GeneticEntity> reader = new GeneReader<>();
+		reader.init(new ReaderRequest("Homo sapiens", getFile("data/1000/hs_gtf/hg38_2.gtf")));
+		List<GeneticEntity> found = new LinkedList<>();
+		while(!reader.isEmpty()) {
+			found.addAll(reader.wind());
+		}
 		
 		assertEquals(230, found.size());
 		assertEquals(1059, reader.linesProcessed());

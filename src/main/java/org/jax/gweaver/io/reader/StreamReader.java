@@ -82,6 +82,8 @@ public interface StreamReader<T extends Entity> {
 
 	/**
 	 * Call to close resources. May do nothing if steam is exhausted.
+	 * Readers are intentionally not auto closable because most can clean up their
+	 * own resources on the last iteration.
 	 */
 	void close() throws IOException;
 

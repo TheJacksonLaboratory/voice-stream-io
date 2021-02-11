@@ -8,7 +8,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -72,6 +71,7 @@ public class TarTest extends AbstractDataFileTest {
 	public void checkReadingGzipsUsingFactory() throws Exception {
 		File tar = new File("./tmp/tarTest/test.tar");
 		
+		// We read each entry separately
 		long total = 0;
 		try (TarArchiveInputStream tarInput = new TarArchiveInputStream(new FileInputStream(tar))) {
 	        TarArchiveEntry entry;
@@ -84,7 +84,7 @@ public class TarTest extends AbstractDataFileTest {
 	        }
 		}
 		
-		// We read the tar as a stream
+		// We read the tar as a stream using the reader
 		StreamReader<Entity> reader = ReaderFactory.getReader(new ReaderRequest(tar));
 		assertEquals(total, reader.stream().count());
 	}

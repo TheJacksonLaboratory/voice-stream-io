@@ -21,6 +21,8 @@ package org.jax.gweaver.io.reader;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,6 +53,21 @@ public class HomologGeneReaderTest extends AbstractDataFileTest {
 		
 		LineIteratorReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest(getFile("data/homol/HOM_MouseHumanSequence.rpt.gz")));
 		assertEquals(4096, reader.getChunkSize());
+	}
+	
+	@Test
+	public void checkUrl() throws Exception {
+		
+		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest(new URL("http://www.informatics.jax.org/downloads/reports/HOM_MouseHumanSequence.rpt")));
+		assertEquals(40015, reader.stream().count());
+	}
+
+	
+	@Test
+	public void checkUrlAsPath() throws Exception {
+		
+		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Test", Paths.get("http://www.informatics.jax.org/downloads/reports/HOM_MouseHumanSequence.rpt")));
+		assertEquals(40015, reader.stream().count());
 	}
 
 	@Test

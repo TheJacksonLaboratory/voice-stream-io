@@ -178,11 +178,6 @@ public class ReaderRequest {
 		this.name = name;
 	}
 
-	public ReaderRequest(String name, boolean noInputStream) {
-		this.name = name;
-		this.noInputStream = noInputStream;
-	}
-
 	/**
 	 * @return the species
 	 */

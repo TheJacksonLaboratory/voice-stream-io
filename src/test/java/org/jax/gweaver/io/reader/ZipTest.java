@@ -25,9 +25,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.jax.gweaver.domain.Entity;
+import org.jax.gweaver.domain.GeneticEntity;
 import org.junit.Test;
 
 // TODO: Auto-generated Javadoc
@@ -111,6 +114,7 @@ public class ZipTest extends AbstractDataFileTest {
 		
 		StreamReader<Entity> reader = ReaderFactory.getReader(new ReaderRequest("Unknown Species", getFile(path)));
 		
+		// Test stream
 		try(TimeInfo info = new TimeInfo()) {
 			reader.stream().forEach(info::increment);
 			
@@ -119,6 +123,16 @@ public class ZipTest extends AbstractDataFileTest {
 			info.close();
 			System.out.println("Iterated '"+path+"' in "+info.getTime()+ " ms");
 		}
+		reader.close();
+		
+		// Test wind on clean reader
+		reader = ReaderFactory.getReader(new ReaderRequest("Unknown Species", getFile(path)));
+		List<Entity> found = new LinkedList<>();
+		while(!reader.isEmpty()) {
+			found.addAll(reader.wind());
+		}
+		assertEquals(expected, found.size());
+		reader.close();
 	}
 
 }
