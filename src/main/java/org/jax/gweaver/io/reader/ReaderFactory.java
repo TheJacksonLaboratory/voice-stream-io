@@ -100,8 +100,11 @@ public class ReaderFactory {
 		try {
 			Constructor<R> constructor = clazz.getDeclaredConstructor();
 			R instance = constructor.newInstance();
-			Method init = clazz.getMethod(StreamReader.INIT, ReaderRequest.class);
-			init.invoke(instance, request);
+			
+			if (request.isInitRequired()) {
+				Method init = clazz.getMethod(StreamReader.INIT, ReaderRequest.class);
+				init.invoke(instance, request);
+			}
 			return instance;
 			
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException

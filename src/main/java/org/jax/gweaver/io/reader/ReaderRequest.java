@@ -100,6 +100,12 @@ public class ReaderRequest {
 	@JsonIgnore
 	private Class<? extends Entity> objType;
 	
+	/**
+	 * Calling init can be turned off.
+	 */
+	private boolean initRequired = true;
+	
+	
 	public ReaderRequest() {
 		
 	}
@@ -252,8 +258,8 @@ public class ReaderRequest {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(closeInputStream, expectedSize, file, fileFilter, includeAll, mapping, name, noInputStream,
-				source);
+		return Objects.hash(closeInputStream, expectedSize, file, fileFilter, includeAll, initRequired, mapping, name,
+				noInputStream, source);
 	}
 
 	@Override
@@ -265,9 +271,9 @@ public class ReaderRequest {
 		ReaderRequest other = (ReaderRequest) obj;
 		return closeInputStream == other.closeInputStream && expectedSize == other.expectedSize
 				&& Objects.equals(file, other.file) && Objects.equals(fileFilter, other.fileFilter)
-				&& includeAll == other.includeAll && Objects.equals(mapping, other.mapping)
-				&& Objects.equals(name, other.name) && noInputStream == other.noInputStream
-				&& Objects.equals(source, other.source);
+				&& includeAll == other.includeAll && initRequired == other.initRequired
+				&& Objects.equals(mapping, other.mapping) && Objects.equals(name, other.name)
+				&& noInputStream == other.noInputStream && Objects.equals(source, other.source);
 	}
 
 	@JsonIgnore
@@ -400,6 +406,20 @@ public class ReaderRequest {
 	 */
 	public void setCloseInputStream(boolean closeInputStream) {
 		this.closeInputStream = closeInputStream;
+	}
+
+	/**
+	 * @return the initRequired
+	 */
+	public boolean isInitRequired() {
+		return initRequired;
+	}
+
+	/**
+	 * @param initRequired the initRequired to set
+	 */
+	public void setInitRequired(boolean initRequired) {
+		this.initRequired = initRequired;
 	}
 	
 }

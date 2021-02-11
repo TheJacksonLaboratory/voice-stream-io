@@ -50,7 +50,7 @@ public class ZipTest extends AbstractDataFileTest {
 			FileUtils.deleteQuietly(dir.toFile());
 		}
 	}
-	
+
 	/**
 	 * Variant zip read 1.
 	 *
