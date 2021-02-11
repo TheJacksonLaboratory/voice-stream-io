@@ -89,6 +89,7 @@ public class ZipTest extends AbstractDataFileTest {
 	@Test
 	public void geneZipRead2() throws Exception {
 		count("data/zip/mm_gtf/mm10_1.gtf.zip", 95996);
+		countFullReader("data/zip/mm_gtf/mm10_1.gtf.zip", 95996);
 	}
 	
 	
@@ -110,7 +111,7 @@ public class ZipTest extends AbstractDataFileTest {
 	 * @param expected the expected
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public void count(String path, long expected) throws Exception {
+	private void count(String path, long expected) throws Exception {
 		
 		StreamReader<Entity> reader = ReaderFactory.getReader(new ReaderRequest("Unknown Species", getFile(path)));
 		
@@ -124,15 +125,19 @@ public class ZipTest extends AbstractDataFileTest {
 			System.out.println("Iterated '"+path+"' in "+info.getTime()+ " ms");
 		}
 		reader.close();
+	}
+	
+	private void countFullReader(String path, long expected) throws Exception {
 		
 		// Test wind on clean reader
-		reader = ReaderFactory.getReader(new ReaderRequest("Unknown Species", getFile(path)));
+		StreamReader<Entity> reader = ReaderFactory.getReader(new ReaderRequest("Unknown Species", getFile(path)));
 		List<Entity> found = new LinkedList<>();
 		while(!reader.isEmpty()) {
 			found.addAll(reader.wind());
 		}
 		assertEquals(expected, found.size());
 		reader.close();
+
 	}
 
 }
