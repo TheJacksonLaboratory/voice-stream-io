@@ -4,6 +4,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Function;
@@ -30,6 +32,31 @@ public class ArchiveReader<T extends Entity> extends AbstractStreamReader<T> {
 			
 		} catch (IOException e) {
 			throw new ReaderException(e);
+		}
+	}
+	
+	public List<T> wind() throws ReaderException {
+
+		try {
+			if (iterator==null) this.iterator = createIterator(false);
+			
+			StreamReader<T> reader = ((StreamIterator)iterator).getActiveReader();
+			return reader.wind();
+			
+		} catch (IOException e) {
+			throw new ReaderException(e);
+		}
+	}
+
+	@Override
+	public boolean isEmpty() {
+		
+		if (iterator==null) return false;
+		try {
+			StreamReader<T> reader = ((StreamIterator)iterator).getActiveReader();
+			return reader.isEmpty();
+		} catch (IOException | ReaderException e) {
+			return true;
 		}
 	}
 
@@ -63,12 +90,6 @@ public class ArchiveReader<T extends Entity> extends AbstractStreamReader<T> {
 	}
 
 	@Override
-	public boolean isEmpty() {
-		if (iterator==null) return false;
-		return iterator.hasNext();
-	}
-
-	@Override
 	public void close() throws IOException {
 		if (iterator!=null && iterator instanceof Closeable) {
 			((Closeable)iterator).close();
@@ -85,6 +106,12 @@ public class ArchiveReader<T extends Entity> extends AbstractStreamReader<T> {
 			this.parent = in;
 		}
 		
+		public StreamReader<T> getActiveReader() throws IOException, ReaderException {
+			if (reader!=null && !reader.isEmpty()) return reader;
+			nextIterator(); // If stream exhausted, see if there is another file.
+			return reader;
+		}
+
 		@Override
 		public boolean hasNext() {
 			if (currentIterator==null) return false;
@@ -141,6 +168,7 @@ public class ArchiveReader<T extends Entity> extends AbstractStreamReader<T> {
 			TarArchiveEntry entry = tstream.getNextTarEntry();
 			if (entry==null) return null;
 			this.reader = ReaderFactory.getReader(new ReaderRequest(tstream, entry.getName(), false));
+			reader.setChunkSize(getChunkSize());
 			return reader.stream().iterator();
 		}
 
@@ -166,6 +194,7 @@ public class ArchiveReader<T extends Entity> extends AbstractStreamReader<T> {
 			ZipEntry entry = zstream.getNextEntry();
 			if (entry==null) return null;
 			this.reader = ReaderFactory.getReader(new ReaderRequest(zstream, entry.getName(), false));
+			reader.setChunkSize(getChunkSize());
 			return reader.stream().iterator();
 		}
 	}

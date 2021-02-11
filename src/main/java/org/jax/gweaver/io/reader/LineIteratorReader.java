@@ -305,7 +305,7 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	 * @throws ReaderException the reader exception
 	 */
 	public List<T> wind() throws ReaderException {
-		List<String> lines = wind(chunkSize);
+		List<String> lines = wind(getChunkSize());
 		List<T> 	 items = new LinkedList<>(); // linked list is fast to add/iterate
 		for (String line : lines) {
 			T bean = create(line);

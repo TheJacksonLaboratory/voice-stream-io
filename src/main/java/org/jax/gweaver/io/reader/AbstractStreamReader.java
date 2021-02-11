@@ -1,5 +1,9 @@
 package org.jax.gweaver.io.reader;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.jax.gweaver.domain.Entity;
 
 /**
@@ -49,4 +53,20 @@ public abstract class AbstractStreamReader<T extends Entity> implements StreamRe
 		this.chunkSize = windForwardAmount;
 	}
 
+	private Iterator<T> iterator;
+	
+	/**
+	 * Used to wind forward somewhere between 0 and the chunk size.
+	 * @return the items passed when winding forward.
+	 */
+	public List<T> wind() throws ReaderException {
+		
+		if (iterator==null || !iterator.hasNext()) iterator = stream().iterator();
+		
+		List<T> ls = new LinkedList<>(); // linked list is fast to add/iterate
+		for (int i = 0; i < getChunkSize() && iterator.hasNext(); i++) {
+			ls.add(iterator.next());
+		}
+		return ls;
+	}
 }

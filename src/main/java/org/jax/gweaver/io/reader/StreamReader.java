@@ -1,6 +1,7 @@
 package org.jax.gweaver.io.reader;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -95,5 +96,14 @@ public interface StreamReader<T extends Entity> {
 	 * @param chunkSize
 	 */
 	void setChunkSize(int chunkSize);
+
+	/**
+	 * Some readers support the ability to wind forward through the 
+	 * stream of items in chunks. In the case where the read is 
+	 * writing a single transaction, this may be faster than a pure stream.
+	 * 
+	 * @return the next chunk of data.
+	 */
+	List<T> wind() throws ReaderException;
 
 }
