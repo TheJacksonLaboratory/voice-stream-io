@@ -1,5 +1,11 @@
 language: java
 sudo: false
+
+cache:
+  directories:
+  - .autoconf
+  - $HOME/.m2
+
 script:
    - cp settings.xml ~/.m2/
    - git clone https://gerring@bitbucket.org/geneweaver/gweaver-test-data.git
