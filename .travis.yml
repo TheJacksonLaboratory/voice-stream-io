@@ -2,5 +2,5 @@ language: java
 sudo: false
 script:
    - cp settings.xml ~/.m2/
-   - git clone git@bitbucket.org:geneweaver/gweaver-test-data.git
+   - git clone https://gerring@bitbucket.org/geneweaver/gweaver-test-data.git
    - mvn -B deploy # -B batch mode makes Maven less verbose
