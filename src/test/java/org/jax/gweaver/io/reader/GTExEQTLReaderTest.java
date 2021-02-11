@@ -6,7 +6,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import org.jax.gweaver.domain.NamedEntity;
@@ -52,7 +56,7 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 		assertEquals(999, map.size());
 	}
 
-	@Ignore
+	@Ignore("Too big!")
 	@Test
 	public void timeMassiveMapURL() throws Exception {
 		File pairs = getFile("data/eQTL/Brain_Substantia_nigra.v8.signif_variant_gene_pairs.txt.gz");
@@ -61,10 +65,9 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 		
 		Map<String,String> map = reader.getMapping();
 		assertNotNull(map);
-		assertEquals(999, map.size());
 	}
 	
-	@Ignore
+	@Ignore("Too big and local file!")
 	@Test
 	public void timeMassiveMapFile() throws Exception {
 		File pairs = getFile("data/eQTL/Brain_Substantia_nigra.v8.signif_variant_gene_pairs.txt.gz");
@@ -73,7 +76,28 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 		
 		Map<String,String> map = reader.getMapping();
 		assertNotNull(map);
-		assertEquals(999, map.size());
+	}
+
+	@SuppressWarnings("deprecation")
+	@Test
+	public void urlInRequest() throws Exception {
+		URL pairs = getFile("data/eQTL/Brain_Substantia_nigra.v8.signif_variant_gene_pairs.txt.gz").toURL();
+		URL fmap = getFile("data/eQTL/GTExLookup-frag.lookup_table.txt").toURL();
+		GTExEQTLReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest(pairs).setMapping(fmap));
+		assertNotNull(reader);
+	}
+	
+	@SuppressWarnings("deprecation")
+	@Test
+	public void mappingStreamTest() throws Exception {
+		checkMappingStream(new ReaderRequest().setMapping(getFile("data/eQTL/GTExLookup-frag.lookup_table.txt")));
+		checkMappingStream(new ReaderRequest().setMapping(getFile("data/eQTL/GTExLookup-frag.lookup_table.txt").toURL()));
+	}
+
+	private void checkMappingStream(ReaderRequest r) throws IOException {
+		try (InputStream in = r.mappingInputStream() ) {
+			assertNotNull(in);
+		}
 	}
 
 }

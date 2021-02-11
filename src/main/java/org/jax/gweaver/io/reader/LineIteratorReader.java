@@ -131,26 +131,6 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	}
 	
 	/**
-	 * If using parallel be sure to use an MultiTranactionManager
-	 * and to close the transaction using the same pool with which
-	 * you run the parallel stream.
-	 *
-	 * @return the stream
-	 */
-	public Stream<T> parallelStream() {
-		return StreamSupport.stream(this, true);
-	}
-	
-	/**
-	 * Iterator of the stream of objects.
-	 *
-	 * @return the iterator
-	 */
-	public Iterator<T> iterator() {
-		return stream().iterator();
-	}
-	
-	/**
 	 * Generate build number.
 	 *
 	 * @return the long
@@ -550,15 +530,6 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
         }
         return attributes;
     }
-
-	/**
-	 * Gets the file name.
-	 *
-	 * @return the file name
-	 */
-	protected String getFileName() {
-		return request.name();
-	}
 	
 	/**
 	 * Close.
@@ -574,7 +545,7 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	 *
 	 * @return the windStopType
 	 */
-	protected String getWindStopType() {
+	private String getWindStopType() {
 		return windStopType;
 	}
 
@@ -585,25 +556,6 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	 */
 	protected void setWindStopType(String windStopType) {
 		this.windStopType = windStopType;
-	}
-
-	/**
-	 * Just tells the user if the stream of lines is empty or not.
-	 * next() returns null.
-	 * @return a half baked iterator for using with chunks.
-	 */
-	public Iterator<String> isEmptyIterator() {
-		return new Iterator<>() {
-			@Override
-			public boolean hasNext() {
-				return !isEmpty();
-			}
-			@Override
-			public String next() {
-				return (String)null;
-			}
-			
-		};
 	}
 
 	public String getDelimiter() {

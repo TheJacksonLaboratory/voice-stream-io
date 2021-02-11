@@ -18,6 +18,7 @@ import org.jax.gweaver.io.reader.ReaderRequest;
 import org.jax.gweaver.io.reader.StreamReader;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class GeneConnectorTest extends AbstractDataFileTest {
@@ -190,6 +191,7 @@ public class GeneConnectorTest extends AbstractDataFileTest {
 	 *
 	 * @throws Exception the exception
 	 */
+	@Ignore("We do not currently do parallel gene connections because bulk import does not need it.")
 	@Test
 	public void parallelGeneZipRead1() throws Exception {
 		
@@ -204,6 +206,7 @@ public class GeneConnectorTest extends AbstractDataFileTest {
 	 *
 	 * @throws Exception the exception
 	 */
+	@Ignore("We do not currently do parallel gene connections because bulk import does not need it.")
 	@Test
 	public void parallelGeneZipRead2() throws Exception {
 		

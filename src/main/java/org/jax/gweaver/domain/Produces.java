@@ -177,7 +177,9 @@ public class Produces extends AbstractEntity {
 	 */
 	@Override
 	public String toString() {
-		return gene.getGeneId()+"-[PRODUCES]->"+transcript.getTranscriptId();
+		String geneId = gene!=null ? gene.getGeneId() : null;
+		String transId = transcript!=null ? transcript.getTranscriptId() : null;
+		return geneId+"-[PRODUCES]->"+transId;
 	}
 
 

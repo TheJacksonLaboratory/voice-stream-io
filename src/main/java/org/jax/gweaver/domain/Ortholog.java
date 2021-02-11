@@ -109,9 +109,9 @@ public class Ortholog extends AbstractEntity {
 	@Override
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
-		buf.append(speciesFrom!=null ? speciesFrom.getGeneId() : geneIdFrom);
+		buf.append(getSpeciesFromId());
 		buf.append(getDelimiter());
-		buf.append(speciesTo!=null ? speciesTo.getGeneId() : geneIdTo);
+		buf.append(getSpeciesToId());
 		buf.append(getDelimiter());
 		buf.append(getClass().getSimpleName().toUpperCase());
 		return buf.toString();
@@ -188,6 +188,14 @@ public class Ortholog extends AbstractEntity {
 		return Objects.equals(uid, other.uid);
 	}
 	
+	protected String getSpeciesFromId() {
+		return speciesFrom!=null ? speciesFrom.getGeneId() : geneIdFrom;
+	}
+	
+	protected String getSpeciesToId() {
+		return speciesTo!=null ? speciesTo.getGeneId() : geneIdTo;
+	}
+
 	/**
 	 * To string.
 	 *
@@ -195,7 +203,7 @@ public class Ortholog extends AbstractEntity {
 	 */
 	@Override
 	public String toString() {
-		return speciesFrom.getGeneId()+"-[ORTHOLOG]->"+speciesTo.getGeneId();
+		return getSpeciesFromId()+"-[ORTHOLOG]->"+getSpeciesToId();
 	}
 
 

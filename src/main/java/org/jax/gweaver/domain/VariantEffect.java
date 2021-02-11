@@ -266,6 +266,8 @@ public class VariantEffect extends AbstractEntity {
 	 */
 	@Override
 	public String toString() {
-		return variant.getRsId()+"-[VARIANT_EFFECT]->"+transcript.getTranscriptId();
+		String rsId = variant!=null ? variant.getRsId() : null;
+		String transId = transcript!=null ? transcript.getTranscriptId() : null;
+		return rsId+"-[VARIANT_EFFECT]->"+transId;
 	}
 }

@@ -89,7 +89,9 @@ public class Tracked  extends AbstractEntity {
 	 */
 	@Override
 	public String toString() {
-		return track.getName()+"-[TRACKED]->"+region.getName();
+		String tname = track!=null ? track.getName() : null;
+		String rname = region!=null ? region.getName() : null;
+		return tname+"-[TRACKED]->"+rname;
 	}
 
 	/**

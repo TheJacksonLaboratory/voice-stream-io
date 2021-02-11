@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -106,41 +105,37 @@ public class ReaderRequest {
 	
 	public ReaderRequest(File file)  {
 		this(null, file, true);
-		checkUrl();
 	}
 	
-	public ReaderRequest(URL data) throws IOException  {
-		createStream(data);
+	public ReaderRequest(URL url) throws IOException  {
+		this.stream = url.openStream();
+		this.name = Paths.get(url.toString()).getFileName().toString();
+		this.file = null; // It's not a file.
 	}
 	
 	public ReaderRequest(File file, File mapping)  {
 		this(null, file, true);
 		this.mapping = mapping;
-		checkUrl();
 	}
 
 	public ReaderRequest(File file, URL mapping)  {
 		this(null, file, true);
 		this.mapping = mapping;
-		checkUrl();
 	}
 
 	public ReaderRequest(String source, File file)  {
 		this(source, file, true);
-		checkUrl();
 	}
 	
 	public ReaderRequest(String source, Path path){
 		this.source = source;
 		this.file = path.toFile();
-		checkUrl();
 	}
 
 	public ReaderRequest(String source, File file, boolean includeAll) {
 		this.source = source;
 		this.file = file;
 		this.includeAll = includeAll;
-		checkUrl();
 	}
 	
 	public ReaderRequest(InputStream stream, String name) {
@@ -204,30 +199,8 @@ public class ReaderRequest {
 	 */
 	public void setFile(File file) {
 		this.file = file!=null ? file.getAbsoluteFile() : null;
-		checkUrl();
 	}
 	
-	private void checkUrl()  {
-		
-		if (file==null) return;
-		String path = file.toString();
-		try {
-			if (path.startsWith("http:/") || path.startsWith("ftp:/")) {
-				String spath = path.toString().replaceAll(":/", "://");
-				URL url =  new URL(spath);
-				createStream(url);
-			}
-		} catch (Exception ne) {
-			throw new IllegalArgumentException("Invalid path "+path, ne);
-		}
-	}
-
-	private void createStream(URL url) throws IOException {
-		this.stream = url.openStream();
-		this.name = Paths.get(url.toString()).getFileName().toString();
-		this.file = null; // It's not a file.
-	}
-
 	/**
 	 * @return the stream
 	 */
@@ -360,8 +333,9 @@ public class ReaderRequest {
 	 * @param mapping the mapping to set
 	 */
 	@JsonIgnore
-	public void setMapping(Serializable mapping) {
+	public ReaderRequest setMapping(Serializable mapping) {
 		this.mapping = mapping;
+		return this;
 	}
 
 	/**
@@ -374,7 +348,6 @@ public class ReaderRequest {
 		if (mapping==null) return null;
 		if (mapping instanceof File) return new FileInputStream((File)mapping);
 		if (mapping instanceof URL) return ((URL)mapping).openStream();
-		if (mapping instanceof Path) return Files.newInputStream((Path)mapping);
 		return null;
 	}
 	
