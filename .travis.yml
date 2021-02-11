@@ -10,4 +10,6 @@ cache:
 script:
    - cp settings.xml ~/.m2/
    - git clone https://gerring@bitbucket.org/geneweaver/gweaver-test-data.git
-   - mvn -B deploy # -B batch mode makes Maven less verbose
+# The bitbucket script deploys, so we just verify
+#   - mvn -B deploy 
+   - mvn -B verify

@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -127,9 +128,18 @@ public class ReaderRequest {
 		this(source, file, true);
 	}
 	
-	public ReaderRequest(String source, Path path){
+	public ReaderRequest(String source, Path path) throws IOException{
 		this.source = source;
-		this.file = path.toFile();
+		
+		if (path.startsWith("http:/") || path.startsWith("ftp:/")) {
+			String spath = path.toString().replaceAll(":/", "://");
+			URL url =  new URL(spath);
+			this.stream = url.openStream();
+			this.name = Paths.get(url.toString()).getFileName().toString();
+			this.file = null; // It's not a file.
+		} else {
+			this.file = path.toFile();
+		}
 	}
 
 	public ReaderRequest(String source, File file, boolean includeAll) {
