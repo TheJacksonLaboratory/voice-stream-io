@@ -42,7 +42,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-// TODO: Auto-generated Javadoc
 /**
  * Tests the partitioner with different inputs including nulls and empy files.
  * @author gerrim

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.zip.GZIPInputStream;
 
 import org.jax.gweaver.domain.Entity;
 import org.jax.gweaver.domain.GeneticEntity;
@@ -18,6 +17,7 @@ import org.jax.gweaver.io.reader.LineIteratorReader;
 import org.jax.gweaver.io.reader.ReaderFactory;
 import org.jax.gweaver.io.reader.ReaderRequest;
 import org.jax.gweaver.io.reader.RepeatedLineReader;
+import org.jax.gweaver.io.reader.StreamReader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -207,7 +207,7 @@ public class VariantConnectorTest extends AbstractDataFileTest {
 	@Test
 	public void parallelVariantZipRead1() throws Exception {
 		
-		LineIteratorReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/zip/hs_gvf/homo_sapiens_incl_consequences_1.gvf.zip")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/zip/hs_gvf/homo_sapiens_incl_consequences_1.gvf.zip")));
 		long count = reader.stream().parallel().flatMap(v->connector.apply(v)).count();
 		assertEquals(7367093, count);
 		assertEquals(872993, reader.linesProcessed());
@@ -221,7 +221,7 @@ public class VariantConnectorTest extends AbstractDataFileTest {
 	@Test
 	public void parallelVariantZipRead2() throws Exception {
 		
-		LineIteratorReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("data/zip/mm_gvf/mus_musculus_incl_consequences_1.gvf.zip")));
+		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("data/zip/mm_gvf/mus_musculus_incl_consequences_1.gvf.zip")));
 		long count = reader.stream().parallel().flatMap(v->connector.apply(v)).count();
 		assertEquals(6648629, count);
 		assertEquals(1726211, reader.linesProcessed());
