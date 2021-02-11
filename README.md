@@ -1,3 +1,5 @@
+![](https://travis-ci.com/geneweaver/gweaver-stream-io.svg?branch=master)
+
 # Gene Weaver Stream IO #
 
 ## Introduction
