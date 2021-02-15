@@ -166,11 +166,4 @@ public class StreamUtil {
 		}
 	}
 
-
-	private static boolean isArchive(String name) {
-		return name!=null && 
-				(name.toLowerCase().endsWith(".zip") || name.toLowerCase().endsWith(".tar"));
-	}
-
-
 }

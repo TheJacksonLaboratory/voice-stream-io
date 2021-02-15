@@ -5,8 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,7 +13,6 @@ import java.util.zip.GZIPInputStream;
 
 import javax.annotation.processing.Generated;
 
-import org.apache.commons.io.FilenameUtils;
 import org.jax.gweaver.domain.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -39,16 +36,7 @@ public class ReaderRequest {
 	 * The file in which the data is in.
 	 */
 	private File file;
-	
-	/**
-	 * If a request needs an additional file to 
-	 * provide a mapping, for instance to the default connector,
-	 * then it should be set here.
-	 * 
-	 * This is usually a URL or a file.
-	 */
-	private Serializable mapping;
-	
+		
 	/**
 	 * Instead of file, the data may be an input stream.
 	 */
@@ -66,11 +54,11 @@ public class ReaderRequest {
 	private boolean includeAll = true;
 	
 	/**
-	 * If the reader is reading a tar file, setting the filter
-	 * means that if the tar has more files in than required,
+	 * If the reader is reading a zip or tar file, setting the filter
+	 * means that if the entry has more files than required,
 	 * those not matching the filter can be ignored when the reader
 	 * streams the data from the file.
-	 * e.g. "^.+\\.egenes\\.txt(\\.gz)?$"
+	 * e.g. "^.+\\.egenes\\.txt(\\.gz)?$" to take only egenes files.
 	 */
 	private String fileFilter;
 	
@@ -114,20 +102,15 @@ public class ReaderRequest {
 		this(null, file, true);
 	}
 	
+	public ReaderRequest(File file, String fileFilter)  {
+		this(null, file, true);
+		this.fileFilter = fileFilter;
+	}
+
 	public ReaderRequest(URL url) throws IOException  {
 		this.stream = url.openStream();
 		this.name = Paths.get(url.toString()).getFileName().toString();
 		this.file = null; // It's not a file.
-	}
-	
-	public ReaderRequest(File file, File mapping)  {
-		this(null, file, true);
-		this.mapping = mapping;
-	}
-
-	public ReaderRequest(File file, URL mapping)  {
-		this(null, file, true);
-		this.mapping = mapping;
 	}
 
 	public ReaderRequest(String source, File file)  {
@@ -194,8 +177,9 @@ public class ReaderRequest {
 	/**
 	 * @param species the species to set
 	 */
-	public void setSource(String species) {
+	public ReaderRequest setSource(String species) {
 		this.source = species;
+		return this;
 	}
 
 	/**
@@ -208,8 +192,9 @@ public class ReaderRequest {
 	/**
 	 * @param file the file to set
 	 */
-	public void setFile(File file) {
+	public ReaderRequest setFile(File file) {
 		this.file = file!=null ? file.getAbsoluteFile() : null;
+		return this;
 	}
 	
 	/**
@@ -224,8 +209,9 @@ public class ReaderRequest {
 	 * @param stream the stream to set
 	 */
 	@JsonIgnore
-	public void setStream(InputStream stream) {
+	public ReaderRequest setStream(InputStream stream) {
 		this.stream = stream;
+		return this;
 	}
 
 	/**
@@ -238,8 +224,9 @@ public class ReaderRequest {
 	/**
 	 * @param name the name to set
 	 */
-	public void setName(String name) {
+	public ReaderRequest setName(String name) {
 		this.name = name;
+		return this;
 	}
 
 	/**
@@ -252,13 +239,14 @@ public class ReaderRequest {
 	/**
 	 * @param includeAll the includeAll to set
 	 */
-	public void setIncludeAll(boolean includeAll) {
+	public ReaderRequest setIncludeAll(boolean includeAll) {
 		this.includeAll = includeAll;
+		return this;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(closeInputStream, expectedSize, file, fileFilter, includeAll, initRequired, mapping, name,
+		return Objects.hash(closeInputStream, expectedSize, file, fileFilter, includeAll, initRequired, name,
 				noInputStream, source);
 	}
 
@@ -272,8 +260,8 @@ public class ReaderRequest {
 		return closeInputStream == other.closeInputStream && expectedSize == other.expectedSize
 				&& Objects.equals(file, other.file) && Objects.equals(fileFilter, other.fileFilter)
 				&& includeAll == other.includeAll && initRequired == other.initRequired
-				&& Objects.equals(mapping, other.mapping) && Objects.equals(name, other.name)
-				&& noInputStream == other.noInputStream && Objects.equals(source, other.source);
+				&& Objects.equals(name, other.name) && noInputStream == other.noInputStream
+				&& Objects.equals(source, other.source);
 	}
 
 	@JsonIgnore
@@ -328,54 +316,14 @@ public class ReaderRequest {
 	/**
 	 * @param expectedSize the expectedSize to set
 	 */
-	public void setExpectedSize(int expectedSize) {
+	public ReaderRequest setExpectedSize(int expectedSize) {
 		this.expectedSize = expectedSize;
-	}
-
-	/**
-	 * @return the mapping
-	 */
-	@JsonIgnore
-	public Serializable getMapping() {
-		return mapping;
-	}
-
-	/**
-	 * @param mapping the mapping to set
-	 */
-	@JsonIgnore
-	public ReaderRequest setMapping(Serializable mapping) {
-		this.mapping = mapping;
 		return this;
-	}
-
-	/**
-	 * Create an input stream for the mapping or none if no mapping file.
-	 * @return
-	 * @throws IOException
-	 */
-	@JsonIgnore
-	public InputStream mappingInputStream() throws IOException {
-		if (mapping==null) return null;
-		if (mapping instanceof File) return new FileInputStream((File)mapping);
-		if (mapping instanceof URL) return ((URL)mapping).openStream();
-		return null;
-	}
-	
-	/**
-	 * Get the name from the mapping or null if no mapping.
-	 * @return
-	 * @throws IOException
-	 */
-	@JsonIgnore
-	public String mappingName() throws IOException {
-		if (mapping==null) return null;
-		return FilenameUtils.getName(mapping.toString());
 	}
 
 	@Override
 	public String toString() {
-		return "ReaderRequest [source=" + source + ", file=" + file + ", mapping=" + mapping + ", stream=" + stream
+		return "ReaderRequest [source=" + source + ", file=" + file + ", stream=" + stream
 				+ ", name=" + name + ", includeAll=" + includeAll + ", fileFilter=" + fileFilter + ", expectedSize="
 				+ expectedSize + ", noInputStream=" + noInputStream + ", objType=" + objType + "]";
 	}
@@ -390,8 +338,9 @@ public class ReaderRequest {
 	/**
 	 * @param noInputStream the noInputStream to set
 	 */
-	public void setNoInputStream(boolean noInputStream) {
+	public ReaderRequest setNoInputStream(boolean noInputStream) {
 		this.noInputStream = noInputStream;
+		return this;
 	}
 
 	/**
@@ -404,8 +353,9 @@ public class ReaderRequest {
 	/**
 	 * @param closeInputStream the closeInputStream to set
 	 */
-	public void setCloseInputStream(boolean closeInputStream) {
+	public ReaderRequest setCloseInputStream(boolean closeInputStream) {
 		this.closeInputStream = closeInputStream;
+		return this;
 	}
 
 	/**
@@ -418,8 +368,24 @@ public class ReaderRequest {
 	/**
 	 * @param initRequired the initRequired to set
 	 */
-	public void setInitRequired(boolean initRequired) {
+	public ReaderRequest setInitRequired(boolean initRequired) {
 		this.initRequired = initRequired;
+		return this;
+	}
+
+	/**
+	 * @return the fileFilter
+	 */
+	public String getFileFilter() {
+		return fileFilter;
+	}
+
+	/**
+	 * @param fileFilter the fileFilter to set
+	 */
+	public ReaderRequest setFileFilter(String fileFilter) {
+		this.fileFilter = fileFilter;
+		return this;
 	}
 	
 }

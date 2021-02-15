@@ -76,7 +76,7 @@ public class Variant extends GeneticEntity {
 		StringBuilder buf = new StringBuilder();
 		buf.append("uuid:ID(Variant-Id)");
 		buf.append(getDelimiter());
-		buf.append("rsId");
+		buf.append("rsId:ID(Rs-Id)");
 		buf.append(getDelimiter());
 		buf.append("dbxRef");
 		buf.append(getDelimiter());

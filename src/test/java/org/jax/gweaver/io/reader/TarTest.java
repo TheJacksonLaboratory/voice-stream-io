@@ -53,7 +53,7 @@ public class TarTest extends AbstractDataFileTest {
 	}
 	
 	@Test
-	public void checkTar() throws Exception {
+	public void countEntries() throws Exception {
 		File tar = new File("./tmp/tarTest/test.tar");
 		assertTrue(tar.exists());
 		
@@ -89,4 +89,33 @@ public class TarTest extends AbstractDataFileTest {
 		assertEquals(total, reader.stream().count());
 	}
 	
+	
+	@Test
+	public void checkReadingGzipsUsingFactoryWithFilter() throws Exception {
+		
+		File tar = new File("./tmp/tarTest/test.tar");
+		
+		// When a file filter is set, the files used must *match* it.
+		String filter = "^.+\\.signif_variant_gene_pairs\\.txt(\\.gz)?$";
+		
+		// We read each entry separately
+		long total = 0;
+		try (TarArchiveInputStream tarInput = new TarArchiveInputStream(new FileInputStream(tar))) {
+	        TarArchiveEntry entry;
+	        while ((entry=tarInput.getNextTarEntry())!=null) {
+	        	
+	        	if (!entry.getName().matches(filter)) continue;
+	        	
+	        	StreamReader<Entity> reader = ReaderFactory.getReader(new ReaderRequest(tarInput, entry.getName(), false));
+	        	long lines = reader.stream().count();
+	        	System.out.println("Lines in reader = "+lines);
+	        	total+=lines;
+	        }
+		}
+		
+		// We read the tar as a stream using the reader
+		StreamReader<Entity> reader = ReaderFactory.getReader(new ReaderRequest(tar, filter));
+		assertEquals(total, reader.stream().count());
+	}
+
 }

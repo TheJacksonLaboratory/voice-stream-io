@@ -3,6 +3,8 @@ package org.jax.gweaver.io.reader;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.jax.gweaver.domain.Entity;
 
@@ -15,6 +17,7 @@ import org.jax.gweaver.domain.Entity;
 public abstract class AbstractStreamReader<T extends Entity> implements StreamReader<T> {
 
 	protected ReaderRequest request;
+	protected String entryName; // When reading from an archive, the entry name is set by the archive reader.
 
 	/**
 	 * Amount to wind forward when using multi-threading.
@@ -69,4 +72,25 @@ public abstract class AbstractStreamReader<T extends Entity> implements StreamRe
 		}
 		return ls;
 	}
+
+	/**
+	 * @return the entryName
+	 */
+	public String getEntryName() {
+		return entryName;
+	}
+
+	/**
+	 * @param entryName the entryName to set
+	 */
+	public void setEntryName(String entryName) {
+		this.entryName = entryName;
+	}
+	
+	@Override
+	public <U extends Entity> Function<T, Stream<U>> getDefaultConnector() {
+		throw new RuntimeException("No connector for "+getClass().getSimpleName());
+	}
+	
+
 }

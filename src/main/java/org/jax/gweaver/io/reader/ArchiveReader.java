@@ -100,7 +100,7 @@ public class ArchiveReader<T extends Entity> extends AbstractStreamReader<T> {
 
 		protected InputStream parent;
 		protected Iterator<T> currentIterator;
-		protected StreamReader<T> reader;
+		protected AbstractStreamReader<T> reader;
 
 		public StreamIterator(InputStream in) throws IOException {
 			this.parent = in;
@@ -141,6 +141,16 @@ public class ArchiveReader<T extends Entity> extends AbstractStreamReader<T> {
 		}
 
 		protected abstract Iterator<T> nextIterator() throws IOException, ReaderException;
+		
+		protected boolean isEntryValid(String name) {
+			if (name==null) return false;
+			if (request.getFileFilter()!=null) {
+				if (!name.matches(request.getFileFilter())) {
+					return false;
+				}
+			}
+			return true;
+		}
 
 		public void close() throws IOException {
 			parent.close();
@@ -167,15 +177,19 @@ public class ArchiveReader<T extends Entity> extends AbstractStreamReader<T> {
 		protected Iterator<T> nextIterator() throws IOException, ReaderException {
 			TarArchiveEntry entry = tstream.getNextTarEntry();
 			if (entry==null) return null;
+			while(!isEntryValid(entry.getName())) {
+				entry = tstream.getNextTarEntry();
+				if (entry==null) return null;
+			}
 			this.reader = ReaderFactory.getReader(new ReaderRequest(tstream, entry.getName(), false));
 			reader.setChunkSize(getChunkSize());
+			reader.setEntryName(entry.getName());
 			return reader.stream().iterator();
 		}
-
 	}
 
 	/**
-	 * Kind of an interator but remove() does not work.
+	 * Kind of an iterator but remove() does not work.
 	 * 
 	 * @author gerrim
 	 *
@@ -193,8 +207,13 @@ public class ArchiveReader<T extends Entity> extends AbstractStreamReader<T> {
 		protected Iterator<T> nextIterator() throws IOException, ReaderException {
 			ZipEntry entry = zstream.getNextEntry();
 			if (entry==null) return null;
+			while(!isEntryValid(entry.getName())) {
+				entry = zstream.getNextEntry();
+				if (entry==null) return null;
+			}
 			this.reader = ReaderFactory.getReader(new ReaderRequest(zstream, entry.getName(), false));
 			reader.setChunkSize(getChunkSize());
+			reader.setEntryName(entry.getName());
 			return reader.stream().iterator();
 		}
 	}

@@ -81,6 +81,12 @@ public class HomologConnector<N extends Entity, E extends Entity> implements Con
 					    .build();
 	}
 
+
+	@Override
+	public Stream<E> apply(N t) {
+		return stream(t);
+	}
+
 	
 
 }

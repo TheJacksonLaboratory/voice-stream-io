@@ -24,7 +24,6 @@ public class ReaderFactoryTest {
 			"sqtl_signifpairs.txt", 	
 			"allpairs.txt.gz", 		
 			"sqtl_allpairs.txt",	
-			"lookup_table.txt.gz",	
 			"tar", 		
 			"zip"
 	});
