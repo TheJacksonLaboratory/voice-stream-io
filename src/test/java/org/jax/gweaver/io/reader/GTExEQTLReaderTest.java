@@ -97,8 +97,8 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 			int[] index = new int[] {1};
 			eqtls.stream().forEach(e->{
 				try {
-					if (done.contains(e.getvId())) return;
-					w.write(e.getvId());
+					if (done.contains(e.getEqtlVariantId())) return;
+					w.write(e.getEqtlVariantId());
 					w.write('\t');
 					w.write(e.getChr());
 					w.write("\t155964792\tG\tC\t1\t");
@@ -106,7 +106,7 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 					w.write(""+index[0]);
 					w.write("FAKE\tX_155194457_G_A_b37");
 					
-					done.add(e.getvId());
+					done.add(e.getEqtlVariantId());
 					index[0]++;
 					w.newLine();
 				} catch (IOException ne) {

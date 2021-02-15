@@ -107,6 +107,15 @@ public class Produces extends AbstractEntity {
 	public Long getUid() {
 		return uid;
 	}
+	
+	/**
+	 * Sets the uid.
+	 *
+	 * @return the uid
+	 */
+	public void setUid(Long uid) {
+		this.uid = uid;
+	}
 
 	/**
 	 * Gets the gene.

@@ -39,6 +39,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * Example of lookup:
  * @see https://storage.googleapis.com/gtex_analysis_v8/reference/GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.lookup_table.txt.gz
  * 
+ * The reason that this is a plain function and not a Connector is that it maps EQTL->EQTL{rsId=....}
+ * IF we consider two possible structures:
+ * 1. (Gene)-[EQTL]-(Variant)
+ * 2. (Gene)-[eLINK]-(EQTL)-[LOOKUP]-(Variant)
+ * Currently we are doing 1. because eqtlVariantId is not unique.
+ * 
  * @author gerrim
  *
  * @param <N>
@@ -109,7 +115,7 @@ public class EQTLFunction<N extends EQTL, E extends EQTL> implements Function<N,
 			}
 		}
 		
-		String variantId = t.getvId();
+		String variantId = t.getEqtlVariantId();
 		try {
 			if (lookup==null) lookup = connection.prepareStatement("SELECT rsId FROM "+tableName+" WHERE variantId = ?;");
 			

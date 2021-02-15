@@ -206,5 +206,12 @@ public class Ortholog extends AbstractEntity {
 		return getSpeciesFromId()+"-[ORTHOLOG]->"+getSpeciesToId();
 	}
 
+	/**
+	 * @param uid the uid to set
+	 */
+	public void setUid(Long uid) {
+		this.uid = uid;
+	}
+
 
 }

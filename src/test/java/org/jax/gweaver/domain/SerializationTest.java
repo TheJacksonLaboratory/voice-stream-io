@@ -146,6 +146,8 @@ public class SerializationTest {
 		for (@SuppressWarnings("rawtypes") Class clazz : testClasses) {
 			Object rand = factory.manufacturePojo(clazz);
 			round(rand, clazz);
+			assertNotEquals(new Object(), rand);
+			assertNotEquals(clazz.getConstructor().newInstance(), rand);
 		}
 	}
 	

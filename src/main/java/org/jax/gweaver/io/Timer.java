@@ -17,6 +17,7 @@
 package org.jax.gweaver.io;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 
 public class Timer {
@@ -28,11 +29,18 @@ public class Timer {
 	private volatile long start;
 	
 	private long timedChunkSize = 10000L;
+	private Consumer<String> consumer;
 	
 	public Timer() {
+		this(System.out::println);
+	}
+	
+	public Timer(Consumer<String> consumer) {
 		this.inodes = 0;
 		this.start = System.currentTimeMillis();
+		this.consumer = consumer;
 	}
+
 	
 	/**
 	 * Used for synchronous (non-chunked)
@@ -72,18 +80,29 @@ public class Timer {
 		double tpn = ((double)time)/inodes;
 		
 		String msg = String.format("Total %d in %d ms. Time per node %.2f ms", inodes, time, tpn);
-		System.out.println(msg);
+		consumer.accept(msg);
 	}
 
 	public void setTimedChunkSize(long chunkSize) {
 		timedChunkSize = chunkSize;
 	}
-
+	
 	/**
-	 * @return the start
+	 * 
+	 * @return formatted time compared to when this timer was made.
 	 */
 	public String getFormattedTime() {
-		long millis = System.currentTimeMillis()-start;
+		return getFormattedTime(System.currentTimeMillis());
+	}
+
+	/**
+	 * @param ltime to compare to when this timer was made.
+	 * @return formatted time compared to when this timer was made.
+	 */
+	public String getFormattedTime(long ltime) {
+		
+		if (ltime<start) throw new IllegalArgumentException("The time must be > when we started to time!");
+		long millis = ltime-start;
 		String time = String.format("%d:%d", 
 			    TimeUnit.MILLISECONDS.toMinutes(millis),
 			    TimeUnit.MILLISECONDS.toSeconds(millis) - 

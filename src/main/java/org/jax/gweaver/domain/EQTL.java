@@ -29,7 +29,19 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 /**
- * The Class Ortholog.
+ * 
+I *think* EQTL is best as just a relationship. It could be either:
+1. (Gene)-[EQTL]-(Variant)
+2. (Gene)-[eLINK]-(EQTL)-[LOOKUP]-(Variant)
+
+I.e. I think it should be 1. and not 2. but this is debatable. EQTL variant Id is not unique and for the
+same eqtlVariantId different properties may exist.
+
+Also shortening the chain means less nodes/rels. A disadvantage is that it is a different structure to Transcripts.
+
+ * 
+ * @author gerrim
+ *
  */
 @Generated("POJO")
 @RelationshipEntity(type = "EQTL")
@@ -65,8 +77,10 @@ public class EQTL extends AbstractEntity {
 	private Gene geneTo;
 	private String geneId;
 
+	private String fullGeneId;
+
 	// Just used to map rsId using EQTLFunction.
-	private String vId;
+	private String eqtlVariantId;
 	
 
 	/**
@@ -85,7 +99,7 @@ public class EQTL extends AbstractEntity {
 	 */
 	public EQTL(String geneId, String variantId, String rsId) {
 		this.geneId = geneId;
-		this.vId = variantId;
+		this.eqtlVariantId = variantId;
 		this.rsId = rsId;
 	}
 
@@ -113,6 +127,8 @@ public class EQTL extends AbstractEntity {
 		buf.append("uberon");
 		buf.append(getDelimiter());
 		buf.append("source");
+		buf.append(getDelimiter());
+		buf.append("fullGeneId");
 		buf.append(getDelimiter());
 		
 		buf.append(":END_ID(Gene-Id)");
@@ -146,6 +162,8 @@ public class EQTL extends AbstractEntity {
 		buf.append(getDelimiter());
 		buf.append(getSource());
 		buf.append(getDelimiter());
+		buf.append(getFullGeneId());
+		buf.append(getDelimiter());
 		
 		buf.append(getGeneId());
 		buf.append(getDelimiter());
@@ -170,15 +188,15 @@ public class EQTL extends AbstractEntity {
 	/**
 	 * @return the variantId
 	 */
-	public String getvId() {
-		return vId;
+	public String getEqtlVariantId() {
+		return eqtlVariantId;
 	}
 
 	/**
 	 * @param variantId the variantId to set
 	 */
-	public void setvId(String variantId) {
-		this.vId = variantId;
+	public void setEqtlVariantId(String variantId) {
+		this.eqtlVariantId = variantId;
 	}
 
 	/**
@@ -215,8 +233,8 @@ public class EQTL extends AbstractEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(altSeq, chr, geneId, geneTo, refSeq, rsId, slope, source, tissue, uberon,
-				uid, vId, variantFrom, version);
+		result = prime * result + Objects.hash(altSeq, chr, eqtlVariantId, fullGeneId, geneId, geneTo, refSeq, rsId,
+				slope, source, tissue, uberon, uid, variantFrom, version);
 		return result;
 	}
 
@@ -230,13 +248,13 @@ public class EQTL extends AbstractEntity {
 			return false;
 		EQTL other = (EQTL) obj;
 		return Objects.equals(altSeq, other.altSeq) && Objects.equals(chr, other.chr)
+				&& Objects.equals(eqtlVariantId, other.eqtlVariantId) && Objects.equals(fullGeneId, other.fullGeneId)
 				&& Objects.equals(geneId, other.geneId) && Objects.equals(geneTo, other.geneTo)
 				&& Objects.equals(refSeq, other.refSeq) && Objects.equals(rsId, other.rsId)
 				&& Double.doubleToLongBits(slope) == Double.doubleToLongBits(other.slope)
 				&& Objects.equals(source, other.source) && Objects.equals(tissue, other.tissue)
 				&& Objects.equals(uberon, other.uberon) && Objects.equals(uid, other.uid)
-				&& Objects.equals(vId, other.vId) && Objects.equals(variantFrom, other.variantFrom)
-				&& Objects.equals(version, other.version);
+				&& Objects.equals(variantFrom, other.variantFrom) && Objects.equals(version, other.version);
 	}
 
 	/**
@@ -377,6 +395,20 @@ public class EQTL extends AbstractEntity {
 	 */
 	public void setVersion(String version) {
 		this.version = version;
+	}
+
+	/**
+	 * @return the fullGeneId
+	 */
+	public String getFullGeneId() {
+		return fullGeneId;
+	}
+
+	/**
+	 * @param fullGeneId the fullGeneId to set
+	 */
+	public void setFullGeneId(String fullGeneId) {
+		this.fullGeneId = fullGeneId;
 	}
 
 

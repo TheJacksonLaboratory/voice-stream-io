@@ -18,6 +18,8 @@ package org.jax.gweaver.io;
 
 /**
  * Simple object for timing line node adding.
+ * It is needed when parallel streams are used with readers, otherwise
+ * it does not give any advantage over Timer.time().
  * 
  * @author gerrim
  *
