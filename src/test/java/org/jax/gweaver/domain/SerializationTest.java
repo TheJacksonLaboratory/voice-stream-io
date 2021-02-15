@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.jax.gweaver.io.TimeInfo;
 import org.jax.gweaver.io.reader.ReaderRequest;
 import org.junit.Before;
 import org.junit.Test;
@@ -97,6 +98,7 @@ public class SerializationTest {
 
 		// Add any other Test classes
 		testClasses.add(ReaderRequest.class);
+		testClasses.add(TimeInfo.class);
 	}
 
 	

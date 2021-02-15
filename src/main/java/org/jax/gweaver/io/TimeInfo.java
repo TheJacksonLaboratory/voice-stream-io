@@ -134,7 +134,7 @@ public class TimeInfo implements AutoCloseable {
 		return true;
 	}
 
-	public long getTime() {
+	public long interval() {
 		return stop-start;
 	}
 
