@@ -6,7 +6,7 @@ Also to deploy to maven central: https://dzone.com/articles/publish-your-artifac
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.jax.gweaver</groupId>
+	<groupId>org.geneweaver</groupId>
 	<artifactId>gweaver-stream-io</artifactId>
 	<packaging>jar</packaging>
 	<version>1.1.0-SNAPSHOT</version>
@@ -52,7 +52,7 @@ Also to deploy to maven central: https://dzone.com/articles/publish-your-artifac
 		<connection>scm:git:https://bitbucket.org/geneweaver/gweaver-stream-io/src/master/</connection>
 		<developerConnection>scm:git:ssh://git@bitbucket.org:geneweaver/gweaver-stream-io.git</developerConnection>
 		<tag>HEAD</tag>
-		<url>https://bitbucket.org/geneweaver/gweaver-stream-io/browse</url>
+		<url>https://www.geneweaver.org</url>
 	</scm>
 	<ciManagement>
 		<system>None</system>
@@ -250,7 +250,7 @@ Also to deploy to maven central: https://dzone.com/articles/publish-your-artifac
 										<exclude>*Exception</exclude>
 										
 										<!--  This is tested throughly in geweaver-bulk-import -->
-										<exclude>org.jax.gweaver.io.connector</exclude>
+										<exclude>org.geneweaver.io.connector</exclude>
 
 									</excludes>
 
