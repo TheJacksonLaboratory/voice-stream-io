@@ -86,7 +86,7 @@ public class EQTLFunction<N extends EQTL, E extends EQTL> implements Function<N,
 
 	public EQTLFunction(File mapping) throws ClassNotFoundException {
 		this.mapping = mapping;
-		setLocation(Paths.get("."));
+		setLocation(mapping.getParentFile().toPath());
 		Class.forName(driver); // Load driver class.
 	}
 
