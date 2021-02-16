@@ -1,3 +1,7 @@
+
+<!--  We can deploy to gene weaver jfrog artifcatory: https://geneweaver.jfrog.io/ui/login/
+Also to deploy to maven central: https://dzone.com/articles/publish-your-artifacts-to-maven-central
+ -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">

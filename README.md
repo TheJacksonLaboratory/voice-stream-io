@@ -1,6 +1,8 @@
 ![](https://travis-ci.com/geneweaver/gweaver-stream-io.svg?branch=master)
 
-# Gene Weaver Stream IO #
+
+#  ![](./icons/GW2-logo-blue.png) Gene Weaver Stream IO #
+
 
 ## Introduction
 This project is designed to be used as a library for reading different file formats. It is intended
