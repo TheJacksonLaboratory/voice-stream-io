@@ -34,9 +34,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
+import java.sql.SQLException;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
@@ -45,11 +44,7 @@ import org.geneweaver.domain.EQTL;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.NamedEntity;
 import org.geneweaver.io.connector.EQTLFunction;
-import org.geneweaver.io.reader.FileFilters;
-import org.geneweaver.io.reader.GTExEQTLReader;
-import org.geneweaver.io.reader.ReaderFactory;
-import org.geneweaver.io.reader.ReaderRequest;
-import org.geneweaver.io.reader.StreamReader;
+import org.geneweaver.io.writer.ExportBuilder;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -138,27 +133,12 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 			});
 		}
 
-		Map<Class<? extends Entity>, BufferedWriter> cache = new HashMap<>();
-		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(fake)) {
-			func.setLocation(dir);
-			
-			func.create(); // Make the database.
-	
-			// Make sure that all the rsIds are mapped
-			long[] sum = new long[] {0L};
-			eqtls.stream()
-				 .map(func::apply)
-				 .map(e-> {
-					 save(e, cache, dir, null);
-					 return e;
-				 })
-				 .filter(e->e.getRsId()==null)
-				 .forEach(e->sum[0]++);
-			
-			assertEquals(0, sum[0]);
-		} finally {
-			for (BufferedWriter writer : cache.values()) writer.close();
-		}
+		// Use an export builder so that it is tested here.
+	 	try (ExportBuilder builder = new ExportBuilder()) {
+	 		builder.setExporter((b,path)->map(dir, b, eqtls, path));
+	 		builder.setInput(fake);
+	 		builder.export();
+	 	}
 		
 		assertTrue(Files.exists(dir.resolve("EQTL-header.csv")));
 		assertTrue(Files.exists(dir.resolve("EQTL.csv.gz")));
@@ -173,6 +153,29 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 			}
 			assertEquals(size, lcount);
 		}
+	}
+
+	private String map(Path dir, ExportBuilder b, StreamReader<EQTL> eqtls, Path path) throws Exception {
+		
+		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(path)) {
+			func.setLocation(dir);
+			
+			func.create(); // Make the database.
+	
+			// Make sure that all the rsIds are mapped
+			long[] sum = new long[] {0L};
+			eqtls.stream()
+				 .map(func::apply)
+				 .map(e-> {
+					 save(e, b.getWriters(), dir, null);
+					 return e;
+				 })
+				 .filter(e->e.getRsId()==null)
+				 .forEach(e->sum[0]++);
+			
+			assertEquals(0, sum[0]);
+		}
+		return "Created eqtl map.";
 	}
 
 	@SuppressWarnings("deprecation")
