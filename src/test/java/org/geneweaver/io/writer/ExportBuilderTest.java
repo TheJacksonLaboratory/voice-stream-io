@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -19,6 +20,18 @@ import org.geneweaver.io.reader.StreamReader;
 import org.junit.Test;
 
 public class ExportBuilderTest extends AbstractDataFileTest {
+
+	@Test(expected=Exception.class)
+	public void fileNotThere() throws Exception {
+		
+		Path geneFile = Paths.get("NOT_THERE");
+		
+		try(ExportBuilder builder = new ExportBuilder().setSpecies("Homo sapiens")
+				   .setInput(geneFile)) {
+			
+			builder.export();
+		}
+	}
 
 	@Test
 	public void geneDefaultExporter() throws Exception {
@@ -76,7 +89,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		try(ExportBuilder builder = new ExportBuilder().setSpecies("Homo sapiens")
 				   .setChunkProperty("1000")
 				   .setDir(dir)
-				   .setInput(geneFile)
+				   .setInputs(Arrays.asList(geneFile))
 				   .setDefaultChunkSize(10000)
 				   .setExporter((b,path)->exportNoConnector(dir, b, path))) {
 			
@@ -102,7 +115,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		try(ExportBuilder builder = new ExportBuilder().setSpecies("Mus musculus")
 				   .setChunkProperty("100000")
 				   .setDir(dir)
-				   .setInput(geneFile)
+				   .setInputs(Arrays.asList(geneFile))
 				   .setDefaultChunkSize(100000)
 				   .setExporter((b,path)->exportNoConnector(dir, b, path))) {
 			
@@ -125,9 +138,6 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 			return e.getMessage();
 		}
 
-	    Function<Entity, Stream<Entity>> connector = reader.getDefaultConnector();
-		
-				
 		Timer timer = b.createTimer();
 		
 		// Directly saving the streams with no chunks is fast.

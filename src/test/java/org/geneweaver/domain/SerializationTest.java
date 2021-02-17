@@ -36,9 +36,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.geneweaver.domain.Entity;
 import org.geneweaver.io.TimeInfo;
 import org.geneweaver.io.reader.ReaderRequest;
+import org.geneweaver.io.writer.ExportBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -102,6 +102,7 @@ public class SerializationTest {
 		// Add any other Test classes
 		testClasses.add(ReaderRequest.class);
 		testClasses.add(TimeInfo.class);
+		testClasses.add(ExportBuilder.class);
 	}
 
 	

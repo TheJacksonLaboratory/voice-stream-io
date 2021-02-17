@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -16,6 +17,8 @@ import org.geneweaver.io.reader.ReaderException;
 import org.geneweaver.io.reader.ReaderFactory;
 import org.geneweaver.io.reader.ReaderRequest;
 import org.geneweaver.io.reader.StreamReader;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Builder for bulk exports.
@@ -44,6 +47,7 @@ public class ExportBuilder implements AutoCloseable {
 	 * Consumer for running the export. By default the export does a 
 	 * simple save using the default connector.
 	 */
+	@JsonIgnore
 	private Export exporter = (builder, path) -> defaultExport(path);
 	
 	/**
@@ -59,6 +63,7 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * Map of writers cached while we write all the files.
 	 */
+	@JsonIgnore
 	private Map<Class<? extends Entity>, BufferedWriter> writers = new HashMap<>();
 	
 	public ExportBuilder() {
@@ -76,37 +81,21 @@ public class ExportBuilder implements AutoCloseable {
 	 * Default save stream the reader, gets its connector and writes the lot to file.
 	 * 
 	 * @param input
+	 * @throws ReaderException 
 	 */
-	protected String defaultExport(Path input) {
+	protected String defaultExport(Path input) throws Exception {
 		
-	    StreamReader<Entity> reader;
-		try {
-			reader = createReader(input);
-		} catch (ReaderException e) {
-			System.out.println("Cannot write bulk file(s) for '"+input.getFileName());
-			e.printStackTrace();
-			return e.getMessage();
-		}
-
+	    StreamReader<Entity> reader = createReader(input);
 	    Function<Entity, Stream<Entity>> connector = reader.getDefaultConnector();
 		
-				
 		Timer timer = createTimer();
 		
-		// Directly saving the streams with no chunks is fast.
-		try {
-			long saved = reader.stream()
-							  .flatMap(g->connector.apply(g))
-							  .map(g->save(g, writers, dir, timer))
-							  .count();
-	
-			return "Wrote bulk file(s) for '"+input.getFileName()+"' in "+timer.getFormattedTime()+" parsed "+saved+" objects.";
-			
-		} catch (ReaderException ne) {
-			ne.printStackTrace();
-			return "Cannot write bulk file(s) for '"+input.getFileName();
-		}
+		long saved = reader.stream()
+							.flatMap(g->connector.apply(g))
+							.map(g->save(g, writers, dir, timer))
+							.count();
 
+		return "Wrote bulk file(s) for '"+input.getFileName()+"' in "+timer.getFormattedTime()+" parsed "+saved+" objects.";
 	}
 
 	/**
@@ -187,6 +176,7 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * @return the writers
 	 */
+	@JsonIgnore
 	public Map<Class<? extends Entity>, BufferedWriter> getWriters() {
 		return writers;
 	}
@@ -194,6 +184,7 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * @return the exporter
 	 */
+	@JsonIgnore
 	public Export getExporter() {
 		return exporter;
 	}
@@ -201,6 +192,7 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * @param exporter the exporter to set
 	 */
+	@JsonIgnore
 	public ExportBuilder setExporter(Export exporter) {
 		this.exporter = exporter;
 		return this;
@@ -254,6 +246,23 @@ public class ExportBuilder implements AutoCloseable {
 	public ExportBuilder setSpecies(String species) {
 		this.species = species;
 		return this;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(chunkProperty, defaultChunkSize, dir, inputs, species);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof ExportBuilder))
+			return false;
+		ExportBuilder other = (ExportBuilder) obj;
+		return Objects.equals(chunkProperty, other.chunkProperty) && defaultChunkSize == other.defaultChunkSize
+				&& Objects.equals(dir, other.dir) && Objects.equals(inputs, other.inputs)
+				&& Objects.equals(species, other.species);
 	}
 
 }
