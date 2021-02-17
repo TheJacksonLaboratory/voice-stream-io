@@ -32,9 +32,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.geneweaver.domain.Entity;
-import org.geneweaver.io.reader.ReaderFactory;
-import org.geneweaver.io.reader.ReaderRequest;
-import org.geneweaver.io.reader.StreamReader;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

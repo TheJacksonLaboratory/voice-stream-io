@@ -34,9 +34,9 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.geneweaver.io.Configuration;
+import org.geneweaver.io.Configuration.ZipType;
 import org.geneweaver.io.PartitionException;
 import org.geneweaver.io.Partitioner;
-import org.geneweaver.io.Configuration.ZipType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;

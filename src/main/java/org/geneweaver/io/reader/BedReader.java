@@ -29,8 +29,8 @@ import org.apache.commons.beanutils.BeanMap;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.NamedEntity;
 import org.geneweaver.domain.Region;
-import org.geneweaver.domain.Track;
 import org.geneweaver.domain.Region.Strand;
+import org.geneweaver.domain.Track;
 import org.geneweaver.io.connector.TrackConnector;
 
 /**

@@ -30,8 +30,6 @@ import java.util.stream.Stream;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.GeneticEntity;
 import org.geneweaver.domain.Variant;
-import org.geneweaver.io.connector.Connector;
-import org.geneweaver.io.connector.VariantConnector;
 import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.geneweaver.io.reader.LineIteratorReader;
 import org.geneweaver.io.reader.ReaderFactory;

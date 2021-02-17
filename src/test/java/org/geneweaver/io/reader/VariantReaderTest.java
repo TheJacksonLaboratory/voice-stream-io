@@ -25,16 +25,10 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
 
 import org.geneweaver.domain.Gene;
 import org.geneweaver.domain.GeneticEntity;
 import org.geneweaver.domain.Variant;
-import org.geneweaver.io.reader.ReaderFactory;
-import org.geneweaver.io.reader.ReaderRequest;
-import org.geneweaver.io.reader.RepeatedLineReader;
-import org.geneweaver.io.reader.StreamReader;
-import org.geneweaver.io.reader.VariantReader;
 import org.junit.Test;
 
 /**

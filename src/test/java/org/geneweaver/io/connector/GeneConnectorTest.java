@@ -29,8 +29,6 @@ import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Gene;
 import org.geneweaver.domain.GeneticEntity;
 import org.geneweaver.domain.Variant;
-import org.geneweaver.io.connector.ConnectorException;
-import org.geneweaver.io.connector.GeneConnector;
 import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.geneweaver.io.reader.LineIteratorReader;
 import org.geneweaver.io.reader.ReaderFactory;

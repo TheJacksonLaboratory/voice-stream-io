@@ -25,9 +25,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.geneweaver.domain.Entity;
-import org.geneweaver.io.reader.ReaderFactory;
-import org.geneweaver.io.reader.ReaderRequest;
-import org.geneweaver.io.reader.StreamReader;
 import org.junit.Test;
 
 public class ReaderFactoryTest {

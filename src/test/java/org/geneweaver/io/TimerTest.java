@@ -24,8 +24,6 @@ import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.geneweaver.io.TimeInfo;
-import org.geneweaver.io.Timer;
 import org.junit.Test;
 
 /**

@@ -21,10 +21,6 @@ package org.geneweaver.io.reader;
 import static org.junit.Assert.assertEquals;
 
 import org.geneweaver.domain.Fantom5Link;
-import org.geneweaver.io.reader.Fantom5EnsemblMapReader;
-import org.geneweaver.io.reader.LineIteratorReader;
-import org.geneweaver.io.reader.ReaderFactory;
-import org.geneweaver.io.reader.ReaderRequest;
 import org.junit.Test;
 
 public class Fantom5EnsemblMapReaderTest extends AbstractDataFileTest {

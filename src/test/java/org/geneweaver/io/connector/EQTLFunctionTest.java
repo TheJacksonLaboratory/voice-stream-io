@@ -32,7 +32,6 @@ import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.EQTL;
-import org.geneweaver.io.connector.EQTLFunction;
 import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.junit.After;
 import org.junit.Before;

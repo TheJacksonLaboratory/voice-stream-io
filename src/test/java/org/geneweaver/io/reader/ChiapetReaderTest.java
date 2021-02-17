@@ -23,10 +23,6 @@ import static org.junit.Assert.assertEquals;
 import org.geneweaver.domain.Anchor;
 import org.geneweaver.domain.ChromatinInteraction;
 import org.geneweaver.domain.ExperimentMetadata;
-import org.geneweaver.io.reader.AbstractXlsReader;
-import org.geneweaver.io.reader.ChiapetReader;
-import org.geneweaver.io.reader.ReaderFactory;
-import org.geneweaver.io.reader.ReaderRequest;
 import org.junit.Test;
 
 public class ChiapetReaderTest extends AbstractDataFileTest {

@@ -21,7 +21,6 @@ package org.geneweaver.io.reader;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,10 +29,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.Entity;
-import org.geneweaver.domain.GeneticEntity;
-import org.geneweaver.io.reader.ReaderFactory;
-import org.geneweaver.io.reader.ReaderRequest;
-import org.geneweaver.io.reader.StreamReader;
 import org.junit.Test;
 
 // TODO: Auto-generated Javadoc

@@ -29,11 +29,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.geneweaver.domain.GeneticEntity;
-import org.geneweaver.io.reader.GeneReader;
-import org.geneweaver.io.reader.LineIteratorReader;
-import org.geneweaver.io.reader.ReaderFactory;
-import org.geneweaver.io.reader.ReaderRequest;
-import org.geneweaver.io.reader.StreamReader;
 import org.junit.Test;
 
 /**

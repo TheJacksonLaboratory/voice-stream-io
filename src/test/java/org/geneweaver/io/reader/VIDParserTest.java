@@ -23,7 +23,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.geneweaver.domain.NamedEntity;
-import org.geneweaver.io.reader.GTExEQTLReader;
 import org.junit.Test;
 
 public class VIDParserTest {

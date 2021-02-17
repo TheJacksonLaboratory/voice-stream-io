@@ -26,14 +26,8 @@ import java.util.stream.Collectors;
 
 import org.geneweaver.domain.NamedEntity;
 import org.geneweaver.domain.Region;
-import org.geneweaver.domain.Track;
 import org.geneweaver.domain.Region.Strand;
-import org.geneweaver.io.reader.BedReader;
-import org.geneweaver.io.reader.LineIteratorReader;
-import org.geneweaver.io.reader.ReaderException;
-import org.geneweaver.io.reader.ReaderFactory;
-import org.geneweaver.io.reader.ReaderRequest;
-import org.geneweaver.io.reader.StreamReader;
+import org.geneweaver.domain.Track;
 import org.junit.Test;
 
 public class BedReaderTest extends AbstractDataFileTest {

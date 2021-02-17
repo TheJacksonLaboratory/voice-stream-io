@@ -34,7 +34,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;

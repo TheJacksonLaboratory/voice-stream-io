@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.geneweaver.domain.EQTL;
-import org.geneweaver.io.connector.EQTLFunction;
 import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.geneweaver.io.reader.ReaderFactory;
 import org.geneweaver.io.reader.ReaderRequest;

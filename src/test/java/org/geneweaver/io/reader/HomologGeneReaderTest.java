@@ -35,11 +35,6 @@ import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Homolog;
 import org.geneweaver.domain.HomologGene;
 import org.geneweaver.domain.NamedEntity;
-import org.geneweaver.io.reader.HomologGeneReader;
-import org.geneweaver.io.reader.LineIteratorReader;
-import org.geneweaver.io.reader.ReaderFactory;
-import org.geneweaver.io.reader.ReaderRequest;
-import org.geneweaver.io.reader.StreamReader;
 import org.junit.Test;
 
 public class HomologGeneReaderTest extends AbstractDataFileTest {
