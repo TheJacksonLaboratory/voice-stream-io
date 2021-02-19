@@ -185,7 +185,7 @@ public class VariantEffect extends AbstractEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(featureId, featureType, index, sequenceVariant, transcript, variant);
+		result = prime * result + Objects.hash(featureId, featureType, index, sequenceVariant);
 		return result;
 	}
 	
@@ -199,8 +199,7 @@ public class VariantEffect extends AbstractEntity {
 			return false;
 		VariantEffect other = (VariantEffect) obj;
 		return Objects.equals(featureId, other.featureId) && Objects.equals(featureType, other.featureType)
-				&& index == other.index && Objects.equals(sequenceVariant, other.sequenceVariant)
-				&& Objects.equals(transcript, other.transcript) && Objects.equals(variant, other.variant);
+				&& index == other.index && Objects.equals(sequenceVariant, other.sequenceVariant);
 	}
 
 	/**
