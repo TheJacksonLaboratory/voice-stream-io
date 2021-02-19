@@ -28,11 +28,6 @@ import org.neo4j.ogm.annotation.Id;
 @Generated("POJO")
 public class ExperimentMetadata extends AbstractEntity {
 	
-	/** The uid. */
-	@Id
-	@GeneratedValue
-    private Long uid;
-	
     private String cellType;
     
     private String cellGroup;
@@ -127,33 +122,24 @@ public class ExperimentMetadata extends AbstractEntity {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(assay, assayTarget, cellGroup, cellType, reference, uid);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(assay, assayTarget, cellGroup, cellType, reference);
+		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
+		if (!super.equals(obj))
+			return false;
 		if (!(obj instanceof ExperimentMetadata))
 			return false;
 		ExperimentMetadata other = (ExperimentMetadata) obj;
 		return Objects.equals(assay, other.assay) && Objects.equals(assayTarget, other.assayTarget)
 				&& Objects.equals(cellGroup, other.cellGroup) && Objects.equals(cellType, other.cellType)
-				&& Objects.equals(reference, other.reference) && Objects.equals(uid, other.uid);
-	}
-
-	/**
-	 * @return the uid
-	 */
-	public Long getUid() {
-		return uid;
-	}
-
-	/**
-	 * @param uid the uid to set
-	 */
-	public void setUid(Long uid) {
-		this.uid = uid;
+				&& Objects.equals(reference, other.reference);
 	}
 
 }

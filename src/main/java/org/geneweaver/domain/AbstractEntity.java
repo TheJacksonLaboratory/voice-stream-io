@@ -20,7 +20,15 @@ package org.geneweaver.domain;
 
 import java.util.Objects;
 
+import org.neo4j.ogm.annotation.GeneratedValue;
+import org.neo4j.ogm.annotation.Id;
+
 public abstract class AbstractEntity implements Entity {
+
+	/** The uid. */
+	@Id
+	@GeneratedValue
+    private Long uid;
 
 	// We purposely use a character unlikely, the default character "," appears in some values.
 	// You can override the delimier or set it if not writing bulk import files.
@@ -44,7 +52,7 @@ public abstract class AbstractEntity implements Entity {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(delimiter);
+		return Objects.hash(delimiter, uid);
 	}
 
 	@Override
@@ -54,6 +62,20 @@ public abstract class AbstractEntity implements Entity {
 		if (!(obj instanceof AbstractEntity))
 			return false;
 		AbstractEntity other = (AbstractEntity) obj;
-		return Objects.equals(delimiter, other.delimiter);
+		return Objects.equals(delimiter, other.delimiter) && Objects.equals(uid, other.uid);
+	}
+
+	/**
+	 * @return the uid
+	 */
+	public final Long getUid() {
+		return uid;
+	}
+
+	/**
+	 * @param uid the uid to set
+	 */
+	public final void setUid(Long uid) {
+		this.uid = uid;
 	}
 }

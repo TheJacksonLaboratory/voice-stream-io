@@ -36,11 +36,6 @@ import org.neo4j.ogm.annotation.StartNode;
 @RelationshipEntity(type = "ORTHOLOG")
 public class Ortholog extends AbstractEntity {
 	
-	/** The uid. */
-	@Id
-	@GeneratedValue
-    private Long uid;
-
 	/** The species from. */
 	@StartNode
 	private Gene speciesFrom;
@@ -118,15 +113,6 @@ public class Ortholog extends AbstractEntity {
 	}
 
 	/**
-	 * Gets the uid.
-	 *
-	 * @return the uid
-	 */
-	public Long getUid() {
-		return uid;
-	}
-
-	/**
 	 * Gets the species from.
 	 *
 	 * @return the speciesFrom
@@ -162,30 +148,25 @@ public class Ortholog extends AbstractEntity {
 		this.speciesTo = speciesTo;
 	}
 
-	/**
-	 * Hash code.
-	 *
-	 * @return the int
-	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(uid);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(geneIdFrom, geneIdTo, speciesFrom, speciesTo);
+		return result;
 	}
 
-	/**
-	 * Equals.
-	 *
-	 * @param obj the obj
-	 * @return true, if successful
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
+		if (!super.equals(obj))
+			return false;
 		if (!(obj instanceof Ortholog))
 			return false;
 		Ortholog other = (Ortholog) obj;
-		return Objects.equals(uid, other.uid);
+		return Objects.equals(geneIdFrom, other.geneIdFrom) && Objects.equals(geneIdTo, other.geneIdTo)
+				&& Objects.equals(speciesFrom, other.speciesFrom) && Objects.equals(speciesTo, other.speciesTo);
 	}
 	
 	protected String getSpeciesFromId() {
@@ -205,13 +186,5 @@ public class Ortholog extends AbstractEntity {
 	public String toString() {
 		return getSpeciesFromId()+"-[ORTHOLOG]->"+getSpeciesToId();
 	}
-
-	/**
-	 * @param uid the uid to set
-	 */
-	public void setUid(Long uid) {
-		this.uid = uid;
-	}
-
 
 }

@@ -35,11 +35,6 @@ import org.neo4j.ogm.annotation.StartNode;
 @RelationshipEntity(type = "HOMOLOG")
 public class Homolog extends AbstractEntity {
 	
-	/** The uid. */
-	@Id
-	@GeneratedValue
-    private Long uid;
-	
 	private Long hid;
 
 	/** The species from. */
@@ -150,15 +145,6 @@ public class Homolog extends AbstractEntity {
 
 
 	/**
-	 * Gets the uid.
-	 *
-	 * @return the uid
-	 */
-	public Long getUid() {
-		return uid;
-	}
-
-	/**
 	 * Gets the species from.
 	 *
 	 * @return the speciesFrom
@@ -196,21 +182,26 @@ public class Homolog extends AbstractEntity {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(geneNameFrom, geneNameTo, hid, source, speciesFrom, speciesTo, taxonFrom, taxonTo, uid);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ Objects.hash(geneNameFrom, geneNameTo, hid, source, speciesFrom, speciesTo, taxonFrom, taxonTo);
+		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
+		if (!super.equals(obj))
+			return false;
 		if (!(obj instanceof Homolog))
 			return false;
 		Homolog other = (Homolog) obj;
 		return Objects.equals(geneNameFrom, other.geneNameFrom) && Objects.equals(geneNameTo, other.geneNameTo)
 				&& Objects.equals(hid, other.hid) && Objects.equals(source, other.source)
 				&& Objects.equals(speciesFrom, other.speciesFrom) && Objects.equals(speciesTo, other.speciesTo)
-				&& Objects.equals(taxonFrom, other.taxonFrom) && Objects.equals(taxonTo, other.taxonTo)
-				&& Objects.equals(uid, other.uid);
+				&& Objects.equals(taxonFrom, other.taxonFrom) && Objects.equals(taxonTo, other.taxonTo);
 	}
 	
 	/**

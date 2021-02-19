@@ -36,11 +36,6 @@ import org.neo4j.ogm.annotation.StartNode;
 @RelationshipEntity(type = "PRODUCES")
 public class Produces extends AbstractEntity {
 	
-	/** The uid. */
-	@Id
-	@GeneratedValue
-    private Long uid;
-
 	/** The gene. */
 	@StartNode
 	private Gene gene;
@@ -100,24 +95,6 @@ public class Produces extends AbstractEntity {
 	}
 	
 	/**
-	 * Gets the uid.
-	 *
-	 * @return the uid
-	 */
-	public Long getUid() {
-		return uid;
-	}
-	
-	/**
-	 * Sets the uid.
-	 *
-	 * @return the uid
-	 */
-	public void setUid(Long uid) {
-		this.uid = uid;
-	}
-
-	/**
 	 * Gets the gene.
 	 *
 	 * @return the gene
@@ -153,30 +130,24 @@ public class Produces extends AbstractEntity {
 		this.transcript = transcript;
 	}
 
-	/**
-	 * Hash code.
-	 *
-	 * @return the int
-	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(uid);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(gene, transcript);
+		return result;
 	}
 
-	/**
-	 * Equals.
-	 *
-	 * @param obj the obj
-	 * @return true, if successful
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
+		if (!super.equals(obj))
+			return false;
 		if (!(obj instanceof Produces))
 			return false;
 		Produces other = (Produces) obj;
-		return Objects.equals(uid, other.uid);
+		return Objects.equals(gene, other.gene) && Objects.equals(transcript, other.transcript);
 	}
 	
 	/**

@@ -263,26 +263,15 @@ public class Variant extends GeneticEntity {
 	}
 
 
-	/**
-	 * Hash code.
-	 *
-	 * @return the int
-	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result
-				+ Objects.hash(altAllele, altAlleleFreq, biotype, id, refAllele, rsId, uuid, variantEffect);
+				+ Objects.hash(altAllele, altAlleleFreq, biotype, dbxRef, id, refAllele, rsId, uuid, variantEffect);
 		return result;
 	}
 
-	/**
-	 * Equals.
-	 *
-	 * @param obj the obj
-	 * @return true, if successful
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -293,10 +282,10 @@ public class Variant extends GeneticEntity {
 			return false;
 		Variant other = (Variant) obj;
 		return Objects.equals(altAllele, other.altAllele) && Objects.equals(altAlleleFreq, other.altAlleleFreq)
-				&& Objects.equals(biotype, other.biotype) && Objects.equals(id, other.id)
-				&& Objects.equals(refAllele, other.refAllele) && Objects.equals(rsId, other.rsId)
-				&& Objects.equals(uuid, other.uuid) && 
-				equalsNullEmpty(variantEffect, other.variantEffect);
+				&& Objects.equals(biotype, other.biotype) && Objects.equals(dbxRef, other.dbxRef)
+				&& Objects.equals(id, other.id) && Objects.equals(refAllele, other.refAllele)
+				&& Objects.equals(rsId, other.rsId) && Objects.equals(uuid, other.uuid)
+				&& equalsNullEmpty(variantEffect, other.variantEffect);
 	}
 
 	private boolean equalsNullEmpty(Collection<?> c1, Collection<?> c2) {

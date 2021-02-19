@@ -30,11 +30,6 @@ import org.neo4j.ogm.annotation.Index;
  */
 public abstract class GeneticEntity extends AbstractEntity implements Species {
 	
-	/** The uid. */
-	@Id
-	@GeneratedValue
-    private Long uid;
-
 	// May be unset for some implementors. Gene and 
 	/** The gene id. */
 	// Transcript must have a GeneId
@@ -147,24 +142,6 @@ public abstract class GeneticEntity extends AbstractEntity implements Species {
 	}
 
 	/**
-	 * Gets the uid.
-	 *
-	 * @return the uid
-	 */
-	public Long getUid() {
-		return uid;
-	}
-
-	/**
-	 * Gets the builds the.
-	 *
-	 * @return the build
-	 */
-	public Long getBuild() {
-		return build;
-	}
-
-	/**
 	 * Sets the builds the.
 	 *
 	 * @param build the build to set
@@ -209,27 +186,21 @@ public abstract class GeneticEntity extends AbstractEntity implements Species {
 		this.chr = chr;
 	}
 
-	/**
-	 * Hash code.
-	 *
-	 * @return the int
-	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(active, build, chr, end, geneId, phase, score, sequenceId, source, species, start, strand,
-				type, uid);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(active, build, chr, end, geneId, phase, score, sequenceId, source,
+				species, start, strand, type);
+		return result;
 	}
 
-	/**
-	 * Equals.
-	 *
-	 * @param obj the obj
-	 * @return true, if successful
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
+		if (!super.equals(obj))
+			return false;
 		if (!(obj instanceof GeneticEntity))
 			return false;
 		GeneticEntity other = (GeneticEntity) obj;
@@ -239,7 +210,7 @@ public abstract class GeneticEntity extends AbstractEntity implements Species {
 				&& Objects.equals(score, other.score) && Objects.equals(sequenceId, other.sequenceId)
 				&& Objects.equals(source, other.source) && Objects.equals(species, other.species)
 				&& Objects.equals(start, other.start) && Objects.equals(strand, other.strand)
-				&& Objects.equals(type, other.type) && Objects.equals(uid, other.uid);
+				&& Objects.equals(type, other.type);
 	}
 
 	/**
@@ -420,6 +391,13 @@ public abstract class GeneticEntity extends AbstractEntity implements Species {
 	 */
 	public void setGeneId(String geneId) {
 		this.geneId = geneId;
+	}
+
+	/**
+	 * @return the build
+	 */
+	public Long getBuild() {
+		return build;
 	}
 
 }

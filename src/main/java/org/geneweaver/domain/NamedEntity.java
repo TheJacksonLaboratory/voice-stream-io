@@ -20,15 +20,8 @@ package org.geneweaver.domain;
 
 import java.util.Objects;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-
 public class NamedEntity extends AbstractEntity implements Species {
 
-	/** The uid. */
-	@Id
-	@GeneratedValue
-    private Long uid;
 
 	private String name;
 	private String species;
@@ -58,28 +51,20 @@ public class NamedEntity extends AbstractEntity implements Species {
 	}
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, species, uid);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(name, species);
+		return result;
 	}
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
+		if (!super.equals(obj))
+			return false;
 		if (!(obj instanceof NamedEntity))
 			return false;
 		NamedEntity other = (NamedEntity) obj;
-		return Objects.equals(name, other.name) && Objects.equals(species, other.species)
-				&& Objects.equals(uid, other.uid);
-	}
-	/**
-	 * @return the uid
-	 */
-	public Long getUid() {
-		return uid;
-	}
-	/**
-	 * @param uid the uid to set
-	 */
-	public void setUid(Long uid) {
-		this.uid = uid;
+		return Objects.equals(name, other.name) && Objects.equals(species, other.species);
 	}
 }

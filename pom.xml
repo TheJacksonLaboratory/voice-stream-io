@@ -1,7 +1,6 @@
 
-<!--  We can deploy to gene weaver jfrog artifcatory: https://geneweaver.jfrog.io/ui/login/
-Also to deploy to maven central: https://dzone.com/articles/publish-your-artifacts-to-maven-central
- -->
+<!-- We can deploy to gene weaver jfrog artifcatory: https://geneweaver.jfrog.io/ui/login/ 
+	Also to deploy to maven central: https://dzone.com/articles/publish-your-artifacts-to-maven-central -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -58,6 +57,14 @@ Also to deploy to maven central: https://dzone.com/articles/publish-your-artifac
 		<system>None</system>
 	</ciManagement>
 
+	<repositories>
+		<repository>
+			<id>bedatadriven</id>
+			<name>bedatadriven public repo</name>
+			<url>https://nexus.bedatadriven.com/content/groups/public/</url>
+		</repository>
+	</repositories>
+
 	<dependencies>
 
 		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
@@ -76,11 +83,11 @@ Also to deploy to maven central: https://dzone.com/articles/publish-your-artifac
 
 		<!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
 		<dependency>
-		    <groupId>com.google.guava</groupId>
-		    <artifactId>guava</artifactId>
-		    <version>30.1-jre</version>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>30.1-jre</version>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/junit/junit -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -88,14 +95,14 @@ Also to deploy to maven central: https://dzone.com/articles/publish-your-artifac
 			<version>4.13</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
 		<dependency>
-		    <groupId>org.slf4j</groupId>
-		    <artifactId>slf4j-api</artifactId>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
 			<version>1.7.21</version>
 		</dependency>
-		
+
 		<!-- NEEDED FOR DOMAIN -->
 		<!-- https://mvnrepository.com/artifact/org.neo4j/neo4j-ogm-core -->
 		<dependency>
@@ -106,40 +113,47 @@ Also to deploy to maven central: https://dzone.com/articles/publish-your-artifac
 
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-csv -->
 		<dependency>
-		    <groupId>org.apache.commons</groupId>
-		    <artifactId>commons-csv</artifactId>
-		    <version>1.8</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.8</version>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
 		<dependency>
-		    <groupId>org.apache.commons</groupId>
-		    <artifactId>commons-compress</artifactId>
-		    <version>1.20</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.20</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
 		<dependency>
-		    <groupId>org.apache.poi</groupId>
-		    <artifactId>poi</artifactId>
-		    <version>5.0.0</version>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>5.0.0</version>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
 		<dependency>
-		    <groupId>com.h2database</groupId>
-		    <artifactId>h2</artifactId>
-		    <version>1.4.200</version>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.200</version>
 		</dependency>
-		
+
+		<!-- https://mvnrepository.com/artifact/org.renjin/renjin-script-engine -->
+		<dependency>
+			<groupId>org.renjin</groupId>
+			<artifactId>renjin-script-engine</artifactId>
+			<version>3.5-beta72</version>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/uk.co.jemos.podam/podam -->
 		<dependency>
-		    <groupId>uk.co.jemos.podam</groupId>
-		    <artifactId>podam</artifactId>
-		    <version>7.2.6.RELEASE</version>
-		    <scope>test</scope>
+			<groupId>uk.co.jemos.podam</groupId>
+			<artifactId>podam</artifactId>
+			<version>7.2.6.RELEASE</version>
+			<scope>test</scope>
 		</dependency>
-		
+
 	</dependencies>
 
 	<build>
@@ -235,12 +249,12 @@ Also to deploy to maven central: https://dzone.com/articles/publish-your-artifac
 						</goals>
 					</execution>
 					<!-- Threshold -->
-					
+
 					<execution>
-					    <id>jacoco-check</id>
-					    <goals>
-					        <goal>check</goal>
-					    </goals>
+						<id>jacoco-check</id>
+						<goals>
+							<goal>check</goal>
+						</goals>
 						<configuration>
 							<rules>
 								<rule>
@@ -248,8 +262,8 @@ Also to deploy to maven central: https://dzone.com/articles/publish-your-artifac
 									<excludes>
 										<!-- Exceptions do not need tests usually. -->
 										<exclude>*Exception</exclude>
-										
-										<!--  This is tested throughly in geweaver-bulk-import -->
+
+										<!-- This is tested throughly in geweaver-bulk-import -->
 										<exclude>org.geneweaver.io.connector</exclude>
 
 									</excludes>

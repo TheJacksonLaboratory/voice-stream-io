@@ -47,7 +47,6 @@ HomoloGene ID	Common Organism Name	NCBI Taxon ID	Symbol	EntrezGene ID	Mouse MGI 
 @Generated("POJO")
 public class HomologGene extends AbstractEntity {
 
-	private Long uid;
 	private Long hid;
 	private String organismName;
 	private Long taxonId;
@@ -68,20 +67,6 @@ public class HomologGene extends AbstractEntity {
 	 */
 	private String source;
 	
-	/**
-	 * @return the uid
-	 */
-	public Long getUid() {
-		return uid;
-	}
-
-	/**
-	 * @param uid the uid to set
-	 */
-	public void setUid(Long uid) {
-		this.uid = uid;
-	}
-
 	/**
 	 * @return the hid
 	 */
@@ -252,14 +237,19 @@ public class HomologGene extends AbstractEntity {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(coords, entrezId, hgncId, hid, location, mgiId, nucelotideSeqIds, organismName,
-				proteinSeqIds, source, swissProtIds, symbol, taxonId, uid);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(coords, entrezId, hgncId, hid, location, mgiId, nucelotideSeqIds,
+				organismName, proteinSeqIds, source, swissProtIds, symbol, taxonId);
+		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
+		if (!super.equals(obj))
+			return false;
 		if (!(obj instanceof HomologGene))
 			return false;
 		HomologGene other = (HomologGene) obj;
@@ -270,7 +260,7 @@ public class HomologGene extends AbstractEntity {
 				&& Objects.equals(organismName, other.organismName)
 				&& Objects.equals(proteinSeqIds, other.proteinSeqIds) && Objects.equals(source, other.source)
 				&& Objects.equals(swissProtIds, other.swissProtIds) && Objects.equals(symbol, other.symbol)
-				&& Objects.equals(taxonId, other.taxonId) && Objects.equals(uid, other.uid);
+				&& Objects.equals(taxonId, other.taxonId);
 	}
 
 	/**

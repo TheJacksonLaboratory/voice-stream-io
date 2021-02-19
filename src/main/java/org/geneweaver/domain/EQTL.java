@@ -47,11 +47,6 @@ Also shortening the chain means less nodes/rels. A disadvantage is that it is a 
 @RelationshipEntity(type = "EQTL")
 public class EQTL extends AbstractEntity {
 	
-	/** The uid. */
-	@Id
-	@GeneratedValue
-    private Long uid;
-		
     /** The chr. */
     private String chr;
 
@@ -68,7 +63,9 @@ public class EQTL extends AbstractEntity {
 	private String refSeq;
 	private String altSeq;
 	private double slope;
-	private String tissue;
+	private String tissueFileName;
+	private String tissueGroup;
+	private String tissueName;
 	private String version;
 	private String uberon;
 	private String source; // e.g. GTEx
@@ -120,7 +117,11 @@ public class EQTL extends AbstractEntity {
 		buf.append(getDelimiter());
 		buf.append("double:slope");
 		buf.append(getDelimiter());
-		buf.append("tissue");
+		buf.append("tissueFileName");
+		buf.append(getDelimiter());
+		buf.append("tissueGroup");
+		buf.append(getDelimiter());
+		buf.append("tissueName");
 		buf.append(getDelimiter());
 		buf.append("version");
 		buf.append(getDelimiter());
@@ -154,7 +155,11 @@ public class EQTL extends AbstractEntity {
 		buf.append(getDelimiter());
 		buf.append(getSlope());
 		buf.append(getDelimiter());
-		buf.append(getTissue());
+		buf.append(getTissueFileName());
+		buf.append(getDelimiter());
+		buf.append(getTissueGroup());
+		buf.append(getDelimiter());
+		buf.append(getTissueName());
 		buf.append(getDelimiter());
 		buf.append(getVersion());
 		buf.append(getDelimiter());
@@ -169,20 +174,6 @@ public class EQTL extends AbstractEntity {
 		buf.append(getDelimiter());
 		buf.append(getClass().getSimpleName().toUpperCase());
 		return buf.toString();
-	}
-
-	/**
-	 * @return the uid
-	 */
-	public Long getUid() {
-		return uid;
-	}
-
-	/**
-	 * @param uid the uid to set
-	 */
-	public void setUid(Long uid) {
-		this.uid = uid;
 	}
 
 	/**
@@ -234,7 +225,7 @@ public class EQTL extends AbstractEntity {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + Objects.hash(altSeq, chr, eqtlVariantId, fullGeneId, geneId, geneTo, refSeq, rsId,
-				slope, source, tissue, uberon, uid, variantFrom, version);
+				slope, source, tissueFileName, tissueGroup, tissueName, uberon, variantFrom, version);
 		return result;
 	}
 
@@ -252,9 +243,11 @@ public class EQTL extends AbstractEntity {
 				&& Objects.equals(geneId, other.geneId) && Objects.equals(geneTo, other.geneTo)
 				&& Objects.equals(refSeq, other.refSeq) && Objects.equals(rsId, other.rsId)
 				&& Double.doubleToLongBits(slope) == Double.doubleToLongBits(other.slope)
-				&& Objects.equals(source, other.source) && Objects.equals(tissue, other.tissue)
-				&& Objects.equals(uberon, other.uberon) && Objects.equals(uid, other.uid)
-				&& Objects.equals(variantFrom, other.variantFrom) && Objects.equals(version, other.version);
+				&& Objects.equals(source, other.source) && Objects.equals(tissueFileName, other.tissueFileName)
+				&& Objects.equals(tissueGroup, other.tissueGroup)
+				&& Objects.equals(tissueName, other.tissueName)
+				&& Objects.equals(uberon, other.uberon) && Objects.equals(variantFrom, other.variantFrom)
+				&& Objects.equals(version, other.version);
 	}
 
 	/**
@@ -342,17 +335,17 @@ public class EQTL extends AbstractEntity {
 	}
 
 	/**
-	 * @return the tissue
+	 * @return the tissueFileName
 	 */
-	public String getTissue() {
-		return tissue;
+	public String getTissueFileName() {
+		return tissueFileName;
 	}
 
 	/**
-	 * @param tissue the tissue to set
+	 * @param tissueFileName the tissueFileName to set
 	 */
-	public void setTissue(String tissue) {
-		this.tissue = tissue;
+	public void setTissueFileName(String tissue) {
+		this.tissueFileName = tissue;
 	}
 
 	/**
@@ -409,6 +402,34 @@ public class EQTL extends AbstractEntity {
 	 */
 	public void setFullGeneId(String fullGeneId) {
 		this.fullGeneId = fullGeneId;
+	}
+
+	/**
+	 * @return the tissueGroup
+	 */
+	public String getTissueGroup() {
+		return tissueGroup;
+	}
+
+	/**
+	 * @param tissueGroup the tissueGroup to set
+	 */
+	public void setTissueGroup(String tissueGroup) {
+		this.tissueGroup = tissueGroup;
+	}
+
+	/**
+	 * @return the tissueName
+	 */
+	public String getTissueName() {
+		return tissueName;
+	}
+
+	/**
+	 * @param tissueName the tissueName to set
+	 */
+	public void setTissueName(String tissueSecondaryGroup) {
+		this.tissueName = tissueSecondaryGroup;
 	}
 
 

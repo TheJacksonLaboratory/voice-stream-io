@@ -65,7 +65,7 @@ public class EQTLFunctionMassiveTest extends AbstractDataFileTest {
 		// Create the database if it is not already there.
 		// It is 6Gb - do not run this test unless you know what you are doing.
 		// The database is not recreated if it exists.
-		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(fmap)) {
+		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(fmap, getFile("data/eQTL/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt.gz"))) {
 			func.setLocation(dir);
 			
 			// We parse the database and create it
@@ -79,7 +79,7 @@ public class EQTLFunctionMassiveTest extends AbstractDataFileTest {
 	 */
 	@Test
 	public void timeMassiveMapFile() throws Exception {
-		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(fmap)) {
+		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(fmap, getFile("data/eQTL/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt.gz"))) {
 			func.setLocation(dir);
 			
 			assertTrue(func.exists());
@@ -93,7 +93,7 @@ public class EQTLFunctionMassiveTest extends AbstractDataFileTest {
 	@Test
 	public void timeMassive1000Lookups() throws Exception {
 				
-		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(fmap)) {
+		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(fmap, getFile("data/eQTL/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt.gz"))) {
 			func.setLocation(dir);
 			
 			// If the index on variantId is not working, this is very slow.
@@ -112,7 +112,7 @@ public class EQTLFunctionMassiveTest extends AbstractDataFileTest {
 	@Test
 	public void testMassiveAllLookups() throws Exception {
 				
-		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(fmap)) {
+		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(fmap, getFile("data/eQTL/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt.gz"))) {
 			func.setLocation(dir);
 			
 			// If the index on variantId is not working, this is very slow.

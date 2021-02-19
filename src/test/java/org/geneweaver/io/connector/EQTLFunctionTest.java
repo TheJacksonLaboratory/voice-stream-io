@@ -52,13 +52,13 @@ public class EQTLFunctionTest extends AbstractDataFileTest {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void mappingStreamTest() throws Exception {
-		checkMappingStream(new EQTLFunction<>(getFile("data/eQTL/GTExLookup-frag.lookup_table.txt")));
-		checkMappingStream(new EQTLFunction<>(getFile("data/eQTL/GTExLookup-frag.lookup_table.txt").toURL()));
+		checkMappingStream(new EQTLFunction<>(getFile("data/eQTL/GTExLookup-frag.lookup_table.txt"), getFile("data/eQTL/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt.gz")));
+		checkMappingStream(new EQTLFunction<>(getFile("data/eQTL/GTExLookup-frag.lookup_table.txt").toURL(), getFile("data/eQTL/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt.gz").toURL()));
 	}
 
 	private void checkMappingStream(EQTLFunction<EQTL, EQTL> func) throws IOException {
 		func.setLocation(dir);
-		try (InputStream in = func.mappingInputStream() ) {
+		try (InputStream in = func.stream(func.getMapping()) ) {
 			assertNotNull(in);
 		}
 	}
@@ -66,7 +66,7 @@ public class EQTLFunctionTest extends AbstractDataFileTest {
 	@Test
 	public void noMap() throws Exception {
 		File fmap = getFile("data/eQTL/GTExLookup-frag.lookup_table.txt");
-		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(fmap)) {
+		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(fmap, getFile("data/eQTL/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt.gz"))) {
 			func.setLocation(dir);
 			assertFalse(func.exists());
 		}
@@ -76,7 +76,7 @@ public class EQTLFunctionTest extends AbstractDataFileTest {
 	public void testMap() throws Exception {
 		
 		File fmap = getFile("data/eQTL/GTExLookup-frag.lookup_table.txt");
-		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(fmap)) {
+		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(fmap, getFile("data/eQTL/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt.gz"))) {
 			func.setLocation(dir);
 			
 			// We parse the database and create it
@@ -91,7 +91,8 @@ public class EQTLFunctionTest extends AbstractDataFileTest {
 	public void testFunction() throws Exception {
 		
 		File fmap = getFile("data/eQTL/GTExLookup-frag.lookup_table.txt");
-		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(fmap)) {
+		File attributes = getFile("data/eQTL/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt.gz");
+		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(fmap, attributes)) {
 			func.setLocation(dir);
 			
 			// We parse the database and create it

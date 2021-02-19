@@ -32,11 +32,6 @@ import org.neo4j.ogm.annotation.NodeEntity;
 @NodeEntity(label="ChromatinInteraction")
 public class ChromatinInteraction extends AbstractEntity implements AnchoredEntity {
 
-	/** The uid. */
-	@Id
-	@GeneratedValue
-    private Long uid;
-	
 	private ExperimentMetadata meta;	
 	private Anchor left;	
 	private Anchor right;
@@ -44,20 +39,6 @@ public class ChromatinInteraction extends AbstractEntity implements AnchoredEnti
 	private double p;
 	private double fdr;
 	private boolean overlapDNAPET;
-
-	/**
-	 * @return the uid
-	 */
-	public Long getUid() {
-		return uid;
-	}
-
-	/**
-	 * @param uid the uid to set
-	 */
-	public void setUid(Long uid) {
-		this.uid = uid;
-	}
 
 	/**
 	 * @return the meta
@@ -159,20 +140,25 @@ public class ChromatinInteraction extends AbstractEntity implements AnchoredEnti
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(fdr, left, meta, overlapDNAPET, p, petCount, right, uid);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(fdr, left, meta, overlapDNAPET, p, petCount, right);
+		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
+		if (!super.equals(obj))
+			return false;
 		if (!(obj instanceof ChromatinInteraction))
 			return false;
 		ChromatinInteraction other = (ChromatinInteraction) obj;
 		return Double.doubleToLongBits(fdr) == Double.doubleToLongBits(other.fdr) && Objects.equals(left, other.left)
 				&& Objects.equals(meta, other.meta) && overlapDNAPET == other.overlapDNAPET
 				&& Double.doubleToLongBits(p) == Double.doubleToLongBits(other.p) && petCount == other.petCount
-				&& Objects.equals(right, other.right) && Objects.equals(uid, other.uid);
+				&& Objects.equals(right, other.right);
 	}
 
 	@Override

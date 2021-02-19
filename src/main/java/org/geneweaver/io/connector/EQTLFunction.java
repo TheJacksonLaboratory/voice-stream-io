@@ -34,11 +34,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.apache.commons.io.FilenameUtils;
 import org.geneweaver.domain.EQTL;
+import org.geneweaver.domain.Sample;
+import org.geneweaver.io.reader.ReaderFactory;
+import org.geneweaver.io.reader.ReaderRequest;
+import org.geneweaver.io.reader.StreamReader;
 import org.geneweaver.io.reader.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,21 +82,23 @@ public class EQTLFunction<N extends EQTL, E extends EQTL> implements Function<N,
 	private static final String tableName 	= System.getProperty("gweaver.gtex.mappingdb.tableName","IDMAPPING");
 
 	private Serializable mapping;
+	private Serializable attributes;
 
 	private String split = System.getProperty("gweaver.gtex.mappingdb.lookupDelimiter", "\\t+");
 	private String dabasePath;
 
-	public EQTLFunction(Path path) throws ClassNotFoundException {
-		this(path.toFile());
+	public EQTLFunction(Path path, Path attributes) throws ClassNotFoundException {
+		this(path.toFile(), attributes.toFile());
 	}
 
-	public EQTLFunction(File mapping) throws ClassNotFoundException {
+	public EQTLFunction(File mapping, File attributes) throws ClassNotFoundException {
 		this.mapping = mapping;
+		this.attributes = attributes;
 		setLocation(mapping.getParentFile().toPath());
 		Class.forName(driver); // Load driver class.
 	}
 
-	public EQTLFunction(URL mapping) throws ClassNotFoundException {
+	public EQTLFunction(URL mapping, URL attributes) throws ClassNotFoundException {
 		this.mapping = mapping;
 		setLocation(Paths.get("."));
 		Class.forName(driver); // Load driver class.
@@ -109,6 +117,7 @@ public class EQTLFunction<N extends EQTL, E extends EQTL> implements Function<N,
 	private Connection connection;
 	private PreparedStatement lookup;
 	
+	private Map<TissueKey, Sample> roughMap;
 	/**
 	 * You must call create() to set up the database.
 	 * This will take a longish time if it does not exist yet.
@@ -133,6 +142,7 @@ public class EQTLFunction<N extends EQTL, E extends EQTL> implements Function<N,
 			}
 		}
 		
+		// Map the rsId
 		String variantId = t.getEqtlVariantId();
 		try {
 			if (lookup==null) lookup = connection.prepareStatement("SELECT rsId FROM "+tableName+" WHERE variantId = ?;");
@@ -147,6 +157,24 @@ public class EQTLFunction<N extends EQTL, E extends EQTL> implements Function<N,
 		} catch (SQLException ne) {
 			throw new RuntimeException("Cannot map "+variantId, ne);
 		}
+		
+		// Map the Sample name
+		if (roughMap==null) {
+			try {
+				this.roughMap = new HashMap<>();
+				StreamReader<Sample> samples = ReaderFactory.getReader(new ReaderRequest(stream(attributes), name(attributes)));
+				samples.stream().forEach(s->roughMap.put(new TissueKey(s), s));
+			} catch (Exception ne) {
+				logger.error("Cannot parse sample attributes!", ne);
+			}
+		}
+		Sample sample = roughMap.get(new TissueKey(t.getTissueFileName()));
+		if (sample==null && t.getTissueFileName()!=null) throw new RuntimeException("Cannot find sample for "+t.getTissueFileName());
+		if (sample!=null) {
+			t.setTissueGroup(sample.getTissueGroup());
+			t.setTissueName(sample.getOriginalTissueName());
+		}
+		
 		return (E)t;
 	}
 	
@@ -183,7 +211,7 @@ public class EQTLFunction<N extends EQTL, E extends EQTL> implements Function<N,
 		try (Connection conn = createConnection();
 			 PreparedStatement stmt = conn.prepareStatement("INSERT INTO "+tableName+" (variantId, rsId) VALUES (?,?);") ) {  
 
-			Iterator<String> iterator = StreamUtil.createStream(mappingInputStream(), mappingName(), true);
+			Iterator<String> iterator = StreamUtil.createStream(stream(mapping), name(mapping), true);
 			try {
 				int varIndex = -1;
 				int rsIndex  = -1;
@@ -249,10 +277,10 @@ public class EQTLFunction<N extends EQTL, E extends EQTL> implements Function<N,
 	 * @throws IOException
 	 */
 	@JsonIgnore
-	InputStream mappingInputStream() throws IOException {
-		if (mapping==null) return null;
-		if (mapping instanceof File) return new FileInputStream((File)mapping);
-		if (mapping instanceof URL) return ((URL)mapping).openStream();
+	InputStream stream(Serializable ser) throws IOException {
+		if (ser==null) return null;
+		if (ser instanceof File) return new FileInputStream((File)ser);
+		if (ser instanceof URL) return ((URL)ser).openStream();
 		return null;
 	}
 
@@ -262,9 +290,9 @@ public class EQTLFunction<N extends EQTL, E extends EQTL> implements Function<N,
 	 * @throws IOException
 	 */
 	@JsonIgnore
-	String mappingName() throws IOException {
+	String name(Serializable ser) throws IOException {
 		if (mapping==null) return null;
-		return FilenameUtils.getName(mapping.toString());
+		return FilenameUtils.getName(ser.toString());
 	}
 
 	/**
@@ -298,5 +326,12 @@ public class EQTLFunction<N extends EQTL, E extends EQTL> implements Function<N,
 				return res.getInt(1);
 			}
 		}
+	}
+
+	/**
+	 * @return the mapping
+	 */
+	public Serializable getMapping() {
+		return mapping;
 	}
 }

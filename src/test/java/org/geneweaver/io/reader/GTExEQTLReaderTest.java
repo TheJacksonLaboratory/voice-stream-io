@@ -156,7 +156,7 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 
 	private String map(Path dir, ExportBuilder b, StreamReader<EQTL> eqtls, Path path) throws Exception {
 		
-		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(path)) {
+		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(path, getPath("data/eQTL/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt.gz"))) {
 			func.setLocation(dir);
 			
 			func.create(); // Make the database.

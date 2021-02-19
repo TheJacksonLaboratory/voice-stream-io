@@ -18,7 +18,6 @@
  */
 package org.geneweaver.io.reader;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,7 +85,7 @@ class GTExEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 	@Override
 	public GTExEQTLReader<N> init(ReaderRequest request) throws ReaderException {
 		super.setup(request);
-		setDelimiter("\\t+");
+		setDelimiter("\\t");
 		return this;
 	}
 	
@@ -108,7 +107,8 @@ class GTExEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		ret.setFullGeneId(fullGeneId);
 		setVariantInfo(ret, segs[indices.get("variant_id")]);
 		ret.setSlope(Double.parseDouble(segs[indices.get("slope")]));
-		setTissueInfo(ret);
+		
+		setTissueInfo(ret, getCurrentFileName());
 		
 		String fileSrc = indices.get("gene_id")==0
 					   ? "eGenes" : "pairs";
@@ -130,26 +130,12 @@ class GTExEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 
 	 * @return
 	 */
-	private void setTissueInfo(EQTL ret) {
-		String name = getEntryName();
-		if (entryName==null) {
-			name = request.name();
-		} else {
-			name = name.substring(name.indexOf('/')+1);
-		}
+	static void setTissueInfo(EQTL ret, String name) {
 		if (name==null) return;
 		
 		String[] frags = name.split("\\.");
-		ret.setTissue(frags[0].replace('_', ' '));
+		ret.setTissueFileName(frags[0].replace('_', ' '));
 		ret.setVersion(frags[1]);
-	}
-
-	private Map<String, Integer> parseIndices(String[] segs) {
-		Map<String, Integer> indices = new HashMap<>();
-		for (int i = 0; i < segs.length; i++) {
-			indices.put(segs[i].toLowerCase(), i);
-		}
-		return indices;
 	}
 
 	private String clean(String geneId) {

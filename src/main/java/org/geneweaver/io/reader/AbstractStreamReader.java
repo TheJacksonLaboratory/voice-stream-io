@@ -18,9 +18,11 @@
  */
 package org.geneweaver.io.reader;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -97,6 +99,13 @@ public abstract class AbstractStreamReader<T extends Entity> implements StreamRe
 	public String getEntryName() {
 		return entryName;
 	}
+	
+	protected String getCurrentFileName() {
+		String name = getEntryName();
+		return name!=null
+			   ? name.substring(name.indexOf('/')+1)
+			   : request.name();
+	}
 
 	/**
 	 * @param entryName the entryName to set
@@ -110,5 +119,18 @@ public abstract class AbstractStreamReader<T extends Entity> implements StreamRe
 		throw new RuntimeException("No connector for "+getClass().getSimpleName());
 	}
 	
+	/**
+	 * Used to create an index map from a segmented line.
+	 * @param segs
+	 * @return map of segment name to index.
+	 */
+	protected Map<String, Integer> parseIndices(String[] segs) {
+		Map<String, Integer> indices = new HashMap<>();
+		for (int i = 0; i < segs.length; i++) {
+			indices.put(segs[i].toLowerCase(), i);
+		}
+		return indices;
+	}
+
 
 }

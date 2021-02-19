@@ -32,11 +32,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Generated("POJO")
 public class Anchor extends AbstractEntity implements AnchoredEntity {
 
-	/** The uid. */
-	@Id
-	@GeneratedValue
-    private Long uid;
-	
 	private String chrom;
 	
 	private int start;
@@ -60,20 +55,6 @@ public class Anchor extends AbstractEntity implements AnchoredEntity {
 		this.start = start;
 		this.end   = end;
 		this.intensity   = intensity;
-	}
-
-	/**
-	 * @return the uid
-	 */
-	public Long getUid() {
-		return uid;
-	}
-
-	/**
-	 * @param uid the uid to set
-	 */
-	public void setUid(Long uid) {
-		this.uid = uid;
 	}
 
 	/**
@@ -120,18 +101,23 @@ public class Anchor extends AbstractEntity implements AnchoredEntity {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(chrom, end, intensity, start, uid);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(chrom, end, intensity, start);
+		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
+		if (!super.equals(obj))
+			return false;
 		if (!(obj instanceof Anchor))
 			return false;
 		Anchor other = (Anchor) obj;
 		return Objects.equals(chrom, other.chrom) && end == other.end && intensity == other.intensity
-				&& start == other.start && Objects.equals(uid, other.uid);
+				&& start == other.start;
 	}
 
 

@@ -70,6 +70,8 @@ public class ReaderFactory {
 		tmp.put("^.+\\.sqtl_allpairs\\.txt(\\.gz)?$",				GTExEQTLReader.class);
 		// This is read directly into a database in EQTLFunction
 		//tmp.put("^.+\\.lookup_table\\.txt(\\.gz)?$",				GTExEQTLReader.class);
+		
+		tmp.put("^GTEx.+Annotations.+Sample.+.txt(\\.gz)?$",		GTExSampleReader.class);
 
 		// Archive Reader just calls back this reader with each entry
 		tmp.put("tar", 			ArchiveReader.class);

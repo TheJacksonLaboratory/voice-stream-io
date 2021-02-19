@@ -40,11 +40,6 @@ import org.neo4j.ogm.annotation.StartNode;
 @RelationshipEntity(type = "VARIANT_EFFECT")
 public class VariantEffect extends AbstractEntity {
 	
-	/** The uid. */
-	@Id
-	@GeneratedValue
-    private Long uid;
-	
 	/** The variant. */
 	@StartNode
 	private Variant variant;
@@ -112,15 +107,6 @@ public class VariantEffect extends AbstractEntity {
 		buf.append(getDelimiter());
 		buf.append("VARIANT_EFFECT");
 		return buf.toString();
-	}
-
-	/**
-	 * Gets the uid.
-	 *
-	 * @return the uid
-	 */
-	public Long getUid() {
-		return uid;
 	}
 
 	/**
@@ -195,32 +181,26 @@ public class VariantEffect extends AbstractEntity {
 		this.featureId = featureId;
 	}
 	
-	/**
-	 * Hash code.
-	 *
-	 * @return the int
-	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(featureId, featureType, index, sequenceVariant, uid);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(featureId, featureType, index, sequenceVariant, transcript, variant);
+		return result;
 	}
 	
-	/**
-	 * Equals.
-	 *
-	 * @param obj the obj
-	 * @return true, if successful
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
+		if (!super.equals(obj))
+			return false;
 		if (!(obj instanceof VariantEffect))
 			return false;
 		VariantEffect other = (VariantEffect) obj;
 		return Objects.equals(featureId, other.featureId) && Objects.equals(featureType, other.featureType)
 				&& index == other.index && Objects.equals(sequenceVariant, other.sequenceVariant)
-				&& Objects.equals(uid, other.uid);
+				&& Objects.equals(transcript, other.transcript) && Objects.equals(variant, other.variant);
 	}
 
 	/**
