@@ -1,7 +1,9 @@
 
 <!-- We can deploy to gene weaver jfrog artifcatory: https://geneweaver.jfrog.io/ui/login/ 
 	Also to deploy to maven central: https://dzone.com/articles/publish-your-artifacts-to-maven-central -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.geneweaver</groupId>
@@ -270,7 +272,6 @@
 					<localCheckout>true</localCheckout>
 					<pushChanges>false</pushChanges>
 					<mavenExecutorId>forked-path</mavenExecutorId>
-					<arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
         			<arguments>-DskipTests</arguments>
 				</configuration>
 				<dependencies>
@@ -307,18 +308,12 @@
 	</distributionManagement>
 
 	<profiles>
-		<!-- Full Release:
-		
-		https://dzone.com/articles/publish-your-artifacts-to-maven-central
-		http://tutorials.jenkov.com/maven/publish-to-central-maven-repository.html
-		https://central.sonatype.org/pages/releasing-the-deployment.html
-		
-		Normal snapshot: 	mvn deploy
-		Full Release: 		mvn clean release:prepare release:perform
-		
-		Might need to do : export GPG_TTY=$(tty)
-		see https://github.com/keybase/keybase-issues/issues/2798
-		-->
+		<!-- Full Release: https://dzone.com/articles/publish-your-artifacts-to-maven-central 
+			http://tutorials.jenkov.com/maven/publish-to-central-maven-repository.html 
+			https://central.sonatype.org/pages/releasing-the-deployment.html -->
+		<!-- Normal snapshot: mvn deploy -->
+		<!-- Full Release: mvn clean release:prepare release:perform -->
+		<!-- Might need to do: export GPG_TTY=$(tty) see https://github.com/keybase/keybase-issues/issues/2798 -->
 		<profile>
 			<id>release-sign-artifacts</id>
 			<activation>
