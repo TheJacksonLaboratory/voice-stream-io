@@ -139,13 +139,6 @@
 			<version>1.4.200</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.renjin/renjin-script-engine -->
-		<dependency>
-			<groupId>org.renjin</groupId>
-			<artifactId>renjin-script-engine</artifactId>
-			<version>3.5-beta72</version>
-		</dependency>
-
 		<!-- https://mvnrepository.com/artifact/uk.co.jemos.podam/podam -->
 		<dependency>
 			<groupId>uk.co.jemos.podam</groupId>
