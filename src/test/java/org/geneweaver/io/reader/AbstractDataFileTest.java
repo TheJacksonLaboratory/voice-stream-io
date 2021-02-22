@@ -75,9 +75,13 @@ public abstract class AbstractDataFileTest {
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	private Path getData() throws IOException {
-		String[] paths = new String[] {"gweaver-test-data", "gweaver-test-data", "../gweaver-test-data", "../gweaver-test-data.git"};
+		String[] paths = new String[] {"./", "../", "../../", "../../../", "../../../../", "/Volumes/Work/JAX/repos/"};
 		for (String spath : paths) {
-			Path path = Paths.get(spath);
+			Path path = Paths.get(spath+"gweaver-test-data");
+			if (Files.exists(path) && Files.isDirectory(path)) {
+				return path;
+			}
+			path = Paths.get(spath+"gweaver-test-data.git");
 			if (Files.exists(path) && Files.isDirectory(path)) {
 				return path;
 			}

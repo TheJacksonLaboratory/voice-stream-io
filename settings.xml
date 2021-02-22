@@ -9,14 +9,9 @@ See : https://www.jfrog.com/confluence/display/RTF20/Using+Secured+Passwords+in+
 	xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
 	<servers>
 		<server>
-			<id>centralgeneweaver</id>
-			<username>${JFROG_USER}</username>
-			<password>${JFROG_PASSWORD}</password>
-		</server>
-		<server>
-			<id>snapshotsgeneweaver</id>
-			<username>${JFROG_USER}</username>
-			<password>${JFROG_PASSWORD}</password>
+			<id>ossrh</id>
+			<username>${NEXUS_USER}</username>
+			<password>${NEXUS_PASSWORD}</password>
 		</server>
 	</servers>
 </settings>

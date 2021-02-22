@@ -2,6 +2,7 @@
 <!-- We can deploy to gene weaver jfrog artifcatory: https://geneweaver.jfrog.io/ui/login/ 
 	Also to deploy to maven central: https://dzone.com/articles/publish-your-artifacts-to-maven-central -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.geneweaver</groupId>
 	<artifactId>gweaver-stream-io</artifactId>
@@ -54,14 +55,6 @@
 	<ciManagement>
 		<system>None</system>
 	</ciManagement>
-
-	<repositories>
-		<repository>
-			<id>bedatadriven</id>
-			<name>bedatadriven public repo</name>
-			<url>https://nexus.bedatadriven.com/content/groups/public/</url>
-		</repository>
-	</repositories>
 
 	<dependencies>
 
@@ -179,14 +172,10 @@
 				<configuration>
 					<encoding>UTF-8</encoding>
 					<configLocation>src/main/resources/checkstyle/checkstyle-rules.xml</configLocation>
-					<!-- <suppressionsLocation>src/main/resources/checkstyle/suppressions.xml</suppressionsLocation> -->
 					<headerLocation>src/main/resources/checkstyle/header.txt</headerLocation>
 					<consoleOutput>true</consoleOutput>
 					<failsOnError>true</failsOnError>
 				</configuration>
-
-				<!-- <executions> <execution> <id>validate</id> <phase>validate</phase> 
-					<goals> <goal>check</goal> </goals> </execution> </executions> -->
 			</plugin>
 
 			<plugin>
@@ -282,6 +271,7 @@
 					<pushChanges>false</pushChanges>
 					<mavenExecutorId>forked-path</mavenExecutorId>
 					<arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
+        			<arguments>-DskipTests</arguments>
 				</configuration>
 				<dependencies>
 					<dependency>
@@ -306,18 +296,6 @@
 	</build>
 
 	<distributionManagement>
-		<!-- 
-		<repository>
-			<id>centralgeneweaver</id>
-			<name>a0wwvwd37k5w5-artifactory-primary-0-releases</name>
-			<url>https://geneweaver.jfrog.io/artifactory/geneweaver</url>
-		</repository>
-		<snapshotRepository>
-			<id>snapshotsgeneweaver</id>
-			<name>a0wwvwd37k5w5-artifactory-primary-0-snapshots</name>
-			<url>https://geneweaver.jfrog.io/artifactory/geneweaver</url>
-		</snapshotRepository>
-		-->
 		<snapshotRepository>
 			<id>ossrh</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
@@ -328,9 +306,19 @@
 		</repository>
 	</distributionManagement>
 
-	<!--  Maven public key: 7A1A768240E886B783DC0CE8AF01800919D181D3 -->
 	<profiles>
-		<!-- GPG Signature on release -->
+		<!-- Full Release:
+		
+		https://dzone.com/articles/publish-your-artifacts-to-maven-central
+		http://tutorials.jenkov.com/maven/publish-to-central-maven-repository.html
+		https://central.sonatype.org/pages/releasing-the-deployment.html
+		
+		Normal snapshot: 	mvn deploy
+		Full Release: 		mvn clean release:prepare release:perform
+		
+		Might need to do : export GPG_TTY=$(tty)
+		see https://github.com/keybase/keybase-issues/issues/2798
+		-->
 		<profile>
 			<id>release-sign-artifacts</id>
 			<activation>
@@ -359,4 +347,5 @@
 			</build>
 		</profile>
 	</profiles>
+	
 </project>
