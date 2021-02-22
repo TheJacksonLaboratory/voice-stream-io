@@ -20,8 +20,9 @@
 	</properties>
 
 	<description>The IO bundle for Geneweaver.</description>
-	<url>https://www.jax.org</url>
+	
 	<inceptionYear>2020</inceptionYear>
+	<url>http://www.geneweaver.org</url>
 	<organization>
 		<name>Jackson Laboratory</name>
 		<url>http://www.jax.org</url>
