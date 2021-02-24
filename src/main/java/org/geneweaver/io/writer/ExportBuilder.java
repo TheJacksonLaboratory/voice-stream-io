@@ -3,6 +3,7 @@ package org.geneweaver.io.writer;
 import static org.geneweaver.io.DirectSave.save;
 
 import java.io.BufferedWriter;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,6 +62,12 @@ public class ExportBuilder implements AutoCloseable {
 	private String species;
 	
 	/**
+	 * Stream for printing messages of each export run.
+	 */
+	@JsonIgnore
+	private PrintStream out = System.out;
+	
+	/**
 	 * Map of writers cached while we write all the files.
 	 */
 	@JsonIgnore
@@ -73,7 +80,8 @@ public class ExportBuilder implements AutoCloseable {
 	public void export() throws Exception {
 		// Process one or more paths into the bulk file.
 		for (Path input : inputs) {
-			exporter.export(this, input);
+			String message = exporter.export(this, input);
+			out.println(message);
 		}		
 	}
 	
@@ -263,6 +271,22 @@ public class ExportBuilder implements AutoCloseable {
 		return Objects.equals(chunkProperty, other.chunkProperty) && defaultChunkSize == other.defaultChunkSize
 				&& Objects.equals(dir, other.dir) && Objects.equals(inputs, other.inputs)
 				&& Objects.equals(species, other.species);
+	}
+
+	/**
+	 * @return the out
+	 */
+	@JsonIgnore
+	public PrintStream getOut() {
+		return out;
+	}
+
+	/**
+	 * @param out the out to set
+	 */
+	@JsonIgnore
+	public void setOut(PrintStream out) {
+		this.out = out;
 	}
 
 }
