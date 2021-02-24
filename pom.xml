@@ -311,8 +311,8 @@
 			http://tutorials.jenkov.com/maven/publish-to-central-maven-repository.html 
 			https://central.sonatype.org/pages/releasing-the-deployment.html -->
 		<!-- Normal snapshot: mvn deploy -->
-		<!-- Full Release: mvn clean release:prepare release:perform -->
 		<!-- Might need to do: export GPG_TTY=$(tty) see https://github.com/keybase/keybase-issues/issues/2798 -->
+		<!-- Full Release: mvn clean release:prepare release:perform -->
 		<profile>
 			<id>release-sign-artifacts</id>
 			<activation>
