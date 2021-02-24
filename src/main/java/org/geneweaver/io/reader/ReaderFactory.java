@@ -155,12 +155,9 @@ public class ReaderFactory {
 			return (Class<R>)classes.get(ext);
 		}
 		if ("gz".equals(ext)) {
-			String alt = name.substring(name.indexOf('.')+1);
-			if (alt.contains(".")) {
-				ext = alt.substring(0, alt.indexOf('.'));
-				if (classes.containsKey(ext)) {
-					return (Class<R>)classes.get(ext);
-				}
+			ext = FilenameUtils.getExtension(name.substring(0, name.length()-3));
+			if (classes.containsKey(ext)) {
+				return (Class<R>)classes.get(ext);
 			}
 		}
 		

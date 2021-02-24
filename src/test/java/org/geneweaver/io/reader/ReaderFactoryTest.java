@@ -31,10 +31,14 @@ public class ReaderFactoryTest {
 	
 	private static final List<String> exts = Arrays.asList(new String[] {
 			"gtf",
+			"gtf.gz",
 			"gvf",
+			"gvf.gz",
 			"bed",
+			"bed.gz",
 			"xls", 
 			"tsv", 
+			"tsv.gz", 
 			"rpt", 
 			"egenes.txt.gz", 	
 			"sgenes.txt", 	
@@ -45,7 +49,12 @@ public class ReaderFactoryTest {
 			"tar", 		
 			"zip"
 	});
-
+	
+	private static final List<String> rnames = Arrays.asList(new String[] {
+			"Homo_sapiens.GRCh38.102.gtf.gz",
+			"Rattus_norvegicus.Rnor_6.0.102.gtf.gz"
+	});
+			
 	@Test
 	public void isSupported() throws Exception {
 		for (String ext : exts) {
@@ -53,6 +62,13 @@ public class ReaderFactoryTest {
 		}
 	}
 	
+	@Test
+	public void isSupportedRealNames() throws Exception {
+		for (String name : rnames) {
+			assertTrue(ReaderFactory.isSupported(new ReaderRequest(name)));
+		}
+	}
+
 	@Test
 	public void doesNotIterate() throws Exception {
 		for (String ext : exts) {
