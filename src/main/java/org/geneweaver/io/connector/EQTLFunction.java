@@ -88,12 +88,12 @@ public class EQTLFunction<N extends EQTL, E extends EQTL> implements Function<N,
 	private String dabasePath;
 
 	public EQTLFunction(Path path, Path attributes) throws ClassNotFoundException {
-		this(path.toFile(), attributes.toFile());
+		this(path.toAbsolutePath().toFile(), attributes.toAbsolutePath().toFile());
 	}
 
 	public EQTLFunction(File mapping, File attributes) throws ClassNotFoundException {
-		this.mapping = mapping;
-		this.attributes = attributes;
+		this.mapping = mapping.getAbsoluteFile();
+		this.attributes = attributes.getAbsoluteFile();
 		setLocation(mapping.getParentFile().toPath());
 		Class.forName(driver); // Load driver class.
 	}
