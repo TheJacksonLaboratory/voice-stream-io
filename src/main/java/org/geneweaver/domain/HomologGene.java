@@ -23,6 +23,8 @@ import java.util.Objects;
 
 import javax.annotation.processing.Generated;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * 
  
@@ -61,6 +63,13 @@ public class HomologGene extends AbstractEntity {
 	private Collection<String> nucelotideSeqIds;
 	private Collection<String> proteinSeqIds;
 	private Collection<String> swissProtIds;
+	
+	/**
+	 * This is the ENSEMBL gene id. It must be found by mapping
+	 * gene name and taxon to ensembl geneId, it is not in the 
+	 * original homologene file.
+	 */
+	private String geneId;
 	
 	/*
 	 * Something like 'Homologene'from http://www.informatics.jax.org/homology.shtml 
@@ -239,7 +248,7 @@ public class HomologGene extends AbstractEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(coords, entrezId, hgncId, hid, location, mgiId, nucelotideSeqIds,
+		result = prime * result + Objects.hash(coords, entrezId, geneId, hgncId, hid, location, mgiId, nucelotideSeqIds,
 				organismName, proteinSeqIds, source, swissProtIds, symbol, taxonId);
 		return result;
 	}
@@ -254,9 +263,9 @@ public class HomologGene extends AbstractEntity {
 			return false;
 		HomologGene other = (HomologGene) obj;
 		return Objects.equals(coords, other.coords) && Objects.equals(entrezId, other.entrezId)
-				&& Objects.equals(hgncId, other.hgncId) && Objects.equals(hid, other.hid)
-				&& Objects.equals(location, other.location) && Objects.equals(mgiId, other.mgiId)
-				&& Objects.equals(nucelotideSeqIds, other.nucelotideSeqIds)
+				&& Objects.equals(geneId, other.geneId) && Objects.equals(hgncId, other.hgncId)
+				&& Objects.equals(hid, other.hid) && Objects.equals(location, other.location)
+				&& Objects.equals(mgiId, other.mgiId) && Objects.equals(nucelotideSeqIds, other.nucelotideSeqIds)
 				&& Objects.equals(organismName, other.organismName)
 				&& Objects.equals(proteinSeqIds, other.proteinSeqIds) && Objects.equals(source, other.source)
 				&& Objects.equals(swissProtIds, other.swissProtIds) && Objects.equals(symbol, other.symbol)
@@ -277,4 +286,23 @@ public class HomologGene extends AbstractEntity {
 		this.source = source;
 	}
 
+	/**
+	 * @return the geneId
+	 */
+	public String getGeneId() {
+		return geneId;
+	}
+
+	/**
+	 * @param geneId the geneId to set
+	 */
+	public HomologGene setGeneId(String geneId) {
+		this.geneId = geneId;
+		return this;
+	}
+
+	@JsonIgnore
+	public String getGeneNameKey() {
+		return getTaxonId()+":"+getSymbol();
+	}
 }

@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -154,6 +155,8 @@ public class HomologGeneReaderTest extends AbstractDataFileTest {
 		equals(hhomols.get(660L).iterator().next(), 660L, "human", 9606L, "GSTP1");
 	}
 	
+	private int geneIndex = 0;
+	
 	@Test
 	public void checkHomologs1() throws Exception {
 
@@ -161,17 +164,21 @@ public class HomologGeneReaderTest extends AbstractDataFileTest {
 		
 		Function<HomologGene,Stream<Entity>> connector = reader.getDefaultConnector();
 		
+		geneIndex = 0;
+		Supplier<String> s = ()->"FAKE000000"+(geneIndex++);
+		
 		List<Entity> tnt = reader.stream()
 									.limit(1000)
 									.filter(h->h.getHid()==292L)
+									.map(h->h.setGeneId(s.get()))
 									.flatMap(h->connector.apply(h))
 									.collect(Collectors.toList());
 		assertEquals(5, tnt.size());
-		assertEquals("10090:Smn1-[HOMOLOG]->9606:SMN1", tnt.get(1).toString());
-		assertEquals("10090:Smn1-[HOMOLOG]->9606:SMN2", tnt.get(3).toString());
+		assertEquals("FAKE0000000-[HOMOLOG]->FAKE0000001", tnt.get(1).toString());
+		assertEquals("FAKE0000000-[HOMOLOG]->FAKE0000002", tnt.get(3).toString());
 		
-		assertEquals("10090:Smn1±292±Homologene±9606:SMN1±HOMOLOG", tnt.get(1).toCsv());
-		assertEquals("10090:Smn1±292±Homologene±9606:SMN2±HOMOLOG", tnt.get(3).toCsv());
+		assertEquals("FAKE0000000±292±Homologene±FAKE0000001±HOMOLOG", tnt.get(1).toCsv());
+		assertEquals("FAKE0000000±292±Homologene±FAKE0000002±HOMOLOG", tnt.get(3).toCsv());
 	}
 	
 	@Test
@@ -181,20 +188,24 @@ public class HomologGeneReaderTest extends AbstractDataFileTest {
 		
 		Function<HomologGene,Stream<Entity>> connector = reader.getDefaultConnector();
 		
+		geneIndex = 0;
+		Supplier<String> s = ()->"FAKE000000"+(geneIndex++);
+
 		List<Entity> tnt = reader.stream()
 									.limit(1000)
 									.filter(h->h.getHid()==660L)
+									.map(h->h.setGeneId(s.get()))
 									.flatMap(h->connector.apply(h))
 									.collect(Collectors.toList());
 		assertEquals(7, tnt.size());
-		assertEquals("10090:Gstp1-[HOMOLOG]->9606:GSTP1", tnt.get(3).toString());
-		assertEquals("10090:Gstp2-[HOMOLOG]->9606:GSTP1", tnt.get(4).toString());
-		assertEquals("10090:Gstp-ps-[HOMOLOG]->9606:GSTP1", tnt.get(5).toString());
+		assertEquals("FAKE0000000-[HOMOLOG]->FAKE0000003", tnt.get(3).toString());
+		assertEquals("FAKE0000001-[HOMOLOG]->FAKE0000003", tnt.get(4).toString());
+		assertEquals("FAKE0000002-[HOMOLOG]->FAKE0000003", tnt.get(5).toString());
 		
 		// Providing delimiter is set to ±
-		assertEquals("10090:Gstp1±660±Homologene±9606:GSTP1±HOMOLOG", tnt.get(3).toCsv());
-		assertEquals("10090:Gstp2±660±Homologene±9606:GSTP1±HOMOLOG", tnt.get(4).toCsv());
-		assertEquals("10090:Gstp-ps±660±Homologene±9606:GSTP1±HOMOLOG", tnt.get(5).toCsv());
+		assertEquals("FAKE0000000±660±Homologene±FAKE0000003±HOMOLOG", tnt.get(3).toCsv());
+		assertEquals("FAKE0000001±660±Homologene±FAKE0000003±HOMOLOG", tnt.get(4).toCsv());
+		assertEquals("FAKE0000002±660±Homologene±FAKE0000003±HOMOLOG", tnt.get(5).toCsv());
 	}
 	
 	
@@ -205,21 +216,25 @@ public class HomologGeneReaderTest extends AbstractDataFileTest {
 		
 		Function<HomologGene,Stream<Entity>> connector = reader.getDefaultConnector();
 		
+		geneIndex = 0;
+		Supplier<String> s = ()->"FAKE000000"+(geneIndex++);
+
 		List<Entity> tnt = reader.stream()
 									.limit(1000)
 									.filter(h->h.getHid()==660L)
+									.map(h->h.setGeneId(s.get()))
 									.flatMap(h->connector.apply(h))
 									.filter(h->h instanceof Homolog)
 									.collect(Collectors.toList());
 		assertEquals(3, tnt.size());
-		assertEquals("10090:Gstp1-[HOMOLOG]->9606:GSTP1", tnt.get(0).toString());
-		assertEquals("10090:Gstp2-[HOMOLOG]->9606:GSTP1", tnt.get(1).toString());
-		assertEquals("10090:Gstp-ps-[HOMOLOG]->9606:GSTP1", tnt.get(2).toString());
+		assertEquals("FAKE0000000-[HOMOLOG]->FAKE0000003", tnt.get(0).toString());
+		assertEquals("FAKE0000001-[HOMOLOG]->FAKE0000003", tnt.get(1).toString());
+		assertEquals("FAKE0000002-[HOMOLOG]->FAKE0000003", tnt.get(2).toString());
 		
 		// Providing delimiter is set to ±
-		assertEquals("10090:Gstp1±660±Homologene±9606:GSTP1±HOMOLOG", tnt.get(0).toCsv());
-		assertEquals("10090:Gstp2±660±Homologene±9606:GSTP1±HOMOLOG", tnt.get(1).toCsv());
-		assertEquals("10090:Gstp-ps±660±Homologene±9606:GSTP1±HOMOLOG", tnt.get(2).toCsv());
+		assertEquals("FAKE0000000±660±Homologene±FAKE0000003±HOMOLOG", tnt.get(0).toCsv());
+		assertEquals("FAKE0000001±660±Homologene±FAKE0000003±HOMOLOG", tnt.get(1).toCsv());
+		assertEquals("FAKE0000002±660±Homologene±FAKE0000003±HOMOLOG", tnt.get(2).toCsv());
 	}
 
 	private void equals(HomologGene g, Long i, String name, Long l, String gene) {

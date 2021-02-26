@@ -46,13 +46,6 @@ public class Gene extends GeneticEntity {
 	private String geneBiotype;
 	
 	/**
-	 * Of the form $taxon:$geneName
-	 * this is designed to be a key 
-	 */
-	@Index(unique=true)
-	private String geneTaxon;
-	
-	/**
 	 * Gets the header.
 	 *
 	 * @return the header
@@ -63,8 +56,6 @@ public class Gene extends GeneticEntity {
 		buf.append("geneId:ID(Gene-Id)");
 		buf.append(getDelimiter());
 		buf.append("geneName");
-		buf.append(getDelimiter());
-		buf.append("geneTaxon:ID(Gene-Taxon)");
 		buf.append(getDelimiter());
 		buf.append("geneVersion");
 		buf.append(getDelimiter());
@@ -85,8 +76,6 @@ public class Gene extends GeneticEntity {
 		buf.append(getGeneId());
 		buf.append(getDelimiter());
 		buf.append(getGeneName());
-		buf.append(getDelimiter());
-		buf.append(getGeneTaxon());
 		buf.append(getDelimiter());
 		buf.append(getGeneVersion());
 		buf.append(getDelimiter());
@@ -114,7 +103,6 @@ public class Gene extends GeneticEntity {
 	 */
 	public void setGeneName(String gene_name) {
 		this.geneName = gene_name;
-		this.geneTaxon = taxon()+":"+geneName;
 	}
 
 	/**
@@ -184,20 +172,6 @@ public class Gene extends GeneticEntity {
 	 */
 	public void setGeneVersion(String geneVersion) {
 		this.geneVersion = geneVersion;
-	}
-
-	/**
-	 * @return the geneTaxon
-	 */
-	public String getGeneTaxon() {
-		return geneTaxon;
-	}
-
-	/**
-	 * @param geneTaxon the geneTaxon to set
-	 */
-	public void setGeneTaxon(String geneTaxon) {
-		this.geneTaxon = geneTaxon;
 	}
 
 

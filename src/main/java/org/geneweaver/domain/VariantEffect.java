@@ -69,7 +69,7 @@ public class VariantEffect extends AbstractEntity {
 	@Override
 	public String getHeader() {
 		StringBuilder buf = new StringBuilder();
-		buf.append(":START_ID(Variant-Id)");
+		buf.append(":START_ID(Rs-Id)");
 		buf.append(getDelimiter());
 		buf.append("sequenceVariant");
 		buf.append(getDelimiter());
@@ -93,7 +93,7 @@ public class VariantEffect extends AbstractEntity {
 	@Override
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
-		buf.append(variant.getUuid());
+		buf.append(variant.getRsId());
 		buf.append(getDelimiter());
 		buf.append(getSequenceVariant());
 		buf.append(getDelimiter());

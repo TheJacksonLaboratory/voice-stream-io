@@ -48,14 +48,11 @@ public class Homolog extends AbstractEntity {
 	private String source;
 	
 	/** The gene name from. */
-	private String geneNameFrom;
+	private String geneIdFrom;
 	
 	/** The gene name to. */
-	private String geneNameTo;
+	private String geneIdTo;
 	
-	private Long taxonFrom;
-	
-	private Long taxonTo;
 
 	/**
 	 * Instantiates a new ortholog.
@@ -71,12 +68,10 @@ public class Homolog extends AbstractEntity {
 	 * @param from the from
 	 * @param to the to
 	 */
-	public Homolog(Long hid, Long taxonFrom, String from, Long taxonTo, String to) {
+	public Homolog(Long hid, String geneIdFrom, String geneIdTo) {
 		this.hid = hid;
-		this.taxonFrom = taxonFrom;
-		this.geneNameFrom = from;
-		this.taxonTo = taxonTo;
-		this.geneNameTo = to;
+		this.geneIdFrom = geneIdFrom;
+		this.geneIdTo = geneIdTo;
 	}
 
 	/**
@@ -98,14 +93,13 @@ public class Homolog extends AbstractEntity {
 	@Override
 	public String getHeader() {
 		StringBuilder buf = new StringBuilder();
-		// TODO Does not work, gene names not unique
-		buf.append(":START_NAME(Gene-Taxon)");
+		buf.append(":START_NAME(Gene-Id)");
 		buf.append(getDelimiter());
 		buf.append(":homologId");
 		buf.append(getDelimiter());
 		buf.append(":Source");
 		buf.append(getDelimiter());
-		buf.append(":END_NAME(Gene-Taxon)");
+		buf.append(":END_NAME(Gene-Id)");
 		buf.append(getDelimiter());		
 		buf.append(":TYPE");
 		return buf.toString();
@@ -119,30 +113,31 @@ public class Homolog extends AbstractEntity {
 	@Override
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
-		buf.append(getGeneTaxonFrom());
+		buf.append(getGeneIdFrom());
 		buf.append(getDelimiter());
 		buf.append(getHid());
 		buf.append(getDelimiter());
 		buf.append(getSource());
 		buf.append(getDelimiter());
-		buf.append(getGeneTaxonTo());
+		buf.append(getGeneIdTo());
 		buf.append(getDelimiter());
 		buf.append(getClass().getSimpleName().toUpperCase());
 		return buf.toString();
 	}
 
-	protected String getGeneTaxonFrom() {
-		String name = speciesFrom!=null ? speciesFrom.getSymbol() : geneNameFrom;
-		Long taxon = speciesFrom!=null ? speciesFrom.getTaxonId() : taxonFrom;
-		return taxon+":"+name;
+	protected String getGeneIdFrom() {
+		if (geneIdFrom==null && speciesFrom==null) return null;
+		String id = geneIdFrom!=null ? geneIdFrom : speciesFrom.getGeneId();
+		if (id==null) throw new IllegalArgumentException("The geneid must not be null!");
+		return id;
 	}
 	
-	protected String getGeneTaxonTo() {
-		String name = speciesTo!=null ? speciesTo.getSymbol() : geneNameTo;
-		Long taxon = speciesTo!=null ? speciesTo.getTaxonId() : taxonTo;
-		return taxon+":"+name;
+	protected String getGeneIdTo() {
+		if (geneIdTo==null && speciesTo==null) return null;
+		String id =  geneIdTo!=null ? geneIdTo : speciesTo.getGeneId();
+		if (id==null) throw new IllegalArgumentException("The geneid must not be null!");
+		return id;
 	}
-
 
 	/**
 	 * Gets the species from.
@@ -180,29 +175,6 @@ public class Homolog extends AbstractEntity {
 		this.speciesTo = speciesTo;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result
-				+ Objects.hash(geneNameFrom, geneNameTo, hid, source, speciesFrom, speciesTo, taxonFrom, taxonTo);
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (!(obj instanceof Homolog))
-			return false;
-		Homolog other = (Homolog) obj;
-		return Objects.equals(geneNameFrom, other.geneNameFrom) && Objects.equals(geneNameTo, other.geneNameTo)
-				&& Objects.equals(hid, other.hid) && Objects.equals(source, other.source)
-				&& Objects.equals(speciesFrom, other.speciesFrom) && Objects.equals(speciesTo, other.speciesTo)
-				&& Objects.equals(taxonFrom, other.taxonFrom) && Objects.equals(taxonTo, other.taxonTo);
-	}
 	
 	/**
 	 * To string.
@@ -211,7 +183,7 @@ public class Homolog extends AbstractEntity {
 	 */
 	@Override
 	public String toString() {
-		return getGeneTaxonFrom()+"-["+getClass().getSimpleName().toUpperCase()+"]->"+getGeneTaxonTo();
+		return getGeneIdFrom()+"-["+getClass().getSimpleName().toUpperCase()+"]->"+getGeneIdTo();
 	}
 
 	/**
@@ -240,6 +212,28 @@ public class Homolog extends AbstractEntity {
 	 */
 	public void setHid(Long hid) {
 		this.hid = hid;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(geneIdFrom, geneIdTo, hid, source, speciesFrom, speciesTo);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (!(obj instanceof Homolog))
+			return false;
+		Homolog other = (Homolog) obj;
+		return Objects.equals(geneIdFrom, other.geneIdFrom) && Objects.equals(geneIdTo, other.geneIdTo)
+				&& Objects.equals(hid, other.hid) && Objects.equals(source, other.source)
+				&& Objects.equals(speciesFrom, other.speciesFrom) && Objects.equals(speciesTo, other.speciesTo);
 	}
 
 
