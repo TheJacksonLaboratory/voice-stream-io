@@ -93,13 +93,13 @@ public class Homolog extends AbstractEntity {
 	@Override
 	public String getHeader() {
 		StringBuilder buf = new StringBuilder();
-		buf.append(":START_NAME(Gene-Id)");
+		buf.append(":START_ID(Gene-Id)");
 		buf.append(getDelimiter());
-		buf.append(":homologId");
+		buf.append("homologId");
 		buf.append(getDelimiter());
-		buf.append(":Source");
+		buf.append("source");
 		buf.append(getDelimiter());
-		buf.append(":END_NAME(Gene-Id)");
+		buf.append(":END_ID(Gene-Id)");
 		buf.append(getDelimiter());		
 		buf.append(":TYPE");
 		return buf.toString();

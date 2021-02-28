@@ -115,7 +115,7 @@ public class EQTL extends AbstractEntity {
 		buf.append(getDelimiter());
 		buf.append("altSeq");
 		buf.append(getDelimiter());
-		buf.append("double:slope");
+		buf.append("slope:double");
 		buf.append(getDelimiter());
 		buf.append("tissueFileName");
 		buf.append(getDelimiter());
