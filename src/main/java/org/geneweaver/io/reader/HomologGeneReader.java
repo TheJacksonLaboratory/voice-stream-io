@@ -105,6 +105,7 @@ class HomologGeneReader<T extends Entity> extends LineIteratorReader<T> {
 	protected T create(String line) throws ReaderException {
 		
 		if (line.startsWith("HomoloGene ID")) return null;
+		if (line.startsWith("DB Class Key")) return null;
 		
 		String[] rec = line.split(getDelimiter());
 		HomologGene gene = new HomologGene();
