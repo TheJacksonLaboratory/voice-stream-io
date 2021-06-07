@@ -62,6 +62,9 @@ public class ReaderFactory {
 		// if it is applicable for a given format and reader request.
 		tmp.put("rpt", 			HomologGeneReader.class);
 		
+		// This one is for the jax csv files which are parsed out of mouse eQTL data.
+		tmp.put("csv", 			JaxEQTLReader.class);
+		
 		// @see https://storage.googleapis.com/gtex_analysis_v8/single_tissue_qtl_data/README_eQTL_v8.txt
 		tmp.put("^.+\\.egenes\\.txt(\\.gz)?$", 						GTExEQTLReader.class);
 		tmp.put("^.+\\.sgenes\\.txt(\\.gz)?$", 						GTExEQTLReader.class);

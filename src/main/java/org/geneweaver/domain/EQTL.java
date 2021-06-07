@@ -18,13 +18,11 @@
  */
 package org.geneweaver.domain;
 
-import java.util.Objects;
+import java.util.Date;
 
 import javax.annotation.processing.Generated;
 
 import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
@@ -49,6 +47,9 @@ public class EQTL extends AbstractEntity {
 	
     /** The chr. */
     private String chr;
+    
+    private String marker;
+    private String strain;
 
 	@StartNode
 	private Variant variantFrom;
@@ -69,6 +70,7 @@ public class EQTL extends AbstractEntity {
 	private String version;
 	private String uberon;
 	private String source; // e.g. GTEx
+	private Date date;
 
 	@EndNode
 	private Gene geneTo;
@@ -78,7 +80,6 @@ public class EQTL extends AbstractEntity {
 
 	// Just used to map rsId using EQTLFunction.
 	private String eqtlVariantId;
-	
 
 	/**
 	 * Instantiates a new ortholog.
@@ -224,8 +225,27 @@ public class EQTL extends AbstractEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(altSeq, chr, eqtlVariantId, fullGeneId, geneId, geneTo, refSeq, rsId,
-				slope, source, tissueFileName, tissueGroup, tissueName, uberon, variantFrom, version);
+		result = prime * result + ((altSeq == null) ? 0 : altSeq.hashCode());
+		result = prime * result + ((chr == null) ? 0 : chr.hashCode());
+		result = prime * result + ((date == null) ? 0 : date.hashCode());
+		result = prime * result + ((eqtlVariantId == null) ? 0 : eqtlVariantId.hashCode());
+		result = prime * result + ((fullGeneId == null) ? 0 : fullGeneId.hashCode());
+		result = prime * result + ((geneId == null) ? 0 : geneId.hashCode());
+		result = prime * result + ((geneTo == null) ? 0 : geneTo.hashCode());
+		result = prime * result + ((marker == null) ? 0 : marker.hashCode());
+		result = prime * result + ((refSeq == null) ? 0 : refSeq.hashCode());
+		result = prime * result + ((rsId == null) ? 0 : rsId.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(slope);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((source == null) ? 0 : source.hashCode());
+		result = prime * result + ((strain == null) ? 0 : strain.hashCode());
+		result = prime * result + ((tissueFileName == null) ? 0 : tissueFileName.hashCode());
+		result = prime * result + ((tissueGroup == null) ? 0 : tissueGroup.hashCode());
+		result = prime * result + ((tissueName == null) ? 0 : tissueName.hashCode());
+		result = prime * result + ((uberon == null) ? 0 : uberon.hashCode());
+		result = prime * result + ((variantFrom == null) ? 0 : variantFrom.hashCode());
+		result = prime * result + ((version == null) ? 0 : version.hashCode());
 		return result;
 	}
 
@@ -235,19 +255,102 @@ public class EQTL extends AbstractEntity {
 			return true;
 		if (!super.equals(obj))
 			return false;
-		if (!(obj instanceof EQTL))
+		if (getClass() != obj.getClass())
 			return false;
 		EQTL other = (EQTL) obj;
-		return Objects.equals(altSeq, other.altSeq) && Objects.equals(chr, other.chr)
-				&& Objects.equals(eqtlVariantId, other.eqtlVariantId) && Objects.equals(fullGeneId, other.fullGeneId)
-				&& Objects.equals(geneId, other.geneId) && Objects.equals(geneTo, other.geneTo)
-				&& Objects.equals(refSeq, other.refSeq) && Objects.equals(rsId, other.rsId)
-				&& Double.doubleToLongBits(slope) == Double.doubleToLongBits(other.slope)
-				&& Objects.equals(source, other.source) && Objects.equals(tissueFileName, other.tissueFileName)
-				&& Objects.equals(tissueGroup, other.tissueGroup)
-				&& Objects.equals(tissueName, other.tissueName)
-				&& Objects.equals(uberon, other.uberon) && Objects.equals(variantFrom, other.variantFrom)
-				&& Objects.equals(version, other.version);
+		if (altSeq == null) {
+			if (other.altSeq != null)
+				return false;
+		} else if (!altSeq.equals(other.altSeq))
+			return false;
+		if (chr == null) {
+			if (other.chr != null)
+				return false;
+		} else if (!chr.equals(other.chr))
+			return false;
+		if (date == null) {
+			if (other.date != null)
+				return false;
+		} else if (!date.equals(other.date))
+			return false;
+		if (eqtlVariantId == null) {
+			if (other.eqtlVariantId != null)
+				return false;
+		} else if (!eqtlVariantId.equals(other.eqtlVariantId))
+			return false;
+		if (fullGeneId == null) {
+			if (other.fullGeneId != null)
+				return false;
+		} else if (!fullGeneId.equals(other.fullGeneId))
+			return false;
+		if (geneId == null) {
+			if (other.geneId != null)
+				return false;
+		} else if (!geneId.equals(other.geneId))
+			return false;
+		if (geneTo == null) {
+			if (other.geneTo != null)
+				return false;
+		} else if (!geneTo.equals(other.geneTo))
+			return false;
+		if (marker == null) {
+			if (other.marker != null)
+				return false;
+		} else if (!marker.equals(other.marker))
+			return false;
+		if (refSeq == null) {
+			if (other.refSeq != null)
+				return false;
+		} else if (!refSeq.equals(other.refSeq))
+			return false;
+		if (rsId == null) {
+			if (other.rsId != null)
+				return false;
+		} else if (!rsId.equals(other.rsId))
+			return false;
+		if (Double.doubleToLongBits(slope) != Double.doubleToLongBits(other.slope))
+			return false;
+		if (source == null) {
+			if (other.source != null)
+				return false;
+		} else if (!source.equals(other.source))
+			return false;
+		if (strain == null) {
+			if (other.strain != null)
+				return false;
+		} else if (!strain.equals(other.strain))
+			return false;
+		if (tissueFileName == null) {
+			if (other.tissueFileName != null)
+				return false;
+		} else if (!tissueFileName.equals(other.tissueFileName))
+			return false;
+		if (tissueGroup == null) {
+			if (other.tissueGroup != null)
+				return false;
+		} else if (!tissueGroup.equals(other.tissueGroup))
+			return false;
+		if (tissueName == null) {
+			if (other.tissueName != null)
+				return false;
+		} else if (!tissueName.equals(other.tissueName))
+			return false;
+		if (uberon == null) {
+			if (other.uberon != null)
+				return false;
+		} else if (!uberon.equals(other.uberon))
+			return false;
+		if (variantFrom == null) {
+			if (other.variantFrom != null)
+				return false;
+		} else if (!variantFrom.equals(other.variantFrom))
+			return false;
+		if (version == null) {
+			if (other.version != null)
+				return false;
+		} else if (!version.equals(other.version))
+			return false;
+		return true;
 	}
 
 	/**
@@ -430,6 +533,30 @@ public class EQTL extends AbstractEntity {
 	 */
 	public void setTissueName(String tissueSecondaryGroup) {
 		this.tissueName = tissueSecondaryGroup;
+	}
+
+	public String getMarker() {
+		return marker;
+	}
+
+	public void setMarker(String marker) {
+		this.marker = marker;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+	public String getStrain() {
+		return strain;
+	}
+
+	public void setStrain(String strain) {
+		this.strain = strain;
 	}
 
 
