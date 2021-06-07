@@ -47,6 +47,7 @@ public class ReaderFactory {
 		// These guys are fairly standard I think.
 		tmp.put("gtf", 			GeneReader.class);
 		tmp.put("gvf", 			VariantReader.class);
+		tmp.put("vcf", 			FastVCFReader.class);
 		tmp.put("bed", 			BedReader.class);
 		
 		// If there are multiple xls formats, we will have to ask 

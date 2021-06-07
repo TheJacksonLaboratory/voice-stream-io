@@ -78,6 +78,16 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	 * delimiter used to split strings. By default any whitespace.
 	 */
 	private String delimiter = System.getProperty("org.geneweaver.io.delimiter", "\\s+");
+	
+	/**
+	 * Comment character
+	 */
+	private String comment = "#";
+	
+	/**
+	 * Header lines, if any
+	 */
+	protected List<String> header;
 
 	/**
 	 * Instantiates a new abstract reader.
@@ -118,6 +128,8 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	 * @return the stream
 	 */
 	public Stream<T> stream() {
+		
+		header = null;
 		if (isEmpty() && isDataSource()) {
 			try {
 				this.iterator = StreamUtil.createStream(request.getFile(), request.isCloseInputStream());
@@ -246,13 +258,22 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 
 			line = iterator.next();
 			if (line==null) return line;
+			
+			// For speed reasons, we only support
+			// comment characters at the start of a trimmed line.
+			// We do not look for them in the body of a line.
 			line = line.trim();
-			if (!line.startsWith("#")) ++count;
-			while((line.isEmpty() || line.startsWith("#")) && iterator.hasNext()) {
+			if (!line.startsWith(comment)) ++count;
+			while((line.isEmpty() || line.startsWith(comment)) && iterator.hasNext()) {
+				
+				if (line.startsWith(comment)) {
+					addHeader(line);
+				}
+				
 				line = iterator.next();
 				if (line==null) return line;
 				line = line.trim();
-				if (! line.startsWith("#")) ++count;
+				if (! line.startsWith(comment)) ++count;
 			}
 			if (line.isEmpty())  line = null;
 			return line;
@@ -274,6 +295,11 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	 		}
 		}
 
+	}
+
+	protected void addHeader(String line) {
+		if (header==null) header = new LinkedList<>();
+		header.add(line);
 	}
 
 	/**
@@ -578,6 +604,14 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	 */
 	public boolean isDataSource() {
 		return request.isFileRequest();
+	}
+
+	protected String getComment() {
+		return comment;
+	}
+
+	protected void setComment(String comment) {
+		this.comment = comment;
 	}
 
 }

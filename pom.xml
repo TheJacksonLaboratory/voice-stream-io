@@ -130,6 +130,15 @@
 			<artifactId>h2</artifactId>
 			<version>1.4.200</version>
 		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/com.github.samtools/htsjdk -->
+		<!-- Contains readers which work with streams
+		<dependency>
+		    <groupId>com.github.samtools</groupId>
+		    <artifactId>htsjdk</artifactId>
+		    <version>2.24.1</version>
+		</dependency>
+		 -->
 
 		<!-- https://mvnrepository.com/artifact/uk.co.jemos.podam/podam -->
 		<dependency>
