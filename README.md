@@ -118,9 +118,10 @@ implementation group: 'org.geneweaver', name: 'gweaver-stream-io', version: '1.3
 
 ## Developing
 This is a pure maven project. Please check out using git and then use common maven commands such as:
-* mvn verify							# Run tests
-* mvn package -DskipTests=true		# Make jars, no tests
-* mvn deploy							# Set artifacts to repository for other projects to use.
+* mvn verify										# Run tests
+* mvn package -DskipTests=true					# Make jars, no tests
+* mvn deploy										# Set artifacts to repository for other projects to use.
+* mvn clean release:prepare release:perform  	# FULL RELEASE. optional:  -DskipTests=true -Djacoco.skip=true
 If you are deploying a new version, do not forget to change the version number which the jar is using.
 
 If you are planning on running the tests you will need to clone the large test data repository:
