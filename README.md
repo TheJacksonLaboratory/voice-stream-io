@@ -107,13 +107,13 @@ This artifact is indexed on Maven Central:
 <dependency>
     <groupId>org.geneweaver</groupId>
     <artifactId>gweaver-stream-io</artifactId>
-    <version>1.1.1</version>
+    <version>1.3.0</version>
 </dependency>
 ```
 
 ``` groovy
 // https://mvnrepository.com/artifact/org.geneweaver/gweaver-stream-io
-implementation group: 'org.geneweaver', name: 'gweaver-stream-io', version: '1.1.1'
+implementation group: 'org.geneweaver', name: 'gweaver-stream-io', version: '1.3.0'
 ```
 
 ## Developing
