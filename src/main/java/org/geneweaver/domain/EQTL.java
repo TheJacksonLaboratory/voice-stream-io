@@ -70,7 +70,6 @@ public class EQTL extends AbstractEntity {
 	private String version;
 	private String uberon;
 	private String source; // e.g. GTEx
-	private Date date;
 
 	@EndNode
 	private Gene geneTo;
@@ -239,7 +238,6 @@ public class EQTL extends AbstractEntity {
 		int result = super.hashCode();
 		result = prime * result + ((altSeq == null) ? 0 : altSeq.hashCode());
 		result = prime * result + ((chr == null) ? 0 : chr.hashCode());
-		result = prime * result + ((date == null) ? 0 : date.hashCode());
 		result = prime * result + ((eqtlVariantId == null) ? 0 : eqtlVariantId.hashCode());
 		result = prime * result + ((fullGeneId == null) ? 0 : fullGeneId.hashCode());
 		result = prime * result + ((geneId == null) ? 0 : geneId.hashCode());
@@ -279,11 +277,6 @@ public class EQTL extends AbstractEntity {
 			if (other.chr != null)
 				return false;
 		} else if (!chr.equals(other.chr))
-			return false;
-		if (date == null) {
-			if (other.date != null)
-				return false;
-		} else if (!date.equals(other.date))
 			return false;
 		if (eqtlVariantId == null) {
 			if (other.eqtlVariantId != null)
@@ -553,14 +546,6 @@ public class EQTL extends AbstractEntity {
 
 	public void setMarker(String marker) {
 		this.marker = marker;
-	}
-
-	public Date getDate() {
-		return date;
-	}
-
-	public void setDate(Date date) {
-		this.date = date;
 	}
 
 	public String getStrain() {

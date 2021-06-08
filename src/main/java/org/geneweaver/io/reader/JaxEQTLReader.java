@@ -138,6 +138,7 @@ public class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 				} catch (ParseException e) {
 					throw new ReaderException("Cannot parse date: "+value);
 				}
+				continue;// We do not repeat date
 			}
 			headerValues.put(name, value);
 		}
