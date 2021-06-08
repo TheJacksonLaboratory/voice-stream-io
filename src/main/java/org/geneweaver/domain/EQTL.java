@@ -112,6 +112,8 @@ public class EQTL extends AbstractEntity {
 		buf.append(":START_ID(Rs-Id)");
 		
 		buf.append(getDelimiter());
+		buf.append("chr");
+		buf.append(getDelimiter());
 		buf.append("refSeq");
 		buf.append(getDelimiter());
 		buf.append("altSeq");
@@ -132,6 +134,10 @@ public class EQTL extends AbstractEntity {
 		buf.append(getDelimiter());
 		buf.append("fullGeneId");
 		buf.append(getDelimiter());
+		buf.append("marker");
+		buf.append(getDelimiter());
+		buf.append("strain");
+		buf.append(getDelimiter());
 		
 		buf.append(":END_ID(Gene-Id)");
 		buf.append(getDelimiter());
@@ -149,6 +155,8 @@ public class EQTL extends AbstractEntity {
 		StringBuilder buf = new StringBuilder();
 		buf.append(getRsId());
 		
+		buf.append(getDelimiter());
+		buf.append(getChr());
 		buf.append(getDelimiter());
 		buf.append(getRefSeq());
 		buf.append(getDelimiter());
@@ -169,6 +177,10 @@ public class EQTL extends AbstractEntity {
 		buf.append(getSource());
 		buf.append(getDelimiter());
 		buf.append(getFullGeneId());
+		buf.append(getDelimiter());
+		buf.append(getMarker());
+		buf.append(getDelimiter());
+		buf.append(getStrain());
 		buf.append(getDelimiter());
 		
 		buf.append(getGeneId());
