@@ -121,11 +121,38 @@ This is a pure maven project. Please check out using git and then use common mav
 * mvn verify										# Run tests
 * mvn package -DskipTests=true					# Make jars, no tests
 * mvn deploy										# Set artifacts to repository for other projects to use.
-* mvn clean release:prepare release:perform  	# FULL RELEASE. optional:  -DskipTests=true -Djacoco.skip=true
+* <b>mvn clean release:prepare release:perform</b>  	# FULL RELEASE. optional:  ` -DskipTests=true -Djacoco.skip=true ` Password is same as used in settings.xml.
 If you are deploying a new version, do not forget to change the version number which the jar is using.
+
 
 If you are planning on running the tests you will need to clone the large test data repository:
 
 ```
 git clone https://bitbucket.org/geneweaver/gweaver-test-data.git
+```
+
+## Additional Features
+An additional feature of this library is that it can transform json from neo4j into csv using streams. With Neo4j and when using the curl command we can extract query information from Neo4j as json. For example the shell script:
+
+
+``` bash
+#!/bin/bash
+
+CYPHER='{"statements":[{"statement":"MATCH (v:Variant{species:\"Mus musculus\", chr:\"chr1\"}) RETURN v.rsId,v.start,v.chr;"}]}'
+
+SERVER_NAME='10.105.16.38'
+USER='your user'
+PASSWORD='your password'
+
+curl -H accept:application/json \
+     -H content-type:application/json \
+     -d "$CYPHER" \
+     http://$USER:$PASSWORD@$SERVER_NAME:7474/db/data/transaction/commit > tmp/mouse_variants_chr1.json
+```
+
+Will extract v.rsId,v.start and v.chr to a table encoded in json. In order to table this table in csv we would use the following command:
+
+``` bash
+# You can do java -jar gweaver-stream-io-1.3.1-SNAPSHOT-jar-with-dependencies.jar -help (there is not a proper CLI just an argument list)
+java -jar gweaver-stream-io-1.3.1-SNAPSHOT-jar-with-dependencies.jar tmp/mouse_variants_chr1.json tmp/mouse_variants_chr1.csv
 ```

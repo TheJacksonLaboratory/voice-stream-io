@@ -60,7 +60,7 @@ public class HomologGeneReaderTest extends AbstractDataFileTest {
 	public void checkUrl() throws Exception {
 		
 		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest(new URL("http://www.informatics.jax.org/downloads/reports/HOM_MouseHumanSequence.rpt")));
-		assertEquals(43134, reader.stream().count());
+		assertEquals(43118, reader.stream().count());
 	}
 
 	
@@ -68,7 +68,7 @@ public class HomologGeneReaderTest extends AbstractDataFileTest {
 	public void checkUrlAsPath() throws Exception {
 		
 		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Test", Paths.get("http://www.informatics.jax.org/downloads/reports/HOM_MouseHumanSequence.rpt")));
-		assertEquals(43134, reader.stream().count());
+		assertEquals(43118, reader.stream().count());
 	}
 
 	@Test
