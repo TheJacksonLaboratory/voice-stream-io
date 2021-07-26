@@ -245,6 +245,7 @@ public class HomologFunction<N extends HomologGene, E extends HomologGene> imple
 				stmt.execute();
 			}
 		} catch (Exception ne) {
+			ne.printStackTrace();
 			throw new RuntimeException(ne);
 		}
 	}
