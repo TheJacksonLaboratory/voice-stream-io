@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Gene;
 import org.geneweaver.domain.GeneticEntity;
 import org.geneweaver.domain.HomologGene;
@@ -219,7 +220,7 @@ public class HomologFunction<N extends HomologGene, E extends HomologGene> imple
 			for (Integer taxon : source.keySet()) {
 
 				File file = source.get(taxon);
-				StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest(String.valueOf(taxon), file));
+				StreamReader<Entity> reader = ReaderFactory.getReader(new ReaderRequest(String.valueOf(taxon), file));
 				reader.stream()
 					  .filter(g->g instanceof Gene)
 					  .forEach(ge -> storeGene(ge, stmt, taxon));
@@ -227,16 +228,16 @@ public class HomologFunction<N extends HomologGene, E extends HomologGene> imple
 		}
 	}
 
-	private void storeGene(GeneticEntity ge, PreparedStatement stmt, int taxon) {
+	private void storeGene(Entity ge, PreparedStatement stmt, int taxon) {
 		try {
 			Gene gene = (Gene)ge;
 			
 			// Put the key in, lower case.
+			if (gene.getGeneName()==null) return; // We canot mapp unnamed genes.
 			String lcName = gene.getGeneName().toLowerCase();
 			stmt.setString(1, taxon+":"+lcName);						
 			stmt.setString(2, gene.getGeneId());
 			stmt.execute();
-			
 			
 			if (lcName.contains(".")) {
 				String notDot = lcName.substring(0, lcName.lastIndexOf('.'));					
