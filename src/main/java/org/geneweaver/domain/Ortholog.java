@@ -28,6 +28,8 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * The Class Ortholog.
  * 
@@ -268,6 +270,22 @@ public class Ortholog extends AbstractEntity {
 	 */
 	public void setHgnc(Integer hgnc) {
 		this.hgnc = hgnc;
+	}
+
+	/**
+	 * @return the geneIdFrom
+	 */
+	@JsonIgnore
+	public String getGeneIdFrom() {
+		return geneIdFrom;
+	}
+
+	/**
+	 * @return the geneIdTo
+	 */
+	@JsonIgnore
+	public String getGeneIdTo() {
+		return geneIdTo;
 	}
 
 }
