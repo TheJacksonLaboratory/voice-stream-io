@@ -23,7 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -39,10 +39,10 @@ import org.geneweaver.domain.Entity;
 public class ReaderFactory {
 
 	/** The Constant classes. */
-	private static final Map<String, Class> classes;
+	private static final Map<Object, Class> classes;
 	static {
 		@SuppressWarnings("rawtypes")
-		Map<String, Class> tmp = new HashMap<>();
+		Map<Object, Class> tmp = new LinkedHashMap<>();
 		
 		// These guys are fairly standard I think.
 		tmp.put("gtf", 			GeneReader.class);
@@ -63,19 +63,20 @@ public class ReaderFactory {
 		tmp.put("rpt", 			HomologGeneReader.class);
 		
 		// This one is for the jax csv files which are parsed out of mouse eQTL data.
-		tmp.put("csv", 			JaxEQTLReader.class);
+		tmp.put(Pattern.compile("^.+\\_balyor\\.csv(\\.gz)?$"), 			OrthologBaylorReader.class);
+		tmp.put("csv", 									JaxEQTLReader.class);
 		
 		// @see https://storage.googleapis.com/gtex_analysis_v8/single_tissue_qtl_data/README_eQTL_v8.txt
-		tmp.put("^.+\\.egenes\\.txt(\\.gz)?$", 						GTExEQTLReader.class);
-		tmp.put("^.+\\.sgenes\\.txt(\\.gz)?$", 						GTExEQTLReader.class);
-		tmp.put("^.+\\.signif_variant_gene_pairs\\.txt(\\.gz)?$",	GTExEQTLReader.class);
-		tmp.put("^.+\\.sqtl_signifpairs\\.txt(\\.gz)?$", 			GTExEQTLReader.class);
-		tmp.put("^.+\\.allpairs\\.txt(\\.gz)?$", 					GTExEQTLReader.class);
-		tmp.put("^.+\\.sqtl_allpairs\\.txt(\\.gz)?$",				GTExEQTLReader.class);
+		tmp.put(Pattern.compile("^.+\\.egenes\\.txt(\\.gz)?$"), 						GTExEQTLReader.class);
+		tmp.put(Pattern.compile("^.+\\.sgenes\\.txt(\\.gz)?$"), 						GTExEQTLReader.class);
+		tmp.put(Pattern.compile("^.+\\.signif_variant_gene_pairs\\.txt(\\.gz)?$"),	GTExEQTLReader.class);
+		tmp.put(Pattern.compile("^.+\\.sqtl_signifpairs\\.txt(\\.gz)?$"), 			GTExEQTLReader.class);
+		tmp.put(Pattern.compile("^.+\\.allpairs\\.txt(\\.gz)?$"), 					GTExEQTLReader.class);
+		tmp.put(Pattern.compile("^.+\\.sqtl_allpairs\\.txt(\\.gz)?$"),				GTExEQTLReader.class);
 		// This is read directly into a database in EQTLFunction
 		//tmp.put("^.+\\.lookup_table\\.txt(\\.gz)?$",				GTExEQTLReader.class);
 		
-		tmp.put("^GTEx.+Annotations.+Sample.+.txt(\\.gz)?$",		GTExSampleReader.class);
+		tmp.put(Pattern.compile("^GTEx.+Annotations.+Sample.+.txt(\\.gz)?$"),		GTExSampleReader.class);
 
 		// Archive Reader just calls back this reader with each entry
 		tmp.put("tar", 			ArchiveReader.class);
@@ -83,14 +84,6 @@ public class ReaderFactory {
 
 		
 		classes = Collections.unmodifiableMap(tmp);
-	}
-	
-	/**
-	 * A list of supported file extensions.
-	 * @return
-	 */
-	public static Collection<String> extensions() {
-		return classes.keySet();
 	}
 	
 	/**
@@ -152,26 +145,29 @@ public class ReaderFactory {
 	@SuppressWarnings("unchecked")
 	private static  <R extends StreamReader<T>, T extends Entity> Class<R> getClassByName(String name) throws ReaderException{
 		
-		String ext = FilenameUtils.getExtension(name);
-		if (ext==null) throw new ReaderException(name+" does not have an extension!");
-		ext = ext.toLowerCase();
-		if (classes.containsKey(ext)) {
-			return (Class<R>)classes.get(ext);
-		}
-		if ("gz".equals(ext)) {
-			ext = FilenameUtils.getExtension(name.substring(0, name.length()-3));
-			if (classes.containsKey(ext)) {
-				return (Class<R>)classes.get(ext);
+		// Unfortunately we have to loop here because files with the 
+		// same extension can have different readers, e.g. txt, csv.
+		for (Object key : classes.keySet()) {
+			
+			if (key instanceof Pattern) {
+				Pattern pattern = (Pattern)key;
+				if (pattern.matcher(name).matches()) {
+					return (Class<R>)classes.get(key);
+				}
+			} else if (key instanceof String) {
+				String ext = FilenameUtils.getExtension(name);
+				if ("gz".equals(ext)) {
+					ext = FilenameUtils.getExtension(name.substring(0, name.length()-3));
+				}
+				
+				if (ext==null) throw new ReaderException(name+" does not have an extension!");
+				ext = ext.toLowerCase();
+				if (key.toString().toLowerCase().equals(ext)) {
+					return (Class<R>)classes.get(ext);
+				}
 			}
 		}
-		
-		// Try matching the name with the keys
-		for (String key : classes.keySet()) {
-			if (Pattern.compile(key).matcher(name).matches()) {
-				return (Class<R>)classes.get(key);
-			}
-		}
-		
+
 		return null;
 	}
 
