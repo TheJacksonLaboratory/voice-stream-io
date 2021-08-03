@@ -20,9 +20,11 @@ package org.geneweaver.io;
 
 
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -47,7 +49,7 @@ public class DirectSave {
 	 * @param timer
 	 * @return
 	 */
-	public static Entity save(Entity e, Map<Class<? extends Entity>, BufferedWriter> writers, Path dir, Timer timer) {
+	public static Entity save(Entity e, Map<Class<? extends Entity>, BufferedWriter> writers, Path dir, Timer timer, boolean append) {
 		
 		try {
 			if (!writers.containsKey(e.getClass())) {
@@ -57,7 +59,7 @@ public class DirectSave {
 				header.close();
 	
 				Path pbody = dir.resolve(e.getClass().getSimpleName()+".csv.gz");
-				BufferedWriter body = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(pbody.toFile()))));
+				BufferedWriter body = createWriter(pbody, append);
 				writers.put(e.getClass(), body);
 			}
 	
@@ -71,6 +73,21 @@ public class DirectSave {
 		}
 
 		return e;
+	}
+	
+	/**
+	 * Create a GZip writer for use with writing bulk import files for neo4j,
+	 * or in fact any gzip file.
+	 * 
+	 * @param pbody
+	 * @param append
+	 * @return
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public static BufferedWriter createWriter(Path pbody, boolean append) throws FileNotFoundException, IOException {
+		BufferedWriter body = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(pbody.toFile(), append))));
+		return body;
 	}
 
 }
