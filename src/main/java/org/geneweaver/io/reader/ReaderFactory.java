@@ -21,10 +21,10 @@ package org.geneweaver.io.reader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
@@ -63,12 +63,16 @@ public class ReaderFactory {
 		tmp.put("rpt", 			HomologGeneReader.class);
 		
 		// This one is for the jax csv files which are parsed out of mouse eQTL data.
-		tmp.put(Pattern.compile("^.+\\_balyor\\.csv(\\.gz)?$"), 			OrthologBaylorReader.class);
-		tmp.put("csv", 									JaxEQTLReader.class);
+		tmp.put(Pattern.compile("^.+\\_balyor\\.csv(\\.gz)?$"), 	OrthologBaylorReader.class);
+		tmp.put("csv", 												JaxEQTLReader.class);
+		
+		// These eQTLs are from this paper: https://www.biorxiv.org/content/10.1101/655670v1
+		// And these files: https://zenodo.org/record/3408356#.YQljwlNKii6
+		tmp.put(Pattern.compile("^(.+)_.+_eQTLs.txt(\\.gz)?$"),		FlexEQTLReader.class);
 		
 		// @see https://storage.googleapis.com/gtex_analysis_v8/single_tissue_qtl_data/README_eQTL_v8.txt
-		tmp.put(Pattern.compile("^.+\\.egenes\\.txt(\\.gz)?$"), 						GTExEQTLReader.class);
-		tmp.put(Pattern.compile("^.+\\.sgenes\\.txt(\\.gz)?$"), 						GTExEQTLReader.class);
+		tmp.put(Pattern.compile("^.+\\.egenes\\.txt(\\.gz)?$"), 					GTExEQTLReader.class);
+		tmp.put(Pattern.compile("^.+\\.sgenes\\.txt(\\.gz)?$"), 					GTExEQTLReader.class);
 		tmp.put(Pattern.compile("^.+\\.signif_variant_gene_pairs\\.txt(\\.gz)?$"),	GTExEQTLReader.class);
 		tmp.put(Pattern.compile("^.+\\.sqtl_signifpairs\\.txt(\\.gz)?$"), 			GTExEQTLReader.class);
 		tmp.put(Pattern.compile("^.+\\.allpairs\\.txt(\\.gz)?$"), 					GTExEQTLReader.class);
@@ -124,10 +128,9 @@ public class ReaderFactory {
 	private static <R extends StreamReader<T>, T extends Entity> Class<R> getClass(ReaderRequest request) throws ReaderException {
 		
 		// Figure out reader from name. Later we may need more complex logic.
-		String name = request.name();
-		Class<R> clazz = getClassByName(name);
+		Class<R> clazz = getClassByName(request);
 		if (clazz!=null) return clazz;
-		throw new ReaderException("There is no reader for "+name);
+		throw new ReaderException("There is no reader for "+request.name());
 	}
 
 	/**
@@ -137,13 +140,14 @@ public class ReaderFactory {
 	 * @throws ReaderException 
 	 */
 	public static boolean isSupported(ReaderRequest request) throws ReaderException {
-		String name = request.name();
-		Class<?> clazz = getClassByName(name);
+		Class<?> clazz = getClassByName(request);
 		return clazz!=null;
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static  <R extends StreamReader<T>, T extends Entity> Class<R> getClassByName(String name) throws ReaderException{
+	private static  <R extends StreamReader<T>, T extends Entity> Class<R> getClassByName(ReaderRequest request) throws ReaderException{
+		
+		String name = request.name();
 		
 		// Unfortunately we have to loop here because files with the 
 		// same extension can have different readers, e.g. txt, csv.
@@ -151,7 +155,9 @@ public class ReaderFactory {
 			
 			if (key instanceof Pattern) {
 				Pattern pattern = (Pattern)key;
-				if (pattern.matcher(name).matches()) {
+				Matcher matcher = pattern.matcher(name);
+				if (matcher.matches()) {
+					request.setMatcher(matcher);
 					return (Class<R>)classes.get(key);
 				}
 			} else if (key instanceof String) {

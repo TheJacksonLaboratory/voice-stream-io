@@ -98,6 +98,9 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	 */
 	protected void setup(ReaderRequest request) throws ReaderException {
 		
+		if (request.getDelimiter()!=null) {
+			setDelimiter(request.getDelimiter());
+		}
 		try {
 			super.init(request);
 			

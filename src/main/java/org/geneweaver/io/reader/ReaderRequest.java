@@ -27,6 +27,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.regex.Matcher;
 import java.util.zip.GZIPInputStream;
 
 import javax.annotation.processing.Generated;
@@ -110,6 +111,14 @@ public class ReaderRequest {
 	 * Calling init can be turned off.
 	 */
 	private boolean initRequired = true;
+
+	@JsonIgnore
+	private transient Matcher matcher;
+	
+	/**
+	 * Delimiter for parsing text files.
+	 */
+	private String delimiter = null; // Use the default of the reader.
 	
 	
 	public ReaderRequest() {
@@ -135,6 +144,11 @@ public class ReaderRequest {
 		this(source, file, true);
 	}
 	
+	public ReaderRequest(String source, File file, String delimiter)  {
+		this(source, file, true);
+		setDelimiter(delimiter);
+	}
+
 	public ReaderRequest(String source, Path path) throws IOException{
 		this.source = source;
 		
@@ -404,6 +418,33 @@ public class ReaderRequest {
 	public ReaderRequest setFileFilter(String fileFilter) {
 		this.fileFilter = fileFilter;
 		return this;
+	}
+
+	@JsonIgnore
+	public Matcher getMatcher() {
+		return matcher;
+	}
+
+	/**
+	 * @param matcher the matcher to set
+	 */
+	@JsonIgnore
+	public void setMatcher(Matcher matcher) {
+		this.matcher = matcher;
+	}
+
+	/**
+	 * @return the delimiter
+	 */
+	public String getDelimiter() {
+		return delimiter;
+	}
+
+	/**
+	 * @param delimiter the delimiter to set
+	 */
+	public void setDelimiter(String delimiter) {
+		this.delimiter = delimiter;
 	}
 	
 }
