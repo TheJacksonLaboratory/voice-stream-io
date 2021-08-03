@@ -141,7 +141,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		// Directly saving the streams with no chunks is fast.
 		try {
 			long saved = reader.stream()
-							  .map(g->save(g, b.getWriters(), dir, timer))
+							  .map(g->save(g, b.getWriters(), dir, timer, false))
 							  .count();
 	
 			return "Wrote bulk file(s) for '"+input.getFileName()+"' in "+timer.getFormattedTime()+" parsed "+saved+" objects.";

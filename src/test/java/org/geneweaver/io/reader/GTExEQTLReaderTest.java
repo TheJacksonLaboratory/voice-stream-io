@@ -35,7 +35,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.FileUtils;
@@ -83,6 +86,36 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 		Path dir = Paths.get("./tmp/eqtlMapRsId");
 		fakeLookupTest(pairs, 0, dir, "Brain_Substantia_nigra_pairs_lookup_fake.txt");
  	}
+	
+	@Test
+	public void append() throws Exception {
+		
+		File pairs = getFile("data/eQTL/Brain_Substantia_nigra.v8.signif_variant_gene_pairs.txt.gz");
+		Path dir = Paths.get("./tmp/append");
+		fakeLookupTest(pairs, 283774, dir, "Brain_Substantia_nigra_pairs_lookup_fake.txt");
+		
+		// Simulate reading a second eQTL file from a different source and appending.
+		// This file has 499 new eQTLs to add.
+		File beta = getFile("data/eQTL/hs/BetaCells_independent_exon_500_eQTLs.txt");
+		
+		try (ExportBuilder builder = new ExportBuilder()) {
+			StreamReader<EQTL> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", beta));
+			long added = reader.stream()
+					.map(e-> {
+						// We purposely append the first file.
+						save(e, builder.getWriters(), dir, null, true);
+						return e;
+					})
+					.count();
+			assertEquals(499L, added);
+		}
+		
+		checkSize(dir, 283774+499, line->{
+			boolean is = line.trim().endsWith("±EQTL");
+			return is;
+		});
+	}
+
 	
 	@Test
 	public void genePairsMapRsId2() throws Exception {
@@ -139,6 +172,14 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 	 		builder.export();
 	 	}
 		
+	 	checkSize(dir, size);
+	}
+	
+	private void checkSize(Path dir, long size) throws Exception {
+		checkSize(dir, size, line->line.matches("^r\\d+FAKE.*ENSG\\d+\\±EQTL$"));
+	}
+	
+	private void checkSize(Path dir, long size, Predicate<String> test) throws Exception {
 		assertTrue(Files.exists(dir.resolve("EQTL-header.csv")));
 		assertTrue(Files.exists(dir.resolve("EQTL.csv.gz")));
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(dir.resolve("EQTL.csv.gz")))))) {
@@ -146,9 +187,8 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 			int lcount = 0;
 			String line = null;
 			while((line = reader.readLine())!=null) {
-				if (line.matches("^r\\d+FAKE.*ENSG\\d+\\±EQTL$")) {
-					lcount++;
-				}
+				boolean isLine = test.test(line);
+				if (isLine)	lcount++;
 			}
 			assertEquals(size, lcount);
 		}
@@ -166,7 +206,7 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 			eqtls.stream()
 				 .map(func::apply)
 				 .map(e-> {
-					 save(e, b.getWriters(), dir, null);
+					 save(e, b.getWriters(), dir, null, false);
 					 return e;
 				 })
 				 .filter(e->e.getRsId()==null)

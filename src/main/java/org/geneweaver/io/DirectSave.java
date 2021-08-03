@@ -20,6 +20,7 @@ package org.geneweaver.io;
 
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -41,6 +42,18 @@ import org.geneweaver.domain.Entity;
  */
 public class DirectSave {
 
+	/**
+	 * This function uses the map to passed in to cache writers.
+	 * @param e
+	 * @param writers
+	 * @param dir
+	 * @param timer
+	 * @return
+	 */
+	public static Entity save(Entity e, Map<Class<? extends Entity>, BufferedWriter> writers, Path dir, Timer timer) {
+		return save(e, writers, dir, timer, false);
+	}
+	
 	/**
 	 * This function uses the map to passed in to cache writers.
 	 * @param e
@@ -75,6 +88,20 @@ public class DirectSave {
 		return e;
 	}
 	
+	/**
+	 * Create a GZip writer for use with writing bulk import files for neo4j,
+	 * or in fact any gzip file.
+	 * 
+	 * @param pbody
+	 * @param append
+	 * @return
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public static BufferedWriter createWriter(File pbody, boolean append) throws FileNotFoundException, IOException {
+		return createWriter(pbody.toPath(), append);
+	}
+
 	/**
 	 * Create a GZip writer for use with writing bulk import files for neo4j,
 	 * or in fact any gzip file.

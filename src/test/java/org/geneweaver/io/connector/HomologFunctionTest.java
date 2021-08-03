@@ -109,7 +109,7 @@ public class HomologFunctionTest extends AbstractDataFileTest {
 							.filter(h->h.getGeneId()!=null)
 							.flatMap(h->connector.apply(h))
 							.filter(e->e instanceof Homolog)
-							.map(g->save(g, builder.getWriters(), builder.getDir(), timer))
+							.map(g->save(g, builder.getWriters(), builder.getDir(), timer, false))
 							.count();
 		
 		assertEquals(17087, saved);

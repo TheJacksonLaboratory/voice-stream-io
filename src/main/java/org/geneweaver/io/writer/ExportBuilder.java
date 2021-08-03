@@ -49,7 +49,7 @@ public class ExportBuilder implements AutoCloseable {
 	 * simple save using the default connector.
 	 */
 	@JsonIgnore
-	private Export exporter = (builder, path) -> defaultExport(path);
+	private Export exporter = (builder, path) -> defaultExport(path, true);
 	
 	/**
 	 * The value of the -c command line
@@ -91,7 +91,7 @@ public class ExportBuilder implements AutoCloseable {
 	 * @param input
 	 * @throws ReaderException 
 	 */
-	protected String defaultExport(Path input) throws Exception {
+	protected String defaultExport(Path input, boolean append) throws Exception {
 		
 	    StreamReader<Entity> reader = createReader(input);
 	    Function<Entity, Stream<Entity>> connector = reader.getDefaultConnector();
@@ -100,7 +100,7 @@ public class ExportBuilder implements AutoCloseable {
 		
 		long saved = reader.stream()
 							.flatMap(g->connector.apply(g))
-							.map(g->save(g, writers, dir, timer))
+							.map(g->save(g, writers, dir, timer, append))
 							.count();
 
 		return "Wrote bulk file(s) for '"+input.getFileName()+"' in "+timer.getFormattedTime()+" parsed "+saved+" objects.";
