@@ -18,20 +18,35 @@
  */
 package org.geneweaver.io.reader;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.IOUtils;
 import org.geneweaver.domain.Entity;
 
-public abstract class AbstractCSVReader<T extends Entity> implements StreamReader<T> {
+public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 
 	private ReaderRequest request;
-
+	private static final CSVFormat format = CSVFormat.DEFAULT;
+	private int lines;
+	
+	@SuppressWarnings("unchecked")
 	@Override
 	public AbstractCSVReader<T> init(ReaderRequest request) {
+		if (request.getDelimiter()==null) request.setDelimiter(",");
 		this.request = request;
+		this.lines = 0;
 		return this;
 	}
 	
@@ -44,23 +59,63 @@ public abstract class AbstractCSVReader<T extends Entity> implements StreamReade
 	 */
 	protected abstract T create(CSVRecord row) throws ReaderException;
 		 
-
 	@Override
-	public Stream<T> stream() {
-		// TODO Auto-generated method stub
-		return null;
+	public Stream<T> stream() throws ReaderException {
+		
+		try {
+			Reader in = createReader(request.getFile().toPath());
+	
+			char delim = request.getDelimiter().charAt(0);
+			Iterable<CSVRecord> records =  format.withFirstRecordAsHeader()
+												 .withDelimiter(delim)
+												 .parse(in);
+			
+			return StreamSupport.stream(records.spliterator(), false)
+								
+								// Make sure we close
+						 		.onClose(()->IOUtils.closeQuietly(in, ex->{throw new RuntimeException(ex);}))
+	 							
+						 		// For each record, make the object
+						 		.map(rec->{
+	 								try{
+	 									return create(rec);
+	 								} catch (Exception ne) {
+	 									throw new RuntimeException(ne);
+	 								}
+	 							})
+						 		
+						 		// Null is a way of saying the line is invalid and legal
+	 							.filter(m->m!=null)
+	 							
+	 							// Count the objects made.
+	 							.map(t->{
+	 								this.lines++;
+	 								return t;
+	 							});
+			
+			
+		} catch (IOException ne) {
+			throw new ReaderException(ne);
+		}
 	}
+	
+	private Reader createReader(Path dataPath) throws IOException {
+		
+		if (dataPath.getFileName().toString().toLowerCase().endsWith(".gz")) {
+			return new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(dataPath))));
+		}
+		return new BufferedReader(new InputStreamReader(Files.newInputStream(dataPath)));
+	}
+
 
 	@Override
 	public <U extends Entity> Function<T, Stream<U>> getDefaultConnector() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public int linesProcessed() {
-		// TODO Auto-generated method stub
-		return 0;
+		return lines;
 	}
 
 	@Override
@@ -70,14 +125,12 @@ public abstract class AbstractCSVReader<T extends Entity> implements StreamReade
 
 	@Override
 	public boolean isEmpty() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public void close() throws IOException {
-		// TODO Auto-generated method stub
-
+		// Stream uses onClose(...)
 	}
 
 	/**
@@ -87,4 +140,18 @@ public abstract class AbstractCSVReader<T extends Entity> implements StreamReade
 		return request.getSource();
 	}
 
+	@Override
+	public int getChunkSize() {
+		return -1;
+	}
+
+	@Override
+	public void setChunkSize(int chunkSize) {
+		
+	}
+
+	@Override
+	public List<T> wind() throws ReaderException {
+		throw new ReaderException("Wind is not supported by "+getClass().getSimpleName());
+	}
 }

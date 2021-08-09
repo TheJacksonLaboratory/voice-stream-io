@@ -37,7 +37,7 @@ import org.geneweaver.domain.Entity;
  *
  * @param <T>
  */
-public interface StreamReader<T extends Entity> {
+public interface StreamReader<T> {
 	
 	/**
 	 * The name of the init method.

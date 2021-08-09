@@ -1,4 +1,4 @@
-package org.geneweaver.io.reader;
+package org.geneweaver.io;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -7,7 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.geneweaver.io.JsonConverter;
+import org.apache.commons.cli.MissingOptionException;
+import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.geneweaver.io.writer.JsonToCSVParser;
 import org.junit.Test;
 
@@ -31,10 +32,32 @@ public class JsonToCSVParserTest extends AbstractDataFileTest {
 		
 		Path in  = getPath("data/json/test_25.json");
 		Path out = Paths.get("tmp/json/test_25_main.csv");
-		JsonConverter.main(in.toAbsolutePath().toString(), out.toAbsolutePath().toString());
+		
+		CLI.testRun(line(in.toAbsolutePath().toString(), out.toAbsolutePath().toString()));
 		
 		assertTrue(Files.exists(out));
 		assertEquals(26, Files.readAllLines(out).size());
+	}
+
+	private String[] line(String... args) {
+		
+		if (args.length<1) return null;
+		
+		String[] ret = new String[(args.length*2) + 1];
+		ret[0] = "-convert";
+		ret[1] = "-i";
+		ret[2] = args[0];
+		
+		if (args.length>1) {
+			ret[3] = "-o";
+			ret[4] = args[1];
+		}
+		
+		if (args.length>2) {
+			ret[5] = "-d";
+			ret[6] = args[2];
+		}
+		return ret;
 	}
 
 	@Test
@@ -42,42 +65,42 @@ public class JsonToCSVParserTest extends AbstractDataFileTest {
 		
 		Path in  = getPath("data/json/test_25.json");
 		Path out = Paths.get("tmp/json/test_25_main_tab.csv");
-		JsonConverter.main(in.toAbsolutePath().toString(), out.toAbsolutePath().toString(), "TAB");
+		CLI.testRun(line(in.toAbsolutePath().toString(), out.toAbsolutePath().toString(), "TAB"));
 		
 		assertTrue(Files.exists(out));
 		assertEquals(26, Files.readAllLines(out).size());
 	}
 	
 
-	@Test
+	@Test(expected=MissingOptionException.class)
 	public void mainWrongArgs1() throws Exception {
 		
-		JsonConverter.main();
+		CLI.testRun(line());
 	}
 
-	@Test
+	@Test(expected=MissingOptionException.class)
 	public void mainWrongArgs2() throws Exception {
 		
-		JsonConverter.main("Hello");
+		CLI.testRun(line("Hello"));
 	}
 
-	@Test
+	@Test(expected=IllegalArgumentException.class)
 	public void mainWrongArgs3() throws Exception {
 		
-		JsonConverter.main("Hello", "WORLD");
+		CLI.testRun(line("Hello", "WORLD"));
 	}
 
-	@Test
+	@Test(expected=IllegalArgumentException.class)
 	public void mainWrongArgs4() throws Exception {
 		
-		JsonConverter.main("Hello", "WORLD", ":");
+		CLI.testRun(line("Hello", "WORLD", ":"));
 	}
 
-	@Test
+	@Test(expected=NullPointerException.class)
 	public void mainWrongArgs5() throws Exception {
 		Path in  = getPath("data/json/test_25.json");
 		Path out = Paths.get("tmp/json/test_25_main_tab.csv");
-		JsonConverter.main(in.toAbsolutePath().toString(), out.toAbsolutePath().toString(), ":", "Too Many!");
+		CLI.testRun(line(in.toAbsolutePath().toString(), out.toAbsolutePath().toString(), ":", "Too Many!"));
 	}
 
 	@Test

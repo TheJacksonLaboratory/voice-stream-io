@@ -1,5 +1,6 @@
 package org.geneweaver.io.reader;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -43,7 +44,7 @@ public class FlexEQTLReaderTest extends AbstractDataFileTest {
 				StreamReader<EQTL> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", path));
 				
 				List<EQTL> eqtls = reader.stream().collect(Collectors.toList());
-				assertTrue(eqtls.size()==499);
+				assertEquals(499, eqtls.size());
 				check(eqtls, true);
 				
 			} catch (Exception ne) {
@@ -53,6 +54,22 @@ public class FlexEQTLReaderTest extends AbstractDataFileTest {
 
 	}
 	
+	@Test
+	public void factoryGZ() throws Exception {
+		
+		Path path = getPath("prod/eQTL/BetaCells_independent_exon_eQTLs.txt.gz");
+		try {
+			StreamReader<EQTL> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", path));
+
+			List<EQTL> eqtls = reader.stream().collect(Collectors.toList());
+			assertEquals(11080, eqtls.size());
+			check(eqtls, true);
+
+		} catch (Exception ne) {
+			fail(ne.getMessage());
+		}
+	}
+
 	private void check(List<EQTL> eqtls, boolean checkTissue) {
 		eqtls.forEach(e-> {
 			assertNotNull(e.getRsId()); // It might be "NA" though

@@ -1,6 +1,7 @@
 package org.geneweaver.io;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -31,10 +32,6 @@ public class CLI {
 			CommandLine cmd = parse(args);
 			if (cmd==null) return;
 			run(cmd, System.getenv());
-		} catch (Exception ne) {
-			System.out.println("An error occured.");
-			System.out.println("It's message was: "+ne.getMessage());
-			ne.printStackTrace();
 		} finally {
 			System.exit(0); // Just in case demons started up, we force exit.
 		}
@@ -62,6 +59,8 @@ public class CLI {
 	private static void convert(CommandLine cmd) throws JsonParseException, IOException {
 		
 		Path json = Paths.get(cmd.getOptionValue('i'));
+		if (!Files.exists(json)) throw new IllegalArgumentException("File does not exist: "+json);
+		
 		Path csv = Paths.get(cmd.getOptionValue('o'));
 		String delim = cmd.getOptionValue('d', ",");
 		if (delim.equals("TAB")) delim = "\t";
@@ -109,11 +108,11 @@ public class CLI {
 		
 		// Command line values
 		Option input = new Option("i", "input", true, "The input file which we convert (e.g. json) .");
-		input.setRequired(false);
+		input.setRequired(true);
 		options.addOption(input);
 
 		Option output = new Option("o", "output", true, "The output file which we write (e.g. for convert a csv table).");
-		output.setRequired(false);
+		output.setRequired(true);
 		options.addOption(output);
 
 		Option delim = new Option("d", "delimiter", true, "The delimiter to use. Default is ',' and 'TAB' can be used for a tab character.");
