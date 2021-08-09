@@ -7,7 +7,7 @@
 	<groupId>org.geneweaver</groupId>
 	<artifactId>gweaver-stream-io</artifactId>
 	<packaging>jar</packaging>
-	<version>1.3.8-SNAPSHOT</version>
+	<version>1.4.0-SNAPSHOT</version>
 	<name>Geneweaver Stream IO</name>
 
 	<properties>
@@ -101,6 +101,13 @@
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-ogm-core</artifactId>
 			<version>${neo4j-ogm.version}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
+		<dependency>
+		    <groupId>commons-cli</groupId>
+		    <artifactId>commons-cli</artifactId>
+		    <version>1.4</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-csv -->
@@ -232,7 +239,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>org.geneweaver.io.JsonConverter</mainClass>
+							<mainClass>org.geneweaver.io.CLI</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
