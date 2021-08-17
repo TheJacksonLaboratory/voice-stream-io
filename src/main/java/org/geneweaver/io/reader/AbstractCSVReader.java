@@ -20,10 +20,10 @@ package org.geneweaver.io.reader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -63,7 +63,7 @@ public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 	public Stream<T> stream() throws ReaderException {
 		
 		try {
-			Reader in = createReader(request.getFile().toPath());
+			Reader in = createReader(request);
 	
 			char delim = request.getDelimiter().charAt(0);
 			Iterable<CSVRecord> records =  format.withFirstRecordAsHeader()
@@ -99,12 +99,22 @@ public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 		}
 	}
 	
-	private Reader createReader(Path dataPath) throws IOException {
+	private Reader createReader(ReaderRequest req) throws IOException {
 		
-		if (dataPath.getFileName().toString().toLowerCase().endsWith(".gz")) {
-			return new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(dataPath))));
+		InputStream in;
+		boolean gz = false;
+		if (req.getStream()!=null) {
+			in = req.getStream();
+			gz = req.getName().toLowerCase().endsWith(".gz");
+		} else {
+			in = Files.newInputStream(req.getFile().toPath());
+			gz = req.getFile().getName().toLowerCase().endsWith(".gz");
 		}
-		return new BufferedReader(new InputStreamReader(Files.newInputStream(dataPath)));
+		if (gz) {
+			in = new GZIPInputStream(in);
+		}
+		
+		return new BufferedReader(new InputStreamReader(in));
 	}
 
 
