@@ -1,6 +1,7 @@
 package org.geneweaver.io.reader;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -8,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 
@@ -24,6 +26,21 @@ public class MapCSVReaderTest extends AbstractDataFileTest {
 		check(reader);
 	}
 	
+	@Test
+	public void csvHeader() throws Exception {
+		
+		AbstractCSVReader<Map<String,String>> reader = new MapCSVReader();
+		ReaderRequest req = new ReaderRequest(getFile("data/csv/snps.csv"));
+		reader.init(req);
+		
+		List<String> headers = reader.headers();
+		assertNotNull(headers);
+		assertEquals(254, headers.size());
+		
+		List<String> firstFew = Arrays.asList("chr", "bp38", "rs", "observed", "dbsnp142annot", "requested", "129P2/OlaHsd", "129S1/SvImJ", "129S2/SvHsd", "129S4/SvJaeJ", "129S6/SvEvTac");
+		assertTrue(headers.containsAll(firstFew));
+	}
+
 	@Test
 	public void rs() throws Exception {
 		

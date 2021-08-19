@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -97,6 +98,22 @@ public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 		} catch (IOException ne) {
 			throw new ReaderException(ne);
 		}
+	}
+	
+	public List<String> headers() throws ReaderException {
+
+		try {
+			Reader in = createReader(request);
+			
+			char delim = request.getDelimiter().charAt(0);
+			return  format.withFirstRecordAsHeader()
+											 .withDelimiter(delim)
+											 .parse(in)
+											 .getHeaderNames();
+		} catch (IOException ne) {
+			throw new ReaderException(ne);
+		}
+
 	}
 	
 	private Reader createReader(ReaderRequest req) throws IOException {
