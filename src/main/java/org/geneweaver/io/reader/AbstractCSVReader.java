@@ -69,6 +69,8 @@ public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 			char delim = request.getDelimiter().charAt(0);
 			Iterable<CSVRecord> records =  format.withFirstRecordAsHeader()
 												 .withDelimiter(delim)
+												 .withTrim(true)
+												 .withTrailingDelimiter()
 												 .parse(in);
 			
 			return StreamSupport.stream(records.spliterator(), false)
@@ -108,6 +110,8 @@ public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 			char delim = request.getDelimiter().charAt(0);
 			return  format.withFirstRecordAsHeader()
 											 .withDelimiter(delim)
+											 .withTrim(true)
+											 .withTrailingDelimiter()
 											 .parse(in)
 											 .getHeaderNames();
 		} catch (IOException ne) {

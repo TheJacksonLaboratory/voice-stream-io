@@ -40,6 +40,21 @@ public class MapCSVReaderTest extends AbstractDataFileTest {
 		List<String> firstFew = Arrays.asList("chr", "bp38", "rs", "observed", "dbsnp142annot", "requested", "129P2/OlaHsd", "129S1/SvImJ", "129S2/SvHsd", "129S4/SvJaeJ", "129S6/SvEvTac");
 		assertTrue(headers.containsAll(firstFew));
 	}
+	
+	@Test
+	public void csvHeaderTrailingDelimiter() throws Exception {
+		
+		AbstractCSVReader<Map<String,String>> reader = new MapCSVReader();
+		ReaderRequest req = new ReaderRequest(getFile("data/csv/snp_UCLA_100.csv"));
+		reader.init(req);
+		
+		List<String> headers = reader.headers();
+		assertNotNull(headers);
+		assertEquals(254, headers.size());
+		
+		List<String> firstFew = Arrays.asList("chr", "bp38", "rs", "observed", "dbsnp142annot", "requested", "129P2/OlaHsd", "129S1/SvImJ", "129S2/SvHsd", "129S4/SvJaeJ", "129S6/SvEvTac");
+		assertTrue(headers.containsAll(firstFew));
+	}
 
 	@Test
 	public void rs() throws Exception {
