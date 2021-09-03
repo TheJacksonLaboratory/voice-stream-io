@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.Test;
 
@@ -19,9 +18,9 @@ public class MapCSVReaderTest extends AbstractDataFileTest {
 	@Test
 	public void csv() throws Exception {
 		
-		StreamReader<Map<String,String>> reader = new MapCSVReader();
 		ReaderRequest req = new ReaderRequest(getFile("data/csv/snps.csv"));
-		reader.init(req);
+		req.setReaderHint("Map");
+		StreamReader<Map<String,String>> reader = ReaderFactory.getReader(req);
 		
 		check(reader);
 	}
@@ -42,12 +41,28 @@ public class MapCSVReaderTest extends AbstractDataFileTest {
 	}
 	
 	@Test
+	public void csvWithComments() throws Exception {
+		
+		ReaderRequest req = new ReaderRequest(getFile("data/csv/snp_ucla_bp38_ordered.csv.gz"));
+		req.setReaderHint("Map");
+		AbstractCSVReader<Map<String,String>> reader = ReaderFactory.getReader(req);
+		
+		List<String> headers = reader.headers();
+		assertNotNull(headers);
+		assertEquals(3, headers.size());
+		
+		assertEquals(132277, reader.stream().count());
+		assertEquals(131908, reader.stream().filter(row->row.get("rs")!=null).count());
+	}
+
+	
+	@Test
 	public void csvHeaderTrailingDelimiter() throws Exception {
 		
-		AbstractCSVReader<Map<String,String>> reader = new MapCSVReader();
 		ReaderRequest req = new ReaderRequest(getFile("data/csv/snp_UCLA_100.csv"));
-		reader.init(req);
-		
+		req.setReaderHint("Map");
+		AbstractCSVReader<Map<String,String>> reader = ReaderFactory.getReader(req);
+
 		List<String> headers = reader.headers();
 		assertNotNull(headers);
 		assertEquals(254, headers.size());

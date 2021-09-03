@@ -9,7 +9,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.VariantCall;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -89,7 +88,7 @@ public class FastVCFReaderTest extends AbstractDataFileTest {
 
 	private void big(String spath, int expected) throws ReaderException, IOException {
 		Path path = Paths.get(spath);
-		StreamReader<? extends Entity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", path));
+		StreamReader<?> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", path));
 		
 		long start = System.currentTimeMillis();
 		long items = reader.stream().count();

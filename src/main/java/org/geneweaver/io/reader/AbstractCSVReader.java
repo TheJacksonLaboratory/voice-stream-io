@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -67,11 +66,7 @@ public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 			Reader in = createReader(request);
 	
 			char delim = request.getDelimiter().charAt(0);
-			Iterable<CSVRecord> records =  format.withFirstRecordAsHeader()
-												 .withDelimiter(delim)
-												 .withTrim(true)
-												 .withTrailingDelimiter()
-												 .parse(in);
+			Iterable<CSVRecord> records =  getFormat(delim).parse(in);
 			
 			return StreamSupport.stream(records.spliterator(), false)
 								
@@ -108,18 +103,24 @@ public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 			Reader in = createReader(request);
 			
 			char delim = request.getDelimiter().charAt(0);
-			return  format.withFirstRecordAsHeader()
-											 .withDelimiter(delim)
-											 .withTrim(true)
-											 .withTrailingDelimiter()
-											 .parse(in)
-											 .getHeaderNames();
+			return  getFormat(delim)
+						 .parse(in)
+						 .getHeaderNames();
 		} catch (IOException ne) {
 			throw new ReaderException(ne);
 		}
 
 	}
 	
+	private CSVFormat getFormat(char delim) {
+		return format.withCommentMarker('#')
+				  .withFirstRecordAsHeader()
+				  .withDelimiter(delim)
+				  .withTrim(true)
+				  .withIgnoreEmptyLines()
+				  .withTrailingDelimiter();
+	}
+
 	private Reader createReader(ReaderRequest req) throws IOException {
 		
 		InputStream in;

@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * @author gerrim
  *
  */
-public class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
+class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 	
 	private static Logger logger = LoggerFactory.getLogger(JaxEQTLReader.class);
 

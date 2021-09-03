@@ -120,6 +120,17 @@ public class ReaderRequest {
 	 */
 	private String delimiter = null; // Use the default of the reader.
 	
+	/**
+	 * The hint for which reader to use. It should be the full class name,
+	 * the simple name or a string which is contained in the name for instance:
+	 * "org.geneweaver.io.reader.MapCSVReader"
+	 * "MapCSVReader"
+	 * "Map"
+	 * Obviously if hinting with a simpler string, you are a bit less likely to get the
+	 * reader you prefer but more likely to be future proof if underlying readers change.
+	 */
+	private String readerHint;
+	
 	
 	public ReaderRequest() {
 		
@@ -445,6 +456,20 @@ public class ReaderRequest {
 	 */
 	public void setDelimiter(String delimiter) {
 		this.delimiter = delimiter;
+	}
+
+	/**
+	 * @return the readerHint
+	 */
+	public String getReaderHint() {
+		return readerHint;
+	}
+
+	/**
+	 * @param readerHint the readerHint to set
+	 */
+	public void setReaderHint(String readerHint) {
+		this.readerHint = readerHint;
 	}
 	
 }

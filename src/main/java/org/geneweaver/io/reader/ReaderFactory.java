@@ -21,14 +21,16 @@ package org.geneweaver.io.reader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
-import org.geneweaver.domain.Entity;
 
 /**
  * Simple factory for getting reader by file extension.
@@ -39,10 +41,9 @@ import org.geneweaver.domain.Entity;
 public class ReaderFactory {
 
 	/** The Constant classes. */
-	private static final Map<Object, Class> classes;
+	private static final Map<Object, Object> classes;
 	static {
-		@SuppressWarnings("rawtypes")
-		Map<Object, Class> tmp = new LinkedHashMap<>();
+		Map<Object, Object> tmp = new LinkedHashMap<>();
 		
 		// These guys are fairly standard I think.
 		tmp.put("gtf", 			GeneReader.class);
@@ -64,7 +65,7 @@ public class ReaderFactory {
 		
 		// This one is for the jax csv files which are parsed out of mouse eQTL data.
 		tmp.put(Pattern.compile("^.+\\_balyor\\.csv(\\.gz)?$"), 	OrthologBaylorReader.class);
-		tmp.put("csv", 												JaxEQTLReader.class);
+		tmp.put("csv", 												Arrays.asList(JaxEQTLReader.class, MapCSVReader.class));
 		
 		// These eQTLs are from this paper: https://www.biorxiv.org/content/10.1101/655670v1
 		// And these files: https://zenodo.org/record/3408356#.YQljwlNKii6
@@ -99,7 +100,7 @@ public class ReaderFactory {
 	 * @return the reader
 	 * @throws ReaderException the reader exception
 	 */
-	public static <R extends StreamReader<T>, T extends Entity> R getReader(ReaderRequest request) throws ReaderException {
+	public static <R extends StreamReader<T>, T> R getReader(ReaderRequest request) throws ReaderException {
 		Class<R> clazz = getClass(request);
 		try {
 			Constructor<R> constructor = clazz.getDeclaredConstructor();
@@ -125,7 +126,7 @@ public class ReaderFactory {
 	 * @return the class
 	 * @throws ReaderException the reader exception
 	 */
-	private static <R extends StreamReader<T>, T extends Entity> Class<R> getClass(ReaderRequest request) throws ReaderException {
+	private static <R extends StreamReader<T>, T> Class<R> getClass(ReaderRequest request) throws ReaderException {
 		
 		// Figure out reader from name. Later we may need more complex logic.
 		Class<R> clazz = getClassByName(request);
@@ -145,12 +146,13 @@ public class ReaderFactory {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static  <R extends StreamReader<T>, T extends Entity> Class<R> getClassByName(ReaderRequest request) throws ReaderException{
+	private static  <R extends StreamReader<T>, T> Class<R> getClassByName(ReaderRequest request) throws ReaderException{
 		
 		String name = request.name();
 		
 		// Unfortunately we have to loop here because files with the 
 		// same extension can have different readers, e.g. txt, csv.
+		Object found = null;
 		for (Object key : classes.keySet()) {
 			
 			if (key instanceof Pattern) {
@@ -158,7 +160,8 @@ public class ReaderFactory {
 				Matcher matcher = pattern.matcher(name);
 				if (matcher.matches()) {
 					request.setMatcher(matcher);
-					return (Class<R>)classes.get(key);
+					found = classes.get(key);
+					break;
 				}
 			} else if (key instanceof String) {
 				String ext = FilenameUtils.getExtension(name);
@@ -169,7 +172,24 @@ public class ReaderFactory {
 				if (ext==null) throw new ReaderException(name+" does not have an extension!");
 				ext = ext.toLowerCase();
 				if (key.toString().toLowerCase().equals(ext)) {
-					return (Class<R>)classes.get(ext);
+					found = classes.get(ext);
+					break;
+				}
+			}
+		}
+		
+		if (found!=null) {
+			if (found instanceof Class) {
+				return (Class<R>)found;
+			} else if (found instanceof Collection) {
+				if (request.getReaderHint()==null) {
+					return (Class<R>)((Collection)found).iterator().next();
+				} else {
+					String hint = request.getReaderHint();
+					for (Iterator<Class<R>> it = ((Collection<Class<R>>)found).iterator(); it.hasNext();) {
+						Class<R> clazz = it.next();
+						if (clazz.getName().contains(hint)) return clazz;
+					}
 				}
 			}
 		}
