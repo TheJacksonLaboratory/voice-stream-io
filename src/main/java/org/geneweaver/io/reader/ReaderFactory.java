@@ -57,7 +57,7 @@ public class ReaderFactory {
 		
 		// If there are multiple tsv formats, we will have to ask 
 		// if it is applicable for a given format and reader request.
-		tmp.put("tsv", 			Fantom5EnsemblMapReader.class);
+		tmp.put("tsv", 			Arrays.asList(Fantom5EnsemblMapReader.class, MapCSVReader.class));
 
 		// If there are multiple rpt formats, we will have to ask 
 		// if it is applicable for a given format and reader request.
