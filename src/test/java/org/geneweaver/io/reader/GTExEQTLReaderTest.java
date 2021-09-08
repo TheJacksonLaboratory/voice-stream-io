@@ -56,7 +56,7 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 	@Test
 	public void lookup() throws Exception {
 		File lookup = getFile("data/eQTL/GTExLookup-frag.lookup_table.txt");
-		assertFalse(ReaderFactory.isSupported(new ReaderRequest(lookup)));
+		assertTrue(ReaderFactory.isSupported(new ReaderRequest(lookup)));
 	}
 
 	@Test
