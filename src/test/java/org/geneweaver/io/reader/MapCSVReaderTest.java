@@ -19,7 +19,7 @@ public class MapCSVReaderTest extends AbstractDataFileTest {
 	public void csv() throws Exception {
 		
 		ReaderRequest req = new ReaderRequest(getFile("data/csv/snps.csv"));
-		req.setReaderHint("Map");
+		req.setReaderHint("MapCSVReader");
 		StreamReader<Map<String,String>> reader = ReaderFactory.getReader(req);
 		
 		check(reader);
@@ -44,7 +44,7 @@ public class MapCSVReaderTest extends AbstractDataFileTest {
 	public void csvWithComments() throws Exception {
 		
 		ReaderRequest req = new ReaderRequest(getFile("data/csv/snp_ucla_bp38_ordered.csv.gz"));
-		req.setReaderHint("Map");
+		req.setReaderHint("MapCSVReader");
 		AbstractCSVReader<Map<String,String>> reader = ReaderFactory.getReader(req);
 		
 		List<String> headers = reader.headers();
@@ -60,7 +60,7 @@ public class MapCSVReaderTest extends AbstractDataFileTest {
 	public void csvHeaderTrailingDelimiter() throws Exception {
 		
 		ReaderRequest req = new ReaderRequest(getFile("data/csv/snp_UCLA_100.csv"));
-		req.setReaderHint("Map");
+		req.setReaderHint("MapCSVReader");
 		AbstractCSVReader<Map<String,String>> reader = ReaderFactory.getReader(req);
 
 		List<String> headers = reader.headers();

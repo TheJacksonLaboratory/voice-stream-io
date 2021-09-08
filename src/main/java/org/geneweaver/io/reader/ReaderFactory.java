@@ -58,6 +58,7 @@ public class ReaderFactory {
 		// If there are multiple tsv formats, we will have to ask 
 		// if it is applicable for a given format and reader request.
 		tmp.put("tsv", 			Arrays.asList(Fantom5EnsemblMapReader.class, MapCSVReader.class));
+		tmp.put("txt", 			MapCSVReader.class);
 
 		// If there are multiple rpt formats, we will have to ask 
 		// if it is applicable for a given format and reader request.
@@ -153,6 +154,8 @@ public class ReaderFactory {
 		// Unfortunately we have to loop here because files with the 
 		// same extension can have different readers, e.g. txt, csv.
 		Object found = null;
+		
+		// Process the patterns first, all of them
 		for (Object key : classes.keySet()) {
 			
 			if (key instanceof Pattern) {
@@ -163,7 +166,12 @@ public class ReaderFactory {
 					found = classes.get(key);
 					break;
 				}
-			} else if (key instanceof String) {
+			}
+		}
+		
+		// Process the direct keys
+		if (found==null) for (Object key : classes.keySet()) {
+		    if (key instanceof String) {
 				String ext = FilenameUtils.getExtension(name);
 				if ("gz".equals(ext)) {
 					ext = FilenameUtils.getExtension(name.substring(0, name.length()-3));
