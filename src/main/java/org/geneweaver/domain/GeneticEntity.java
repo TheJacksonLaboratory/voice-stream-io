@@ -20,8 +20,6 @@ package org.geneweaver.domain;
 
 import java.util.Objects;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.Index;
 
 // TODO: Auto-generated Javadoc
