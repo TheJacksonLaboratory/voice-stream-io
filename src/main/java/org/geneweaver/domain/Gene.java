@@ -174,7 +174,11 @@ public class Gene extends GeneticEntity {
 		this.geneVersion = geneVersion;
 	}
 
-
     // Auto-generated stuff
-    
+
+	@Override
+	public String id() {
+		return getGeneId();
+	}
+ 
 }

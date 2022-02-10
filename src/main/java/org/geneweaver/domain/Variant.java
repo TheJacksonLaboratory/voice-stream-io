@@ -28,6 +28,8 @@ import javax.annotation.processing.Generated;
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * The Class Variant.
  */
@@ -37,31 +39,38 @@ public class Variant extends GeneticEntity {
 
 	/** The rs id. */
 	@Index(unique=true)
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String rsId;
 	
 	/** The dbx ref. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String dbxRef;
 	
 	/** The id. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String id; // Only id + species is unique, id number repeats.
 	
 	/** The ref allele. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String refAllele;
 	
 	/** The alt allele. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String altAllele;
 	
 	/** The alt allele freq. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Float altAlleleFreq = 0F;
     
     /** The biotype. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
     private String biotype;
 
 	
     /** The variant effect. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
     private Set<VariantEffect> variantEffect;
     
-	
 	/**
 	 * Gets the header.
 	 *
@@ -318,4 +327,11 @@ public class Variant extends GeneticEntity {
 
 
 	// Auto-generated stuff: 
+	
+
+	@Override
+	public String id() {
+		return getRsId();
+	}
+
 }

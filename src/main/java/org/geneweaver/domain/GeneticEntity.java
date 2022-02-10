@@ -22,6 +22,9 @@ import java.util.Objects;
 
 import org.neo4j.ogm.annotation.Index;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 // TODO: Auto-generated Javadoc
 /**
  * The Class GeneticEntity.
@@ -32,42 +35,55 @@ public abstract class GeneticEntity extends AbstractEntity implements Species {
 	/** The gene id. */
 	// Transcript must have a GeneId
 	@Index(unique=true)
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String geneId;
 
     /** The build. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
     private Long build = 0L;
     
     /** The active. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean active = true;
     
     /** The chr. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
     private String chr;
     
     /** The type. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
     private String type;
     
     /** The phase. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
     private String phase;
     
     /** The strand. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
     private String strand;
     
     /** The source. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
     private String source;
     
     /** The species. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
     private String species;
     
     /** The start. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer start = 0;
     
     /** The end. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer end = 0;
 	
 	/** The sequence id. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String sequenceId;  // sequence ID stores chromosome
 	
 	/** The score. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String score;   // TODO Should this be number?
 
 	
@@ -398,4 +414,12 @@ public abstract class GeneticEntity extends AbstractEntity implements Species {
 		return build;
 	}
 
+	/**
+	 * Get the value of the id field. 
+	 * Not all entities will have the same field name
+	 * for the id field but they all must have a value for it.
+	 * @return id
+	 */
+	@JsonIgnore
+	public abstract String id();
 }

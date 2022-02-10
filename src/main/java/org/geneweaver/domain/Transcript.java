@@ -249,4 +249,10 @@ public class Transcript extends GeneticEntity {
 
 	
 	// Auto-generated stuff
+
+	@Override
+	public String id() {
+		return getTranscriptId();
+	}
+
 }

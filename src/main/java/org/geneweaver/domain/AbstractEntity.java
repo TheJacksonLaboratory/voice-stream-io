@@ -23,15 +23,19 @@ import java.util.Objects;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 public abstract class AbstractEntity implements Entity {
 
 	/** The uid. */
 	@Id
 	@GeneratedValue
+	@JsonInclude(JsonInclude.Include.NON_NULL)
     private Long uid;
 
 	// We purposely use a character unlikely, the default character "," appears in some values.
 	// You can override the delimier or set it if not writing bulk import files.
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String delimiter = System.getProperty("delimiter", "±").intern();// Character used for delimiter in bulk import files.
 	
 	/**
