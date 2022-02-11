@@ -14,7 +14,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.target>11</maven.compiler.target>
 		<maven.compiler.source>11</maven.compiler.source>
-		<neo4j-ogm.version>3.2.18</neo4j-ogm.version>
+		<neo4j-ogm.version>3.2.28</neo4j-ogm.version>
 	</properties>
 
 	<description>The IO bundle for Geneweaver.</description>
