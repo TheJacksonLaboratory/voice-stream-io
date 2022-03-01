@@ -68,7 +68,7 @@ public class Variant extends GeneticEntity {
 
 	
     /** The variant effect. */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Set<VariantEffect> variantEffect;
     
 	/**
