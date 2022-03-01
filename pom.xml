@@ -383,7 +383,7 @@
 									<goal>sign</goal>
 								</goals>
 								
-								<!--  Get from (where - is two):       gpg -list-secret-keys -keyid-format=long 
+								<!--  Get from (where '-' IS TWO!!):       gpg -list-secret-keys -keyid-format=long 
 									  Then name is after slash:
 									sec   ed25519/F3168809691CBA81 2022-02-11 [SC]
 									      ECE7120F2BB5E60007433194F3168809691CBA81
