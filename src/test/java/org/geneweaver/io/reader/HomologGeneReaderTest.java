@@ -36,6 +36,7 @@ import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Homolog;
 import org.geneweaver.domain.HomologGene;
 import org.geneweaver.domain.NamedEntity;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class HomologGeneReaderTest extends AbstractDataFileTest {
@@ -56,6 +57,7 @@ public class HomologGeneReaderTest extends AbstractDataFileTest {
 		assertEquals(4096, reader.getChunkSize());
 	}
 	
+	@Ignore
 	@Test
 	public void checkUrl() throws Exception {
 		
@@ -64,6 +66,7 @@ public class HomologGeneReaderTest extends AbstractDataFileTest {
 	}
 
 	
+	@Ignore
 	@Test
 	public void checkUrlAsPath() throws Exception {
 		
