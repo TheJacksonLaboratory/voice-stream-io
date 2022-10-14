@@ -44,11 +44,11 @@ import org.junit.Test;
 
 public class TrackConnectorTest extends AbstractDataFileTest {
 
-	private TrackConnector<NamedEntity, Entity> connector;
+	private BedConnector<NamedEntity, Entity> connector;
 	
 	@Before
 	public void before() throws Exception {
-		connector = new TrackConnector<>();
+		connector = new BedConnector<>();
 	}
 	
 	@After
@@ -126,7 +126,7 @@ public class TrackConnectorTest extends AbstractDataFileTest {
 	public void simpleTrackFromReader() throws ReaderException, IOException {
 		
 		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/track1.bed")));
-		this.connector = (TrackConnector<NamedEntity, Entity>)reader.getDefaultConnector();
+		this.connector = (BedConnector<NamedEntity, Entity>)reader.getDefaultConnector();
 		List<Entity> lines = reader.stream().flatMap(b->connector.apply(b)).collect(Collectors.toList());
 
 		assertEquals(1, lines.stream().filter(e->e instanceof Track).count());

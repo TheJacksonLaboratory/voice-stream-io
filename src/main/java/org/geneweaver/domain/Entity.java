@@ -18,6 +18,8 @@
  */
 package org.geneweaver.domain;
 
+import java.util.Iterator;
+
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 
@@ -70,7 +72,7 @@ public interface Entity {
 	 */
 	@JsonIgnore
 	default String getHeader() {
-		return null; // TODO
+		return null; 
 	}
 	
 	/**
@@ -81,7 +83,26 @@ public interface Entity {
 	 */
 	@JsonIgnore
 	default String toCsv() {
-		return null; // TODO
+		return null; 
+	}
+	
+	/**
+	 * Interleave the values with the delimiter and return
+	 * as a string without a terminating delim.
+	 * @param values
+	 * @return
+	 */
+	default String delimify(Object... values) {
+		
+		StringBuilder buf = new StringBuilder();
+		buf.append(values[0]);
+		if (values.length>1) {
+			for (int i = 1; i < values.length; i++) {
+				buf.append(getDelimiter());
+				buf.append(values[i]);
+			}
+		}
+		return buf.toString();
 	}
 	
 	/**

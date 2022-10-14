@@ -14,7 +14,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.target>11</maven.compiler.target>
 		<maven.compiler.source>11</maven.compiler.source>
-		<neo4j-ogm.version>3.2.28</neo4j-ogm.version>
+		<neo4j-ogm.version>3.2.37</neo4j-ogm.version>
 	</properties>
 
 	<description>The IO bundle for Geneweaver.</description>
@@ -128,14 +128,14 @@
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
-			<version>5.0.0</version>
+			<version>5.2.3</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
 		<dependency>
 		    <groupId>com.h2database</groupId>
 		    <artifactId>h2</artifactId>
-		    <version>2.1.210</version>
+		    <version>2.1.214</version>
 		</dependency>	
 			
 		<!-- https://mvnrepository.com/artifact/com.github.samtools/htsjdk -->
@@ -151,7 +151,7 @@
 		<dependency>
 			<groupId>uk.co.jemos.podam</groupId>
 			<artifactId>podam</artifactId>
-			<version>7.2.6.RELEASE</version>
+			<version>7.2.10.RELEASE</version>
 			<scope>test</scope>
 		</dependency>
 

@@ -19,9 +19,15 @@
 package org.geneweaver.io.reader;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.geneweaver.domain.NamedEntity;
@@ -117,6 +123,120 @@ public class BedReaderTest extends AbstractDataFileTest {
 
 		assertEquals(0, lines.stream().filter(e->e instanceof Track).count());
 		assertEquals(190, lines.stream().filter(e->e instanceof Region).count());
+	}
+
+	@Test
+	public void peaksOneFileHomoSap() throws Exception {
+		StreamReader<Region> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", 
+															getPath("data/bed_peaks/homo_sapiens/A549/BCL3/homo_sapiens.GRCh38.A549.BCL3.SWEmbl_R0005.peaks.20210107.bed.gz")));
+		List<Region> peaks = reader.stream().collect(Collectors.toList());
+		assertEquals(5737, peaks.size());	
+		peaks.stream().allMatch(p->"A549".equals(p.getEpigenome()));
+		peaks.stream().allMatch(p->"BCL3".equals(p.getFeatureType()));
+	}
+	
+	@Test
+	public void peaksOneMusMus() throws Exception {
+		StreamReader<Region> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", 
+				getPath("data/bed_peaks/mus_musculus/CH12_LX/BHLHE40/mus_musculus.GRCm39.CH12_LX.BHLHE40.SWEmbl_R0005.peaks.20201021.bed.gz")));
+		List<Region> peaks = reader.stream().collect(Collectors.toList());
+		assertEquals(33350, peaks.size());	
+		peaks.stream().allMatch(p->"CH12_LX".equals(p.getEpigenome()));
+		peaks.stream().allMatch(p->"BHLHE40".equals(p.getFeatureType()));
+	}
+
+	@Test
+	public void allTestPeaksHomoSap() throws Exception {
+		testDir("Homo sapiens", getPath("data/bed_peaks/homo_sapiens/"));
+	}
+
+	@Test
+	public void allTestPeaksMusMus() throws Exception {
+		testDir("Mus musculus", getPath("data/bed_peaks/mus_musculus/"));
+	}
+
+	private void testDir(String sname, Path sdir) throws IOException {
+		Files.list(sdir).forEach(edir->{
+			if (!Files.isDirectory(edir)) return;
+			try {
+				testFeatureDir(sname, edir);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		});
+	}
+
+	private void testFeatureDir(String sname, Path edir) throws IOException {
+		Files.list(edir).forEach(fdir->{
+			if (!Files.isDirectory(fdir)) return;
+			try {
+				testDir(sname, edir.getFileName().toString(), fdir);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		});
+	}
+
+	private void testDir(String sname, String ename, Path fdir) throws IOException {
+		// In Ensembl dirs are named <Epigenome>/<FeatureType>/*.bed.gz
+		String fname = fdir.getFileName().toString();
+		
+		Files.list(fdir).forEach(bed -> {
+			if (Files.isDirectory(bed)) return;
+			if (!bed.getFileName().toString().endsWith(".bed.gz")) return;
+			try {
+				StreamReader<Region> reader = ReaderFactory.getReader(new ReaderRequest(sname, bed));
+				List<Region> peaks = reader.stream().collect(Collectors.toList());
+				peaks.stream().allMatch(p->ename.equals(p.getEpigenome()));
+				peaks.stream().allMatch(p->fname.equals(p.getFeatureType()));
+				
+				List<Region> withDes = peaks.stream().filter(p->p.getTissueDescription()!=null).collect(Collectors.toList());
+				if (withDes.size() <= 0) fail("Could not find description for "+ename);
+				
+				System.out.println("Tested: "+bed);
+			} catch (ReaderException | IOException e) {
+				throw new RuntimeException(e);
+			}
+
+		});
+	}
+	
+	@Test
+	public void testHomoSapDescriptions() throws Exception {
+		BedReader<Region> reader = new BedReader<>();
+		Map<String,String> des = reader.getEpigenomeDescriptions("Homo sapiens");
+		assertNotNull(des);
+		des.keySet().forEach(key->{
+			assertTrue(key+" has unexpected characters", key.matches("[a-z0-9]+"));
+		});
+		
+		String descr = des.get(BedReader.getKey("GM18505"));
+		String expected = "B-lymphoblastoid cell line, International HapMap Project, Yoruba in Ibadan, Nigera, treatment: Epstein-Barr Virus transformed";
+		assertEquals(expected, descr);
+		
+		descr = des.get(BedReader.getKey("EM CD4+ ab T (PB)"));
+		expected = "Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Primary T Cells Effector/Memory Enriched from Peripheral Blood using donors/samples:62;332";
+		assertEquals(expected, descr);
+
+	}
+	
+	@Test
+	public void testMusMusDescriptions() throws Exception {
+		BedReader<Region> reader = new BedReader<>();
+		Map<String,String> des = reader.getEpigenomeDescriptions("Mus musculus");
+		assertNotNull(des);
+		des.keySet().forEach(key->{
+			assertTrue(key+" has unexpected characters", key.matches("[a-z0-9]+"));
+		});
+		
+		String descr = des.get(BedReader.getKey("thymus adult"));
+		String expected = "Mouse thymus from adult 8 weeks";
+		assertEquals(expected, descr);
+		
+		descr = des.get(BedReader.getKey("lung E15.5"));
+		expected = "Mouse lung from embryonic 15.5 days";
+		assertEquals(expected, descr);
+
 	}
 
 }

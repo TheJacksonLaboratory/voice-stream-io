@@ -1,0 +1,86 @@
+# From http://useast.ensembl.org/Mus_musculus/Experiment/Sources?db=core;ex=all
+NExper	Link	Epigenome	Type	Description
+8	Show	thymus adult	Cell/Tissue	Mouse thymus from adult 8 weeks
+11	Show	stomach P0	Cell/Tissue	Mouse stomach from postnatal 0 days
+8	Show	stomach E16.5	Cell/Tissue	Mouse stomach from embryonic 16.5 days
+8	Show	stomach E15.5	Cell/Tissue	Mouse stomach from embryonic 15.5 days
+8	Show	stomach E14.5	Cell/Tissue	Mouse stomach from embryonic 14.5 days
+8	Show	spleen adult	Cell/Tissue	Mouse spleen from adult 8 weeks
+124	Show	Open chromatin & TFBS	Evidence type	Open chromatin & Transcription factor binding sites
+8	Show	neural tube E15.5	Cell/Tissue	Mouse neural tube from embryonic 15.5 days
+8	Show	neural tube E14.5	Cell/Tissue	Mouse neural tube from embryonic 14.5 days
+8	Show	neural tube E13.5	Cell/Tissue	Mouse neural tube from embryonic 13.5 days
+8	Show	neural tube E12.5	Cell/Tissue	Mouse neural tube from embryonic 12.5 days
+9	Show	neural tube E11.5	Cell/Tissue	Mouse neural tube from embryonic 11.5 days
+10	Show	midbrain P0	Cell/Tissue	Mouse midbrain from postnatal 0 days
+8	Show	midbrain E16.5	Cell/Tissue	Mouse midbrain from embryonic 16.5 days
+8	Show	midbrain E15.5	Cell/Tissue	Mouse midbrain from embryonic 15.5 days
+9	Show	midbrain E14.5	Cell/Tissue	Mouse midbrain from embryonic 14.5 days
+8	Show	midbrain E13.5	Cell/Tissue	Mouse midbrain from embryonic 13.5 days
+8	Show	midbrain E12.5	Cell/Tissue	Mouse midbrain from embryonic 12.5 days
+9	Show	midbrain E11.5	Cell/Tissue	Mouse midbrain from embryonic 11.5 days
+6	Show	midbrain E10.5	Cell/Tissue	Mouse midbrain from embryonic 10.5 days
+45	Show	MEL cell line	Cell/Tissue	Mouse MEL cell line
+11	Show	lung P0	Cell/Tissue	Mouse lung from postnatal 0 days
+8	Show	lung E16.5	Cell/Tissue	Mouse lung from embryonic 16.5 days
+8	Show	lung E15.5	Cell/Tissue	Mouse lung from embryonic 15.5 days
+10	Show	lung E14.5	Cell/Tissue	Mouse lung from embryonic 14.5 days
+11	Show	liver P0	Cell/Tissue	Mouse liver from postnatal 0 days
+8	Show	liver E16.5	Cell/Tissue	Mouse liver from embryonic 16.5 days
+8	Show	liver E15.5	Cell/Tissue	Mouse liver from embryonic 15.5 days
+11	Show	liver E14.5	Cell/Tissue	Mouse liver from embryonic 14.5 days
+8	Show	liver E13.5	Cell/Tissue	Mouse liver from embryonic 13.5 days
+8	Show	liver E12.5	Cell/Tissue	Mouse liver from embryonic 12.5 days
+8	Show	liver E11.5	Cell/Tissue	Mouse liver from embryonic 11.5 days
+9	Show	liver adult	Cell/Tissue	Mouse liver from adult 8 weeks
+8	Show	limb E15.5	Cell/Tissue	Mouse limb from embryonic 15.5 days
+9	Show	limb E14.5	Cell/Tissue	Mouse limb from embryonic 14.5 days
+8	Show	limb E13.5	Cell/Tissue	Mouse limb from embryonic 13.5 days
+8	Show	limb E12.5	Cell/Tissue	Mouse limb from embryonic 12.5 days
+9	Show	limb E11.5	Cell/Tissue	Mouse limb from embryonic 11.5 days
+6	Show	limb E10.5	Cell/Tissue	Mouse limb from embryonic 10.5 days
+10	Show	kidney P0	Cell/Tissue	Mouse kidney from postnatal 0 days
+8	Show	kidney E16.5	Cell/Tissue	Mouse kidney from embryonic 16.5 days
+8	Show	kidney E15.5	Cell/Tissue	Mouse kidney from embryonic 15.5 days
+8	Show	kidney E14.5	Cell/Tissue	Mouse kidney from embryonic 14.5 days
+8	Show	kidney adult	Cell/Tissue	Mouse kidney from adult 8 weeks
+9	Show	intestine P0	Cell/Tissue	Mouse intestine from postnatal 0 days
+8	Show	intestine E16.5	Cell/Tissue	Mouse intestine from embryonic 16.5 days
+8	Show	intestine E15.5	Cell/Tissue	Mouse intestine from embryonic 15.5 days
+8	Show	intestine E14.5	Cell/Tissue	Mouse intestine from embryonic 14.5 days
+620	Show	Hists & Pols	Evidence type	Histone modifications & RNA polymerases
+10	Show	hindbrain P0	Cell/Tissue	Mouse hindbrain from postnatal 0 days
+8	Show	hindbrain E16.5	Cell/Tissue	Mouse hindbrain from embryonic 16.5 days
+8	Show	hindbrain E15.5	Cell/Tissue	Mouse hindbrain from embryonic 15.5 days
+9	Show	hindbrain E14.5	Cell/Tissue	Mouse hindbrain from embryonic 14.5 days
+8	Show	hindbrain E13.5	Cell/Tissue	Mouse hindbrain from embryonic 13.5 days
+8	Show	hindbrain E12.5	Cell/Tissue	Mouse hindbrain from embryonic 12.5 days
+9	Show	hindbrain E11.5	Cell/Tissue	Mouse hindbrain from embryonic 11.5 days
+6	Show	hindbrain E10.5	Cell/Tissue	Mouse hindbrain from embryonic 10.5 days
+11	Show	heart P0	Cell/Tissue	Mouse heart from postnatal 0 days
+8	Show	heart E16.5	Cell/Tissue	Mouse heart from embryonic 16.5 days
+8	Show	heart E15.5	Cell/Tissue	Mouse heart from embryonic 15.5 days
+8	Show	heart E14.5	Cell/Tissue	Mouse heart from embryonic 14.5 days
+8	Show	heart E13.5	Cell/Tissue	Mouse heart from embryonic 13.5 days
+8	Show	heart E12.5	Cell/Tissue	Mouse heart from embryonic 12.5 days
+8	Show	heart E11.5	Cell/Tissue	Mouse heart from embryonic 11.5 days
+6	Show	heart E10.5	Cell/Tissue	Mouse heart from embryonic 10.5 days
+10	Show	heart adult	Cell/Tissue	Mouse heart from adult 8 weeks
+10	Show	forebrain P0	Cell/Tissue	Mouse forebrain from postnatal 0 days
+8	Show	forebrain E16.5	Cell/Tissue	Mouse forebrain from embryonic 16.5 days
+8	Show	forebrain E15.5	Cell/Tissue	Mouse forebrain from embryonic 15.5 days
+9	Show	forebrain E14.5	Cell/Tissue	Mouse forebrain from embryonic 14.5 days
+8	Show	forebrain E13.5	Cell/Tissue	Mouse forebrain from embryonic 13.5 days
+8	Show	forebrain E12.5	Cell/Tissue	Mouse forebrain from embryonic 12.5 days
+8	Show	forebrain E11.5	Cell/Tissue	Mouse forebrain from embryonic 11.5 days
+6	Show	forebrain E10.5	Cell/Tissue	Mouse forebrain from embryonic 10.5 days
+10	Show	ES-Bruce4 E	Cell/Tissue	Mouse ES-Bruce4 from embryonic
+744	Show	ENCODE	Project	The ENCODE Project
+8	Show	embryonic facial prominence E15.5	Cell/Tissue	Mouse embryonic facial prominence from embryonic 15.5 days
+9	Show	embryonic facial prominence E14.5	Cell/Tissue	Mouse embryonic facial prominence from embryonic 14.5 days
+8	Show	embryonic facial prominence E13.5	Cell/Tissue	Mouse embryonic facial prominence from embryonic 13.5 days
+8	Show	embryonic facial prominence E12.5	Cell/Tissue	Mouse embryonic facial prominence from embryonic 12.5 days
+9	Show	embryonic facial prominence E11.5	Cell/Tissue	Mouse embryonic facial prominence from embryonic 11.5 days
+6	Show	embryonic facial prominence E10.5	Cell/Tissue	Mouse embryonic facial prominence from embryonic 10.5 days
+44	Show	CH12.LX	Cell/Tissue	Mouse CH12.LX
+2	Show	bone marrow adult	Cell/Tissue	Mouse bone marrow from adult 8 weeks

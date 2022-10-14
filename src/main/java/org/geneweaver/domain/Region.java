@@ -20,10 +20,15 @@ package org.geneweaver.domain;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.annotation.processing.Generated;
 
+import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * 
@@ -32,7 +37,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
  * Required fields
 The first three fields in each feature line are required:
 
-chrom - name of the chromosome or scaffold. Any valid seq_region_name can be used, and chromosome names can be given with or without the 'chr' prefix.
+chr - name of the chromosome or scaffold. Any valid seq_region_name can be used, and chromosome names can be given with or without the 'chr' prefix.
 chromStart - Start position of the feature in standard chromosomal coordinates (i.e. first base is 0).
 chromEnd - End position of the feature in standard chromosomal coordinates
 chr1  213941196  213942363
@@ -66,7 +71,7 @@ chr7  127478198  127479365  Neg3  0  -  127478198  127479365  0,0,255
 chr7  127479365  127480532  Pos5  0  +  127479365  127480532  255,0,0
 chr7  127480532  127481699  Neg4  0  -  127480532  127481699  0,0,255
 
-chrom
+chr
 start
 end
 name
@@ -87,24 +92,61 @@ blockStarts
 @NodeEntity(label="Region")
 public class Region  extends NamedEntity {
 
+
+	@Index(unique=true)
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private UUID peakId;
+
 	/**
-	 * name of the chromosome or scaffold. Any valid seq_region_name can be used, and chromosome names can be given with or without the 'chr' prefix.
+	 * The epigenome code from ensembl 
+	 * E.g. A673/ sigmoid_colon/  etc. corresponding to the directory name in the source data.
+	 * This property is called 'epigenome' in the gff format.
 	 */
-	private String chrom;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String epigenome;
+	
+	/**
+	 * The epigenome description from ensembl 
+	 * E.g. @see http://useast.ensembl.org/Homo_sapiens/Experiment/Sources?db=core;ex=all and 
+	 * 		@see http://useast.ensembl.org/Mus_musculus/Experiment/Sources?db=core;ex=all
+	 */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String tissueDescription;
+	
+	/**
+	 * The epigenome description from ensembl, usually something like "Cell/Tissue"
+	 * E.g. @see http://useast.ensembl.org/Homo_sapiens/Experiment/Sources?db=core;ex=all and 
+	 * 		@see http://useast.ensembl.org/Mus_musculus/Experiment/Sources?db=core;ex=all
+	 */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String filterType;
+
+	/**
+	 * The subdir of the new data sources e.g. H3K4me1
+	 */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String featureType;
+
+    /** The chromosome e.g. chr1 or X. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+ 	private String chr;
 	
 	/**
 	 * Start position of the feature in standard chromosomal coordinates (i.e. first base is 0).
 	 */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private int start;
 	
 	/**
 	 * End position of the feature in standard chromosomal coordinates.
 	 */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private int end;
 	
 	/**
 	 * A score between 0 and 1000. See track lines, below, for ways to configure the display style of scored data.
 	 */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private int score;
 	
 	/**
@@ -152,6 +194,12 @@ public class Region  extends NamedEntity {
 			if ("-".equals(seg)) return REVERSE; 
 			return null; // They can choose to put null/none etc.
 		}
+		
+		public String toString() {
+			if (this==FORWARD) return "+";
+			if (this==REVERSE) return "-";
+			return null;
+		}
 	}
 
 	public Region() {
@@ -160,7 +208,7 @@ public class Region  extends NamedEntity {
 
 	public Region(String species, String chr, int start, int end, String name, int score, Strand strand, int thickStart, int thickEnd) {
 		setSpecies(species);
-		this.chrom = chr;
+		this.chr = chr;
 		this.start = start;
 		this.end = end;
 		this.setName(name);
@@ -170,20 +218,74 @@ public class Region  extends NamedEntity {
 		this.thickEnd = thickEnd;
 	}
 
+	public Region(String speakId, int low, int high) {
+		this.peakId = UUID.fromString(speakId);
+		this.start = low;
+		this.end = high;
+	}
 
 	/**
-	 * @return the chrom
+	 * Gets the header.
+	 *
+	 * @return the header
 	 */
-	public String getChrom() {
-		return chrom;
+	@Override
+	public String getHeader() {
+		StringBuilder buf = new StringBuilder();
+		String fields = delimify("peakId:ID(Peak-Id)",
+				"epigenome", "tissueDescription", "featureType", "filterType",
+				"start", "end", "chr", "score", "strand");
+		buf.append(fields);
+		
+		String sheader = super.getHeader();
+		if (sheader!=null) {
+			buf.append(getDelimiter());
+			buf.append(sheader);
+		}
+		return buf.toString();
+	}
+	
+	/**
+	 * To csv.
+	 *
+	 * @return the string
+	 */
+	@Override
+	public String toCsv() {
+		
+		StringBuilder buf = new StringBuilder();
+		String values = delimify(getPeakId(),
+				getEpigenome(), getTissueDescription(), getFeatureType(), getFilterType(),
+				getStart(), getEnd(), getChr(), getScore(), strandCharacter(getStrand()));
+		buf.append(values);
+		
+		String scsv = super.toCsv();
+		if (scsv!=null) {
+			buf.append(getDelimiter());
+			buf.append(scsv);
+		}
+		return buf.toString();
+	}
+
+	@JsonIgnore
+	private String strandCharacter(Strand s) {
+		if (s==null) return null;
+		return s.toString();
+	}
+
+	/**
+	 * @return the chr
+	 */
+	public String getChr() {
+		return chr;
 	}
 
 
 	/**
-	 * @param chrom the chrom to set
+	 * @param chr the chr to set
 	 */
-	public void setChrom(String chrom) {
-		this.chrom = chrom;
+	public void setChr(String chrom) {
+		this.chr = chrom;
 	}
 
 
@@ -353,7 +455,8 @@ public class Region  extends NamedEntity {
 		result = prime * result + Arrays.hashCode(blockSizes);
 		result = prime * result + Arrays.hashCode(blockStarts);
 		result = prime * result + Arrays.hashCode(itemRgb);
-		result = prime * result + Objects.hash(blockCount, chrom, end, score, start, strand, thickEnd, thickStart);
+		result = prime * result + Objects.hash(blockCount, chr, end, epigenome, featureType, filterType, peakId, score,
+				start, strand, thickEnd, thickStart, tissueDescription);
 		return result;
 	}
 
@@ -368,10 +471,82 @@ public class Region  extends NamedEntity {
 			return false;
 		Region other = (Region) obj;
 		return blockCount == other.blockCount && Arrays.equals(blockSizes, other.blockSizes)
-				&& Arrays.equals(blockStarts, other.blockStarts) && Objects.equals(chrom, other.chrom)
-				&& end == other.end && Arrays.equals(itemRgb, other.itemRgb) && score == other.score
-				&& start == other.start && strand == other.strand && thickEnd == other.thickEnd
-				&& thickStart == other.thickStart;
+				&& Arrays.equals(blockStarts, other.blockStarts) && Objects.equals(chr, other.chr) && end == other.end
+				&& Objects.equals(epigenome, other.epigenome) && Objects.equals(featureType, other.featureType)
+				&& Objects.equals(filterType, other.filterType) && Arrays.equals(itemRgb, other.itemRgb)
+				&& Objects.equals(peakId, other.peakId) && score == other.score && start == other.start
+				&& strand == other.strand && thickEnd == other.thickEnd && thickStart == other.thickStart
+				&& Objects.equals(tissueDescription, other.tissueDescription);
+	}
+
+	/**
+	 * @return the peakId
+	 */
+	public UUID getPeakId() {
+		return peakId;
+	}
+
+	/**
+	 * @param peakId the peakId to set
+	 */
+	public void setPeakId(UUID peakId) {
+		this.peakId = peakId;
+	}
+
+	/**
+	 * @return the epigenome
+	 */
+	public String getEpigenome() {
+		return epigenome;
+	}
+
+	/**
+	 * @param epigenome the epigenome to set
+	 */
+	public void setEpigenome(String epigenome) {
+		this.epigenome = epigenome;
+	}
+
+	/**
+	 * @return the tissueDescription
+	 */
+	public String getTissueDescription() {
+		return tissueDescription;
+	}
+
+	/**
+	 * @param tissueDescription the tissueDescription to set
+	 */
+	public void setTissueDescription(String tissueDescription) {
+		this.tissueDescription = tissueDescription;
+	}
+
+	/**
+	 * @return the featureType
+	 */
+	public String getFeatureType() {
+		return featureType;
+	}
+
+	/**
+	 * @param featureType the featureType to set
+	 */
+	public void setFeatureType(String featureType) {
+		this.featureType = featureType;
+	}
+
+	/**
+	 * @return the filterType
+	 */
+	public String getFilterType() {
+		return filterType;
+	}
+
+	/**
+	 * @param filterType the filterType to set
+	 */
+	public void setFilterType(String filterType) {
+		this.filterType = filterType;
 	}
 
 }

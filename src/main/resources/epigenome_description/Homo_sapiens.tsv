@@ -1,0 +1,155 @@
+# Taken from: http://useast.ensembl.org/Homo_sapiens/Experiment/Sources?db=core;ex=all
+NExper	Link	Epigenome	Type	Description
+1	Show	GM18505	Cell/Tissue	B-lymphoblastoid cell line, International HapMap Project, Yoruba in Ibadan, Nigera, treatment: Epstein-Barr Virus transformed
+8	Show	DND-41	Cell/Tissue	ENCODE Reference Epigenome of DND-41
+13	Show	myotube	Cell/Tissue	ENCODE Reference Epigenome of human skeletal muscle myoblast derived myotube
+7	Show	iPS DF 6.9	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for iPS DF 6.9 Cells using donors/samples:iPS-6.9-01;iPS-6.9-02
+5	Show	neurosphere (C)	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 4) for Cortex Derived Primary Cultured Neurospheres using donors/samples:HuFNSC02
+7	Show	NK (PB)	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Primary Natural Killer Cells from Peripheral Blood using donors/samples:RO_01679;RO_01701
+19	Show	HUVEC	Cell/Tissue	ENCODE Reference Epigenome of endothelial cell of umbilical vein
+6	Show	brain_1	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 3) for Fetal Brain Male using donors/samples:H-22510;UW_H22676
+1	Show	GM15510	Cell/Tissue	B-lymphoblastoid cell line, NIGMS Human Genetic Cell Repository, DNA Polymorphism Discovery Resource Collection, treatment: Epstein-Barr Virus transformed
+7	Show	M1 (VB)	Cell/Tissue	BLUEPRINT Epigenome for inflammatory macrophage from venous blood
+21	Show	NPC_3	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 1) for H1 Derived Neuronal Progenitor Cultured Cells using donors/samples:NPC-03;NPC-04;NPC-05;NPC-06
+6	Show	M1 (CB)	Cell/Tissue	BLUEPRINT Epigenome for inflammatory macrophage from cord blood
+7	Show	mononuclear (PB)	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 4) for Primary Mononuclear Cells from Peripheral Blood using donors/samples:TC010;TC012
+5	Show	EM CD8+ ab T (VB)	Cell/Tissue	BLUEPRINT Epigenome for effector memory CD8-positive, alpha-beta T cell from venous blood
+4	Show	CD38- naive B (CB)	Cell/Tissue	BLUEPRINT Epigenome for CD38-negative naive B cell from cord blood
+22	Show	trophoblast	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 1) for H1 Derived Trophoblast Cultured Cells using donors/samples:BMP4-05 ;BMP4-06; BMP4-09; BMP4-10
+5	Show	CMP CD4+_2	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Primary Hematopoietic Stem Cells Short Term Culture using donors/samples:123;cultured_CD34_2_20_09
+6	Show	aorta	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Aorta using donors/samples:STL003
+6	Show	CD4+ ab T (PB)_2	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Primary T Helper Memory Cells from Peripheral Blood 1 using donors/samples:62;332
+9	Show	hepatocyte	Cell/Tissue	ENCODE Reference Epigenome of human H9 derived hepatocyte
+6	Show	EM CD4+ ab T (PB)	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Primary T Cells Effector/Memory Enriched from Peripheral Blood using donors/samples:62;332
+156	Show	K562	Cell/Tissue	ENCODE Reference Epigenome of K562
+5	Show	neurosphere (GE)	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Ganglion Eminence Derived Primary Cultured Neurospheres using donors/samples:HuFNSC02
+5	Show	UCSF-4	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for ES-UCSF4 Cells using donors/samples:UCSF-4*_Cell_Line_hESC
+1	Show	PFSK-1	Cell/Tissue	Neuroectodermal cell line derived from a cerebral brain tumor
+68	Show	MCF-7	Cell/Tissue	ENCODE Reference Epigenome of MCF-7
+7	Show	large intestine	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Fetal Intestine Large using donors/samples:H-24595; H-23769
+8	Show	bipolar neuron	Cell/Tissue	ENCODE Reference Epigenome of human GM23338 derived bipolar neuron
+27	Show	HCT116	Cell/Tissue	ENCODE Reference epigenome for HCT116 (child)
+7	Show	small intestine_2	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Small Intestine using donors/samples:STL001; STL003
+6	Show	foreskin keratinocyte_1	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Foreskin Keratinocyte Primary Cells using donors/samples: skin02
+7	Show	iPS DF 19.11	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for iPS DF 19.11 Cells using donors/samples:iPS-19.11-01; iPS-19.11-02
+6	Show	naive B (VB)	Cell/Tissue	BLUEPRINT Epigenome for naive B cell from venous blood
+7	Show	neutrophil (VB)	Cell/Tissue	BLUEPRINT Epigenome for mature neutrophil from venous blood
+1	Show	Panc1	Cell/Tissue	Pancreatic Carcinoma
+7	Show	foreskin melanocyte_1	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 3) for Foreskin Melanocyte Primary Cells using donors/samples: skin01
+1	Show	Hu. Fe.	Cell/Tissue	ENCODE Reference Epigenome of IMR-90
+14	Show	keratinocyte	Cell/Tissue	ENCODE Reference Epigenome of keratinocyte
+6	Show	HUES64	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for HUES64 Cells using donors/samples:196;202;BioSam_825
+27	Show	H1-hESC_2	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 1) for H1 Cells using donors/samples:56; 68; 69; 27276; 27277; 35081; 35082; 35083; CDI-01; H1-02; H1-04; H1-05; H1-06; H1-07; H1-09; H1-10; H1-12; H1-13; hESC-01; HS0995; HS0998-1; HS1032-1; HS1345-1; HS1346-1; HS1347-1
+6	Show	EPC (VB)	Cell/Tissue	BLUEPRINT Epigenome for adult endothelial progenitor cell from venous blood
+8	Show	cardiac muscle	Cell/Tissue	ENCODE Reference Epigenome of human RUES2 derived cardiac muscle cell
+6	Show	mammary epithelial_2	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 3) for Breast variant Human Mammary Epithelial Cells (vHMEC) using donors/samples:RM035
+38	Show	IMR-90	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 1) for Fetal Lung Fibroblasts Cell Line using donors/samples:IMR90_r1;IMR90-04;IMR90-05;IMR90-06;IMR90-07
+7	Show	endodermal	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for hESC Derived CD184+ Endoderm Cultured Cells using donors/samples:262;263
+11	Show	dermal fibroblast	Cell/Tissue	ENCODE Reference Epigenome of fibroblast of dermis
+6	Show	iPS-15b	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for iPS-15b Cells using donors/samples:62
+5	Show	CD38- naive B (VB)	Cell/Tissue	BLUEPRINT Epigenome for CD38-negative naive B cell from venous blood
+6	Show	MSC (VB)	Cell/Tissue	BLUEPRINT Epigenome for mesenchymal stem cell of the bone marrow from venous blood
+53	Show	H1-hESC_3	Cell/Tissue	ENCODE Reference Epigenome of H1-hESC
+85	Show	HepG2	Cell/Tissue	ENCODE Reference Epigenome of HepG2
+37	Show	A549	Cell/Tissue	ENCODE Reference Epigenome of A549 (treated with 0.02% ethanol)
+6	Show	right ventricle	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Right Ventricle using donors/samples:STL001;STL003
+12	Show	mammary epithelial_1	Cell/Tissue	ENCODE Reference Epigenome of mammary epithelial cell
+6	Show	neutro myelocyte	Cell/Tissue	BLUEPRINT Epigenome for neutrophilic myelocyte from bone marrow
+5	Show	naive B (To)	Cell/Tissue	BLUEPRINT Epigenome for naive B cell from tonsil
+9	Show	PC-9	Cell/Tissue	ENCODE Reference epigenome of PC-9
+5	Show	CD4+ ab T (PB)_1	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Primary T Helper Cells from Peripheral Blood using donors/samples:62;332
+6	Show	spleen	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Spleen using donors/samples:STL003
+7	Show	CMP CD4+_1	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Primary Hematopoietic Stem Cells G-CSF-mobilized Female using donors/samples:RO_01480; RO_01508; RO_01536; RO_01549; UW_RO_01480
+1	Show	astrocyte cerebellum	Cell/Tissue	ENCODE astrocyte of the cerebellum
+7	Show	leg muscle	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Fetal Muscle Leg using donors/samples:H-24644
+7	Show	placenta	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Placenta using donors/samples:H-24996
+7	Show	stomach_2	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Gastric using donors/samples:STL003
+7	Show	pancreas	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Pancreas using donors/samples:STL003
+113	Show	GM12878	Cell/Tissue	ENCODE Reference Epigenome of GM12878
+27	Show	H9_1	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 1) for H9 Cells using donors/samples:H9-01;H9-02;H9-04
+6	Show	right atrium	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Right Atrium using donors/samples:STL003
+1	Show	GM19099	Cell/Tissue	B-lymphoblastoid cell line, International HapMap Project, Yoruba in Ibadan, Nigera, treatment: Epstein-Barr Virus transformed
+7	Show	stomach_1	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Fetal Stomach using donors/samples:H-24639;H-24683;H-24754;H-24776
+6	Show	Th17	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Primary T Helper 17 Cells PMA-I Stimulated using donors/samples:62;332
+7	Show	foreskin fibroblast_2	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 3) for Foreskin Fibroblast Primary Cells using donors/samples:skin01
+6	Show	thymus_1	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Thymus using donors/samples:STL001
+7	Show	monocyte (VB)	Cell/Tissue	BLUEPRINT Epigenome for CD14-positive, CD16-negative classical monocyte from venous blood
+6	Show	foreskin melanocyte_2	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 4) for Foreskin Melanocyte Primary Cells using donors/samples:skin03
+4	Show	SK-N-SH_RA	Cell/Tissue	Neuroblastoma cell line, treatment: differentiated with retinoic acid, (Biedler, et al. Morphology and Growth, Tumorigenicity, and Cytogenetics of Human Neuroblastoma Cells in Continuous Culture. Cancer Research 33, 2643-2652, November 1973.)
+6	Show	neutrophil (PB)	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Primary Neutrophils from Peripheral Blood using donors/samples:23
+7	Show	monocyte (CB)	Cell/Tissue	BLUEPRINT Epigenome for CD14-positive, CD16-negative classical monocyte from cord blood
+7	Show	Karpas-422	Cell/Tissue	ENCODE Reference epigenome of Karpas-422
+1	Show	GM19193	Cell/Tissue	B-lymphoblastoid cell line, International HapMap Project, Yoruba in Ibadan, Nigera, treatment: Epstein-Barr Virus transformed
+6	Show	CMP CD4+_3	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 3) for Primary hematopoietic Stem Cells G-CSF-mobilized Male using donors/samples:RO_01562
+7	Show	B (PB)	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Primary B cells from Peripheral Blood using donors/samples:RO_01679;RO_01701
+6	Show	eosinophil (VB)	Cell/Tissue	BLUEPRINT Epigenome for mature eosinophil from venous blood
+7	Show	trunk muscle	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Fetal Muscle Trunk using donors/samples:H-24851
+1	Show	pancreas_2	Cell/Tissue	ENCODE Reference Epigenome of pancreas (37 year old male)
+9	Show	PC-3	Cell/Tissue	ENCODE Reference epigenome of PC-3
+6	Show	amnion	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Placenta Amnion using donors/samples:CTL02
+6	Show	sigmoid colon	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Sigmoid Colon using donors/samples:STL001;STL003
+6	Show	CD4+ ab T	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Primary T Helper Cells PMA-I Stimulated using donors/samples:62;332
+6	Show	CM CD4+ ab T (VB)	Cell/Tissue	BLUEPRINT Epigenome for central memory CD4-positive, alpha-beta T cell from venous blood
+6	Show	mammary myoepithelial	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Breast Myoepithelial Primary Cells using donors/samples:RM066;RM081
+1	Show	GM18951	Cell/Tissue	B-lymphoblastoid cell line, International HapMap Project, Japanese in Tokyo, Japan, treatment: Epstein-Barr Virus transformed
+7	Show	iPS-20b	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 4) for iPS-20b Cells
+6	Show	M0 (CB)	Cell/Tissue	BLUEPRINT Epigenome for macrophage from cord blood
+50	Show	HeLa-S3	Cell/Tissue	ENCODE Reference Epigenome of HeLa-S3
+6	Show	H9_2	Cell/Tissue	ENCODE Reference Epigenome of H9
+7	Show	M0 (VB)	Cell/Tissue	BLUEPRINT Epigenome for macrophage from venous blood
+6	Show	CD4+ ab T (Th)	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Primary T Helper Naive Cells from Peripheral Blood using donors/samples:62;332
+9	Show	MM.1S	Cell/Tissue	ENCODE Reference epigenome of MM.1S
+6	Show	esophagus	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Esophagus using donors/samples:STL003
+7	Show	small intestine_1	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Fetal Intestine Small using donors/samples:H-24595; H-23769
+6	Show	HUES48	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for HUES48 Cells using donors/samples:197;201;BioSam_824
+8	Show	foreskin fibroblast_1	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 3) for Foreskin Fibroblast Primary Cells using donors/samples:skin02
+7	Show	psoas muscle	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Psoas Muscle using donors/samples:STL001; STL003
+1	Show	T	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 3) for Primary T cells from Cord Blood using donors/samples:CD3_39661;CD3_39804;CD3_39811;CD3_39840
+7	Show	CD8+ ab T (CB)	Cell/Tissue	BLUEPRINT Epigenome for CD8-positive, alpha-beta T cell from cord blood
+14	Show	HSMM	Cell/Tissue	ENCODE Reference Epigenome of skeletal muscle myoblast
+5	Show	neuron	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for H9 Derived Neuron Cultured Cells using donors/samples:113
+20	Show	MSC	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 1) for H1 Derived Mesenchymal Stem Cells using donors/samples:MSC-01;MSC-02
+1	Show	transverse colon	Cell/Tissue	ENCODE transverse colon male adult (37 years)
+1	Show	GM10847	Cell/Tissue	B-lymphoblastoid cell line, International HapMap Project, CEPH/Utah, treatment: Epstein-Barr Virus transformed; treated with TNFa
+7	Show	adrenal gland	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Fetal Adrenal Gland using donors/samples:H-24800; H-22662
+8	Show	osteoblast	Cell/Tissue	ENCODE Reference Epigenome of osteoblast
+9	Show	NPC_2	Cell/Tissue	ENCODE Reference Epigenome of human H9 derived neural progenitor cell
+33	Show	SK-N.	Cell/Tissue	ENCODE Reference Epigenome of SK-N-SH
+6	Show	M2 (CB)	Cell/Tissue	BLUEPRINT Epigenome for alternatively activated macrophage from cord blood
+11	Show	CD14+ monocyte_1	Cell/Tissue	ENCODE Reference Epigenome of CD14-positive monocyte
+7	Show	T (PB)	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Primary T Cells from Peripheral Blood using donors/samples:RO_01679; RO_01701
+6	Show	lung_2	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Lung using donors/samples:STL002
+5	Show	germinal matrix	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Brain Germinal Matrix using donors/samples:HuFGM02
+5	Show	CD4+ ab T (CB)	Cell/Tissue	BLUEPRINT Epigenome for CD4-positive, alpha-beta T cell from cord blood
+6	Show	HUVEC-prol (CB)	Cell/Tissue	BLUEPRINT Epigenome for endothelial cell of umbilical vein (proliferating) from cord blood
+6	Show	EB (CB)	Cell/Tissue	BLUEPRINT Epigenome for erythroblast from cord blood
+7	Show	heart	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 3) for Fetal Heart using donors/samples:H-22727; H-23524; UW_H23914; H-23468
+11	Show	NHLF	Cell/Tissue	ENCODE Reference Epigenome of fibroblast of lung
+7	Show	M2 (VB)	Cell/Tissue	BLUEPRINT Epigenome for alternatively activated macrophage from venous blood
+6	Show	left ventricle	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Left Ventricle using donors/samples:STL001;STL003
+2	Show	endocrine pancreas	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 4) for Pancreatic Islets using donors/samples:pancreatic_islets_normal_0/0/00; pancreatic_islets_normal_3/27/09; ZD4_273
+7	Show	ovary	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Ovary
+7	Show	lung_1	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 3) for Fetal Lung using donors/samples:H-22727; UW_H23266; UW_H23284
+6	Show	HUES6	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for HUES6 Cells using donors/samples:199;207
+4	Show	GM12892	Cell/Tissue	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah pedigree 1463, treatment: Epstein-Barr Virus transformed
+6	Show	foreskin keratinocyte_2	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 2) for Foreskin Keratinocyte Primary Cells using donors/samples:skin03
+5	Show	NPC_1	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for H9 Derived Neuronal Progenitor Cultured Cells using using donors/samples:113
+6	Show	CD4+ ab T (VB)	Cell/Tissue	BLUEPRINT Epigenome for CD4-positive, alpha-beta T cell from venous blood
+7	Show	thymus_2	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Fetal Thymus using donors/samples:H-24644
+7	Show	CD14+ monocyte (PB)	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Primary Monocytes from Peripheral Blood using donors/samples:RO_01701;RO_01721
+6	Show	GM12891	Cell/Tissue	B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah pedigree 1463, treatment: Epstein-Barr Virus transformed
+5	Show	CD4+ CD25+ ab Treg (PB)	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 5) for Primary T Regulatory Cells from Peripheral Blood using donors/samples:62;332
+7	Show	kidney	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 3) for Fetal Kidney using donors/samples:H-22676
+9	Show	A673	Cell/Tissue	ENCODE Reference Epigenome of A673
+6	Show	CD8+ ab T (PB)	Cell/Tissue	Roadmap Epigenomics Mapping Consortium Epigenome (Class 4) for Primary T CD8+ Naive Cells from Peripheral Blood using donors/samples:Donor_100_7_pooled_leukopaks_Jan_7_2011;Donor_101_8_pooled_leukopaks_Jan_20_2011;TC001;TC010
+6	Show	neutrophil (CB)	Cell/Tissue	BLUEPRINT Epigenome for mature neutrophil from cord blood
+4	Show	CD8+ ab T (VB)	Cell/Tissue	BLUEPRINT Epigenome for CD8-positive, alpha-beta T cell from venous blood
+1	Show	GM18526	Cell/Tissue	B-lymphoblastoid cell line, International HapMap Project, Han Chinese in Beijing, China, treatment: Epstein-Barr Virus transformed
+9	Show	B	Cell/Tissue	ENCODE Reference Epigenome of B cell
+12	Show	astrocyte	Cell/Tissue	ENCODE Reference Epigenome of astrocyte
+1	Show	astrocyte spinal cord	Cell/Tissue	ENCODE astrocyte of the spinal cord
+710	Show	Open chromatin & TFBS	Evidence type	Open chromatin & Transcription factor binding sites
+895	Show	Hists & Pols	Evidence type	Histone modifications & RNA polymerases
+873	Show	ENCODE	Project	The ENCODE Project
+155	Show	BLUEPRINT	Project	A BLUEPRINT of Haematopoietic Epigenomes
+577	Show	Roadmap Epigenomics	Project	The NIH Roadmap Epigenomics Mapping Consortium

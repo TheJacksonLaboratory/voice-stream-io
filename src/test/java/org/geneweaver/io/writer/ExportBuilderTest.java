@@ -5,11 +5,15 @@ import static org.geneweaver.io.DirectSave.save;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.io.Timer;
 import org.geneweaver.io.reader.AbstractDataFileTest;
@@ -150,5 +154,49 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 			ne.printStackTrace();
 			return "Cannot write bulk file(s) for '"+input.getFileName();
 		}
+	}
+	
+	@Test
+	public void testHumanBedFiles() throws Exception {
+		
+		// recursively process all bed files.
+		testBedExport("data/bed_peaks/homo_sapiens/");
+	}
+	
+	@Test
+	public void testMouseBedFiles() throws Exception {
+		
+		// recursively process all bed files.
+		testBedExport("data/bed_peaks/mus_musculus/");
+	}
+
+
+	private void testBedExport(String spath) throws Exception {
+		
+		Path bedDir = getPath(spath);
+		List<Path> bfiles = new LinkedList<>();
+		Files.walk(bedDir).forEach(f -> {
+			if (f.getFileName().toString().toLowerCase().endsWith(".bed.gz")) {
+				bfiles.add(f);
+			}
+		});
+		
+		Path dir = Paths.get("./tmp/testBedExport");
+		FileUtils.deleteQuietly(dir.toFile());
+		dir.toFile().mkdirs();
+
+		try(ExportBuilder builder = new ExportBuilder().setSpecies("Homo sapiens")
+				   .setChunkProperty("1000")
+				   .setDir(dir)
+				   .setInputs(bfiles)
+				   .setDefaultChunkSize(10000)
+				   .setExporter((b,path)->exportNoConnector(dir, b, path))) {
+			
+			builder.export();
+		}
+		
+		assertTrue(Files.exists(dir.resolve("Region.csv.gz")));
+		assertTrue(Files.size(dir.resolve("Region.csv.gz"))>10000);
+		assertTrue(Files.exists(dir.resolve("Region-header.csv")));
 	}
 }

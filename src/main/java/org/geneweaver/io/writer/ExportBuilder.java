@@ -6,7 +6,9 @@ import java.io.BufferedWriter;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -37,7 +39,7 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * Iterable of paths from which we will export.
 	 */
-	private Iterable<Path> inputs;
+	private Collection<Path> inputs;
 	
 	/**
 	 * The chunk size if there is none on the command line.
@@ -147,7 +149,7 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * @param inputs the inputs to set
 	 */
-	public ExportBuilder setInputs(Iterable<Path> inputs) {
+	public ExportBuilder setInputs(Collection<Path> inputs) {
 		this.inputs = inputs;
 		return this;
 	}
@@ -157,6 +159,24 @@ public class ExportBuilder implements AutoCloseable {
 	 */
 	public ExportBuilder setInput(Path input) {
 		this.inputs = Arrays.asList(input);
+		return this;
+	}
+
+	/**
+	 * @param inputs the inputs to set
+	 */
+	public ExportBuilder addInput(Path input) {
+		if (this.inputs==null) this.inputs = new LinkedList<>();
+		this.inputs.add(input);
+		return this;
+	}
+	
+	/**
+	 * @param inputs the inputs to set
+	 */
+	public ExportBuilder addInputs(Collection<Path> inputs) {
+		if (this.inputs==null) this.inputs = new LinkedList<>();
+		this.inputs.addAll(inputs);
 		return this;
 	}
 

@@ -36,7 +36,7 @@ import org.neo4j.ogm.session.Session;
  * @author gerrim
  *
  */
-public class TrackConnector<N extends NamedEntity, E extends Entity> implements Connector<N, E>, Function<N, Stream<E>> {
+public class BedConnector<N extends NamedEntity, E extends Entity> implements Connector<N, E>, Function<N, Stream<E>> {
 	
 	
 	private Track currentTrack;
