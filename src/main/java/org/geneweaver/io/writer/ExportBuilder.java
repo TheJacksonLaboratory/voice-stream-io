@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author gerrim
  *
  */
-public class ExportBuilder implements AutoCloseable {
+public class ExportBuilder<F> implements AutoCloseable {
 
 	/**
 	 * The directory in which to export
@@ -40,6 +40,11 @@ public class ExportBuilder implements AutoCloseable {
 	 * Iterable of paths from which we will export.
 	 */
 	private Collection<Path> inputs;
+	
+	/**
+	 * If the connectors are different from the default connector.
+	 */
+	private Collection<Function<Entity, Stream<Entity>>> connectors;
 	
 	/**
 	 * The chunk size if there is none on the command line.
@@ -96,14 +101,23 @@ public class ExportBuilder implements AutoCloseable {
 	protected String defaultExport(Path input, boolean append) throws Exception {
 		
 	    StreamReader<Entity> reader = createReader(input);
-	    Function<Entity, Stream<Entity>> connector = reader.getDefaultConnector();
+	    
+	    Collection<Function<Entity, Stream<Entity>>> conns = null;
+	    if (this.connectors==null || this.connectors.isEmpty()) {
+	    	conns = Arrays.asList(reader.getDefaultConnector());
+	    } else {
+	    	conns = this.connectors;
+	    }
 		
 		Timer timer = createTimer();
 		
-		long saved = reader.stream()
-							.flatMap(g->connector.apply(g))
-							.map(g->save(g, writers, dir, timer, append))
-							.count();
+		Stream<Entity> stream = reader.stream();
+		for (Function<Entity, Stream<Entity>> c : conns) {
+			stream = stream.flatMap(g->c.apply(g));
+		}
+		
+		long saved = stream.map(g->save(g, writers, dir, timer, append))
+						   .count();
 
 		return "Wrote bulk file(s) for '"+input.getFileName()+"' in "+timer.getFormattedTime()+" parsed "+saved+" objects.";
 	}
@@ -134,7 +148,7 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * @param dir the dir to set
 	 */
-	public ExportBuilder setDir(Path dir) {
+	public ExportBuilder<F> setDir(Path dir) {
 		this.dir = dir;
 		return this;
 	}
@@ -149,7 +163,7 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * @param inputs the inputs to set
 	 */
-	public ExportBuilder setInputs(Collection<Path> inputs) {
+	public ExportBuilder<F> setInputs(Collection<Path> inputs) {
 		this.inputs = inputs;
 		return this;
 	}
@@ -157,7 +171,7 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * @param inputs the inputs to set
 	 */
-	public ExportBuilder setInput(Path input) {
+	public ExportBuilder<F> setInput(Path input) {
 		this.inputs = Arrays.asList(input);
 		return this;
 	}
@@ -165,16 +179,27 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * @param inputs the inputs to set
 	 */
-	public ExportBuilder addInput(Path input) {
+	public ExportBuilder<F> addInput(Path input) {
 		if (this.inputs==null) this.inputs = new LinkedList<>();
 		this.inputs.add(input);
 		return this;
 	}
 	
+
 	/**
 	 * @param inputs the inputs to set
 	 */
-	public ExportBuilder addInputs(Collection<Path> inputs) {
+	public ExportBuilder<F> addConnector(Function<Entity, Stream<Entity>> conn) {
+		if (this.connectors==null) this.connectors = new LinkedList<>();
+		this.connectors.add(conn);
+		return this;
+	}
+
+	
+	/**
+	 * @param inputs the inputs to set
+	 */
+	public ExportBuilder<F> addInputs(Collection<Path> inputs) {
 		if (this.inputs==null) this.inputs = new LinkedList<>();
 		this.inputs.addAll(inputs);
 		return this;
@@ -190,7 +215,7 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * @param defaultChunkSize the defaultChunkSize to set
 	 */
-	public ExportBuilder setDefaultChunkSize(int defaultChunkSize) {
+	public ExportBuilder<F> setDefaultChunkSize(int defaultChunkSize) {
 		this.defaultChunkSize = defaultChunkSize;
 		return this;
 	}
@@ -221,7 +246,7 @@ public class ExportBuilder implements AutoCloseable {
 	 * @param exporter the exporter to set
 	 */
 	@JsonIgnore
-	public ExportBuilder setExporter(Export exporter) {
+	public ExportBuilder<F> setExporter(Export exporter) {
 		this.exporter = exporter;
 		return this;
 	}
@@ -256,7 +281,7 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * @param chunkProperty the chunkProperty to set
 	 */
-	public ExportBuilder setChunkProperty(String chunkProperty) {
+	public ExportBuilder<F> setChunkProperty(String chunkProperty) {
 		this.chunkProperty = chunkProperty;
 		return this;
 	}
@@ -271,7 +296,7 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * @param species the species to set
 	 */
-	public ExportBuilder setSpecies(String species) {
+	public ExportBuilder<F> setSpecies(String species) {
 		this.species = species;
 		return this;
 	}
@@ -287,7 +312,7 @@ public class ExportBuilder implements AutoCloseable {
 			return true;
 		if (!(obj instanceof ExportBuilder))
 			return false;
-		ExportBuilder other = (ExportBuilder) obj;
+		ExportBuilder<?> other = (ExportBuilder<?>) obj;
 		return Objects.equals(chunkProperty, other.chunkProperty) && defaultChunkSize == other.defaultChunkSize
 				&& Objects.equals(dir, other.dir) && Objects.equals(inputs, other.inputs)
 				&& Objects.equals(species, other.species);

@@ -1,7 +1,7 @@
 package org.geneweaver.io.connector;
 
 import org.geneweaver.domain.Overlap;
-import org.geneweaver.domain.Region;
+import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Variant;
 
 /**
@@ -31,7 +31,7 @@ public class OverlapService {
 	 * @return
 	 * @throws OverlapException
 	 */
-	public Overlap intersection(Variant variant, Region peak) {
+	public Overlap intersection(Variant variant, Peak peak) {
 		
 		int vs = Math.min(variant.getStart(), variant.getEnd());
 		int ve = Math.max(variant.getStart(), variant.getEnd());

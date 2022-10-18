@@ -80,31 +80,6 @@ public class HomologFunction<N extends HomologGene, E extends HomologGene> exten
 		super(System.getProperty("gweaver.mappingdb.tableName","IDMAPPING"), databaseFileName);
 	}
 	
-	/**
-	 * Add the genes from this file to the database we are building.
-	 * @param taxon
-	 * @param gtf
-	 * @throws ClassNotFoundException
-	 */
-	public void add(int taxon, Path gtf) throws ClassNotFoundException, FileNotFoundException {
-		add(taxon, gtf.toAbsolutePath().toFile());
-	}
-
-	/**
-	 * Add the genes from this file to the database we are building.
-	 * @param taxon
-	 * @param gtf
-	 * @throws ClassNotFoundException
-	 * @throws FileNotFoundException 
-	 */
-	public void add(int taxon, File gtf) throws ClassNotFoundException, FileNotFoundException {	
-		if (!gtf.exists()) throw new FileNotFoundException(gtf+" is not there!");
-		if (dabasePath==null) {
-			setLocation(gtf.getParentFile().toPath());
-			Class.forName(driver); // Load driver class.
-		}
-		source.put(taxon, gtf);
-	}
 
 	private Connection connection;
 	private PreparedStatement lookup;

@@ -89,8 +89,8 @@ blockStarts
  *
  */
 @Generated("POJO")
-@NodeEntity(label="Region")
-public class Region  extends NamedEntity {
+@NodeEntity(label="Peak")
+public class Peak  extends NamedEntity {
 
 
 	@Index(unique=true)
@@ -202,11 +202,11 @@ public class Region  extends NamedEntity {
 		}
 	}
 
-	public Region() {
+	public Peak() {
 		
 	}
 
-	public Region(String species, String chr, int start, int end, String name, int score, Strand strand, int thickStart, int thickEnd) {
+	public Peak(String species, String chr, int start, int end, String name, int score, Strand strand, int thickStart, int thickEnd) {
 		setSpecies(species);
 		this.chr = chr;
 		this.start = start;
@@ -218,7 +218,7 @@ public class Region  extends NamedEntity {
 		this.thickEnd = thickEnd;
 	}
 
-	public Region(String speakId, int low, int high) {
+	public Peak(String speakId, int low, int high) {
 		this.peakId = UUID.fromString(speakId);
 		this.start = low;
 		this.end = high;
@@ -234,7 +234,7 @@ public class Region  extends NamedEntity {
 		StringBuilder buf = new StringBuilder();
 		String fields = delimify("peakId:ID(Peak-Id)",
 				"epigenome", "tissueDescription", "featureType", "filterType",
-				"start", "end", "chr", "score", "strand");
+				"start", "end", "chr", "score", "strand", ":LABEL");
 		buf.append(fields);
 		
 		String sheader = super.getHeader();
@@ -256,7 +256,8 @@ public class Region  extends NamedEntity {
 		StringBuilder buf = new StringBuilder();
 		String values = delimify(getPeakId(),
 				getEpigenome(), getTissueDescription(), getFeatureType(), getFilterType(),
-				getStart(), getEnd(), getChr(), getScore(), strandCharacter(getStrand()));
+				getStart(), getEnd(), getChr(), getScore(), strandCharacter(getStrand()),
+				getClass().getSimpleName().toString());
 		buf.append(values);
 		
 		String scsv = super.toCsv();
@@ -467,9 +468,9 @@ public class Region  extends NamedEntity {
 			return true;
 		if (!super.equals(obj))
 			return false;
-		if (!(obj instanceof Region))
+		if (!(obj instanceof Peak))
 			return false;
-		Region other = (Region) obj;
+		Peak other = (Peak) obj;
 		return blockCount == other.blockCount && Arrays.equals(blockSizes, other.blockSizes)
 				&& Arrays.equals(blockStarts, other.blockStarts) && Objects.equals(chr, other.chr) && end == other.end
 				&& Objects.equals(epigenome, other.epigenome) && Objects.equals(featureType, other.featureType)

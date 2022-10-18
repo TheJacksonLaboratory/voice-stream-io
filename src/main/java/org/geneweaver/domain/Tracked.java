@@ -38,14 +38,14 @@ public class Tracked  extends AbstractEntity {
 	
 	/** The transcript. */
 	@EndNode
-	private Region region;
+	private Peak peak;
 
 	public Tracked() {
 		
 	}
 	
-	public Tracked(Region region, Track track) {
-		this.region = region;
+	public Tracked(Peak peak, Track track) {
+		this.peak = peak;
 		this.track = track;
 	}
 
@@ -66,15 +66,15 @@ public class Tracked  extends AbstractEntity {
 	/**
 	 * @return the region
 	 */
-	public Region getRegion() {
-		return region;
+	public Peak getRegion() {
+		return peak;
 	}
 
 	/**
-	 * @param region the region to set
+	 * @param peak the region to set
 	 */
-	public void setRegion(Region region) {
-		this.region = region;
+	public void setRegion(Peak peak) {
+		this.peak = peak;
 	}
 
 	/**
@@ -85,7 +85,7 @@ public class Tracked  extends AbstractEntity {
 	@Override
 	public String toString() {
 		String tname = track!=null ? track.getName() : null;
-		String rname = region!=null ? region.getName() : null;
+		String rname = peak!=null ? peak.getName() : null;
 		return tname+"-[TRACKED]->"+rname;
 	}
 
@@ -93,7 +93,7 @@ public class Tracked  extends AbstractEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(region, track);
+		result = prime * result + Objects.hash(peak, track);
 		return result;
 	}
 
@@ -106,7 +106,7 @@ public class Tracked  extends AbstractEntity {
 		if (!(obj instanceof Tracked))
 			return false;
 		Tracked other = (Tracked) obj;
-		return Objects.equals(region, other.region) && Objects.equals(track, other.track);
+		return Objects.equals(peak, other.peak) && Objects.equals(track, other.track);
 	}
 
 

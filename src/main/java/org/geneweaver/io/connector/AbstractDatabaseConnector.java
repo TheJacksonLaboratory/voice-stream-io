@@ -1,6 +1,7 @@
 package org.geneweaver.io.connector;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,7 +29,10 @@ public abstract class AbstractDatabaseConnector {
 	protected final String tableName; 
 	protected String databaseFileName;
 	
-	
+	/**
+	 * The source of data which we will cache prior to doing the mapping.
+	 * IF the create() method is called before setting sources, it will fail.
+	 */
 	protected Map<Integer, File> source = new HashMap<>();
 
 	/**
@@ -39,6 +43,32 @@ public abstract class AbstractDatabaseConnector {
 	public AbstractDatabaseConnector(String tableName, String databaseFileName) {
 		this.tableName = tableName;
 		this.databaseFileName = databaseFileName;
+	}
+
+	/**
+	 * Add the genes from this file to the database we are building.
+	 * @param taxon
+	 * @param gtf
+	 * @throws ClassNotFoundException
+	 */
+	public void add(int taxon, Path gtf) throws ClassNotFoundException, FileNotFoundException {
+		add(taxon, gtf.toAbsolutePath().toFile());
+	}
+
+	/**
+	 * Add the genes from this file to the database we are building.
+	 * @param taxon
+	 * @param gtf
+	 * @throws ClassNotFoundException
+	 * @throws FileNotFoundException 
+	 */
+	public void add(int taxon, File gtf) throws ClassNotFoundException, FileNotFoundException {	
+		if (!gtf.exists()) throw new FileNotFoundException(gtf+" is not there!");
+		if (dabasePath==null) {
+			setLocation(gtf.getParentFile().toPath());
+			Class.forName(driver); // Load driver class.
+		}
+		source.put(taxon, gtf);
 	}
 
 	/**

@@ -31,8 +31,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.geneweaver.domain.NamedEntity;
-import org.geneweaver.domain.Region;
-import org.geneweaver.domain.Region.Strand;
+import org.geneweaver.domain.Peak;
+import org.geneweaver.domain.Peak.Strand;
 import org.geneweaver.domain.Track;
 import org.junit.Test;
 
@@ -61,15 +61,15 @@ public class BedReaderTest extends AbstractDataFileTest {
 
 	private void check04998(List<NamedEntity> lines) {
 		// line 0: chr1 959245 959305 NOC2L_1 900 - 959245 959256
-		Region r0 = new Region("Homo sapiens", "chr1", 959245, 959305, "NOC2L_1", 900, Strand.REVERSE, 959245, 959256);
+		Peak r0 = new Peak("Homo sapiens", "chr1", 959245, 959305, "NOC2L_1", 900, Strand.REVERSE, 959245, 959256);
 		assertEquals(r0, lines.get(0));
 
 		// line 49: chr1 1727706 1727766 SLC35E2B_3 900 - 1727706 1727717
-		Region r49 = new Region("Homo sapiens", "chr1", 1727706, 1727766, "SLC35E2B_3", 900, Strand.REVERSE, 1727706, 1727717);
+		Peak r49 = new Peak("Homo sapiens", "chr1", 1727706, 1727766, "SLC35E2B_3", 900, Strand.REVERSE, 1727706, 1727717);
 		assertEquals(r49, lines.get(49));
 
 		// line 98: chr1 3752400 3752460 CCDC27_1 900 + 3752449 3752460
-		Region r98 = new Region("Homo sapiens", "chr1", 3752400, 3752460, "CCDC27_1", 900, Strand.FORWARD, 3752449, 3752460);
+		Peak r98 = new Peak("Homo sapiens", "chr1", 3752400, 3752460, "CCDC27_1", 900, Strand.FORWARD, 3752449, 3752460);
 		assertEquals(r98, lines.get(98));	}
 
 	@Test
@@ -92,7 +92,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 		List<NamedEntity> lines = reader.stream().collect(Collectors.toList());
 
 		assertEquals(1, lines.stream().filter(e->e instanceof Track).count());
-		assertEquals(9, lines.stream().filter(e->e instanceof Region).count());
+		assertEquals(9, lines.stream().filter(e->e instanceof Peak).count());
 	}
 
 	@Test
@@ -102,7 +102,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 		List<NamedEntity> lines = reader.stream().collect(Collectors.toList());
 
 		assertEquals(1, lines.stream().filter(e->e instanceof Track).count());
-		assertEquals(8, lines.stream().filter(e->e instanceof Region).count());
+		assertEquals(8, lines.stream().filter(e->e instanceof Peak).count());
 	}
 
 	@Test
@@ -112,7 +112,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 		List<NamedEntity> lines = reader.stream().collect(Collectors.toList());
 
 		assertEquals(0, lines.stream().filter(e->e instanceof Track).count());
-		assertEquals(66752, lines.stream().filter(e->e instanceof Region).count());
+		assertEquals(66752, lines.stream().filter(e->e instanceof Peak).count());
 	}
 	
 	@Test
@@ -122,14 +122,14 @@ public class BedReaderTest extends AbstractDataFileTest {
 		List<NamedEntity> lines = reader.stream().collect(Collectors.toList());
 
 		assertEquals(0, lines.stream().filter(e->e instanceof Track).count());
-		assertEquals(190, lines.stream().filter(e->e instanceof Region).count());
+		assertEquals(190, lines.stream().filter(e->e instanceof Peak).count());
 	}
 
 	@Test
 	public void peaksOneFileHomoSap() throws Exception {
-		StreamReader<Region> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", 
+		StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", 
 															getPath("data/bed_peaks/homo_sapiens/A549/BCL3/homo_sapiens.GRCh38.A549.BCL3.SWEmbl_R0005.peaks.20210107.bed.gz")));
-		List<Region> peaks = reader.stream().collect(Collectors.toList());
+		List<Peak> peaks = reader.stream().collect(Collectors.toList());
 		assertEquals(5737, peaks.size());	
 		peaks.stream().allMatch(p->"A549".equals(p.getEpigenome()));
 		peaks.stream().allMatch(p->"BCL3".equals(p.getFeatureType()));
@@ -137,9 +137,9 @@ public class BedReaderTest extends AbstractDataFileTest {
 	
 	@Test
 	public void peaksOneMusMus() throws Exception {
-		StreamReader<Region> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", 
+		StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", 
 				getPath("data/bed_peaks/mus_musculus/CH12_LX/BHLHE40/mus_musculus.GRCm39.CH12_LX.BHLHE40.SWEmbl_R0005.peaks.20201021.bed.gz")));
-		List<Region> peaks = reader.stream().collect(Collectors.toList());
+		List<Peak> peaks = reader.stream().collect(Collectors.toList());
 		assertEquals(33350, peaks.size());	
 		peaks.stream().allMatch(p->"CH12_LX".equals(p.getEpigenome()));
 		peaks.stream().allMatch(p->"BHLHE40".equals(p.getFeatureType()));
@@ -185,12 +185,12 @@ public class BedReaderTest extends AbstractDataFileTest {
 			if (Files.isDirectory(bed)) return;
 			if (!bed.getFileName().toString().endsWith(".bed.gz")) return;
 			try {
-				StreamReader<Region> reader = ReaderFactory.getReader(new ReaderRequest(sname, bed));
-				List<Region> peaks = reader.stream().collect(Collectors.toList());
+				StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest(sname, bed));
+				List<Peak> peaks = reader.stream().collect(Collectors.toList());
 				peaks.stream().allMatch(p->ename.equals(p.getEpigenome()));
 				peaks.stream().allMatch(p->fname.equals(p.getFeatureType()));
 				
-				List<Region> withDes = peaks.stream().filter(p->p.getTissueDescription()!=null).collect(Collectors.toList());
+				List<Peak> withDes = peaks.stream().filter(p->p.getTissueDescription()!=null).collect(Collectors.toList());
 				if (withDes.size() <= 0) fail("Could not find description for "+ename);
 				
 				System.out.println("Tested: "+bed);
@@ -203,7 +203,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 	
 	@Test
 	public void testHomoSapDescriptions() throws Exception {
-		BedReader<Region> reader = new BedReader<>();
+		BedReader<Peak> reader = new BedReader<>();
 		Map<String,String> des = reader.getEpigenomeDescriptions("Homo sapiens");
 		assertNotNull(des);
 		des.keySet().forEach(key->{
@@ -222,7 +222,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 	
 	@Test
 	public void testMusMusDescriptions() throws Exception {
-		BedReader<Region> reader = new BedReader<>();
+		BedReader<Peak> reader = new BedReader<>();
 		Map<String,String> des = reader.getEpigenomeDescriptions("Mus musculus");
 		assertNotNull(des);
 		des.keySet().forEach(key->{

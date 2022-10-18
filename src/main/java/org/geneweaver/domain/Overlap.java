@@ -1,7 +1,6 @@
 package org.geneweaver.domain;
 
 import java.util.Objects;
-import java.util.UUID;
 
 import javax.annotation.processing.Generated;
 
@@ -18,13 +17,10 @@ public class Overlap extends AbstractEntity {
 	/** The variant. */
 	@StartNode
 	private Variant variant;
-	private String variantId;
-
 	
 	/** The peak. */
 	@EndNode
-	private Region peak;
-	private UUID peakId;
+	private Peak peak;
 
 	/**
 	 * A scalar which is the amount of overlap between the variant and the park.
@@ -73,13 +69,13 @@ public class Overlap extends AbstractEntity {
 	@Override
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
-		buf.append(getVariantId());
+		buf.append(variant.getRsId());
 		buf.append(getDelimiter());
 		buf.append(getIntersectRange());
 		buf.append(getDelimiter());
 		buf.append(getIntersectFraction());
 		buf.append(getDelimiter());
-		buf.append(getPeakId());
+		buf.append(peak.getPeakId());
 		buf.append(getDelimiter());
 		buf.append("OVERLAP");
 		return buf.toString();
@@ -102,14 +98,14 @@ public class Overlap extends AbstractEntity {
 	/**
 	 * @return the peak
 	 */
-	public Region getPeak() {
+	public Peak getPeak() {
 		return peak;
 	}
 
 	/**
 	 * @param peak the peak to set
 	 */
-	public void setPeak(Region peak) {
+	public void setPeak(Peak peak) {
 		this.peak = peak;
 	}
 
@@ -162,36 +158,10 @@ public class Overlap extends AbstractEntity {
 				&& Objects.equals(peak, other.peak) && Objects.equals(variant, other.variant);
 	}
 
-	/**
-	 * @return the variantId
-	 */
-	public String getVariantId() {
-		if (variantId!=null) return variantId;
-		if (variant!=null) return variant.getRsId();
-		return null;
-	}
-
-	/**
-	 * @param variantId the variantId to set
-	 */
-	public void setVariantId(String variantId) {
-		this.variantId = variantId;
-	}
-
-	/**
-	 * @return the peakId
-	 */
-	public UUID getPeakId() {
-		if (peakId!=null) return peakId;
-		if (peak!=null) return peak.getPeakId();
-		return null;
-	}
-
-	/**
-	 * @param peakId the peakId to set
-	 */
-	public void setPeakId(UUID peakId) {
-		this.peakId = peakId;
+	@Override
+	public String toString() {
+		if (variant==null || peak==null) return super.toString();
+		return "(Variant{rsId:"+variant.getRsId()+"})-[OVERLAP]-(Peak{peakId:"+peak.getPeakId()+")";
 	}
 
 

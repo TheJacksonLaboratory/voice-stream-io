@@ -1,7 +1,10 @@
 package org.geneweaver.io.connector;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,11 +12,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Overlap;
-import org.geneweaver.domain.Region;
+import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Variant;
 import org.geneweaver.io.reader.ReaderException;
 import org.geneweaver.io.reader.ReaderFactory;
@@ -34,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author gerrim
  *
  */
-public class OverlapConnector<N extends Variant, E extends Entity> extends AbstractDatabaseConnector implements Connector<N, E>, AutoCloseable  {
+public class OverlapConnector<N extends Entity, E extends Entity> extends AbstractDatabaseConnector implements Connector<N, E>, AutoCloseable  {
 
 	
 	private static Logger logger = LoggerFactory.getLogger(OverlapConnector.class);
@@ -46,14 +50,51 @@ public class OverlapConnector<N extends Variant, E extends Entity> extends Abstr
 	public OverlapConnector(String databaseFileName) {
 		super(System.getProperty("gweaver.mappingdb.tableName","REGIONS"), databaseFileName);
 	}
-
+	
+	/**
+	 * Adds all the bed.gz files to be cached recursively.
+	 * @param dir
+	 * @throws IOException 
+	 */
+	public void addAll(Path dir) throws IOException {
+		addAll(dir, -1);
+	}
+	
+	/**
+	 * Adds all the bed.gz files to be cached recursively.
+	 * Stopping if the limit is reached (reduces total files for testing).
+	 * @param dir
+	 * @param limit
+	 * @throws IOException 
+	 */
+	void addAll(Path dir, int limit) throws IOException {
+		Files.walk(dir).forEach(path->{
+			if (!Files.isRegularFile(path)) {
+				logger.debug(path+" is not a regular file and will not be used!");
+				return;
+			}
+			if (!path.getFileName().toString().toLowerCase().endsWith(".bed.gz")) return;
+			try {
+				if (limit>0 && source.size()>limit) return; // Do not add things after limit reached.
+				add(source.size(), path);
+			} catch (ClassNotFoundException | FileNotFoundException e) {
+				logger.error(path.toString(), e);
+			}
+		});
+	}
 
 	private Connection connection;
 	private PreparedStatement lookup;
 	private OverlapService oservice;
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Stream<E> stream(N variant, Session session) {
+	public Stream<E> stream(N ent, Session session) {
+		
+		// Other streams may run through this connector, but
+		// if they sent other objects, we return them.
+		if (!(ent instanceof Variant)) return (Stream<E>) Stream.of(ent);
+		Variant variant = (Variant)ent;
 		
 		if (connection==null) {
 			try {
@@ -67,12 +108,14 @@ public class OverlapConnector<N extends Variant, E extends Entity> extends Abstr
 		Collection<Entity> ret = new LinkedList<>();
 		ret.add(variant);
 		try {
-			if (lookup==null) lookup = connection.prepareStatement("SELECT peakId FROM "+tableName+" WHERE lower >= ? OR upper <= ?;");
+			if (lookup==null) lookup = connection.prepareStatement("SELECT peakId, lower, upper FROM "+tableName+" WHERE (?>=lower AND ?<=upper) OR (?>=lower AND ?<=upper);");
 			
-			int lower = Math.min(variant.getStart(), variant.getEnd());
-			lookup.setInt(1, lower);
-			int upper = Math.max(variant.getStart(), variant.getEnd());
-			lookup.setInt(2, upper);
+			int vlower = Math.min(variant.getStart(), variant.getEnd());
+			lookup.setInt(1, vlower);
+			lookup.setInt(2, vlower);
+			int vupper = Math.max(variant.getStart(), variant.getEnd());
+			lookup.setInt(3, vupper);
+			lookup.setInt(4, vupper);
 
 			try (ResultSet res = lookup.executeQuery()) {
 				while(res.next()) {
@@ -80,7 +123,7 @@ public class OverlapConnector<N extends Variant, E extends Entity> extends Abstr
 					int rlow = res.getInt(2);
 					int rup  = res.getInt(3);
 					
-					Overlap o = oservice.intersection(variant, new Region(peakId, rlow, rup));
+					Overlap o = oservice.intersection(variant, new Peak(peakId, rlow, rup));
 					if (o!=null) ret.add(o);
 				}
 			}
@@ -124,24 +167,24 @@ public class OverlapConnector<N extends Variant, E extends Entity> extends Abstr
 			for (Integer code : source.keySet()) {
 
 				File file = source.get(code);
-				StreamReader<Region> reader = ReaderFactory.getReader(new ReaderRequest(String.valueOf(code), file));
+				StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest(String.valueOf(code), file));
 				reader.stream()
 					  .forEach(reg -> storeRegion(reg, stmt));
 			} 
 		}
 	}
 
-	private void storeRegion(Region region, PreparedStatement stmt) {
+	private void storeRegion(Peak peak, PreparedStatement stmt) {
 		try {
 			
 			// Put the key in, lower case.
-			if (region.getPeakId()==null) return; // We cannot map unnamed peaks.
-			stmt.setString(1, region.getPeakId().toString());	
+			if (peak.getPeakId()==null) return; // We cannot map unnamed peaks.
+			stmt.setString(1, peak.getPeakId().toString());	
 			
-			int lower = Math.min(region.getStart(), region.getEnd());
+			int lower = Math.min(peak.getStart(), peak.getEnd());
 			stmt.setInt(2,lower);
 			
-			int upper = Math.max(region.getStart(), region.getEnd());
+			int upper = Math.max(peak.getStart(), peak.getEnd());
 			stmt.setInt(3,upper);
 			stmt.execute();
 			

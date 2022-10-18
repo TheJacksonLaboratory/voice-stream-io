@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.NamedEntity;
 import org.geneweaver.domain.Produces;
-import org.geneweaver.domain.Region;
-import org.geneweaver.domain.Region.Strand;
+import org.geneweaver.domain.Peak;
+import org.geneweaver.domain.Peak.Strand;
 import org.geneweaver.domain.Track;
 import org.geneweaver.domain.Tracked;
 import org.geneweaver.domain.VariantEffect;
@@ -86,15 +86,15 @@ public class TrackConnectorTest extends AbstractDataFileTest {
 
 	private void check04998(List<Entity> lines) {
 		// line 0: chr1 959245 959305 NOC2L_1 900 - 959245 959256
-		Region r0 = new Region("Homo sapiens", "chr1", 959245, 959305, "NOC2L_1", 900, Strand.REVERSE, 959245, 959256);
+		Peak r0 = new Peak("Homo sapiens", "chr1", 959245, 959305, "NOC2L_1", 900, Strand.REVERSE, 959245, 959256);
 		assertEquals(r0, lines.get(0));
 
 		// line 49: chr1 1727706 1727766 SLC35E2B_3 900 - 1727706 1727717
-		Region r49 = new Region("Homo sapiens", "chr1", 1727706, 1727766, "SLC35E2B_3", 900, Strand.REVERSE, 1727706, 1727717);
+		Peak r49 = new Peak("Homo sapiens", "chr1", 1727706, 1727766, "SLC35E2B_3", 900, Strand.REVERSE, 1727706, 1727717);
 		assertEquals(r49, lines.get(49));
 
 		// line 98: chr1 3752400 3752460 CCDC27_1 900 + 3752449 3752460
-		Region r98 = new Region("Homo sapiens", "chr1", 3752400, 3752460, "CCDC27_1", 900, Strand.FORWARD, 3752449, 3752460);
+		Peak r98 = new Peak("Homo sapiens", "chr1", 3752400, 3752460, "CCDC27_1", 900, Strand.FORWARD, 3752449, 3752460);
 		assertEquals(r98, lines.get(98));	}
 
 	@Test
@@ -117,7 +117,7 @@ public class TrackConnectorTest extends AbstractDataFileTest {
 		List<Entity> lines = reader.stream().flatMap(b->connector.apply(b)).collect(Collectors.toList());
 
 		assertEquals(1, lines.stream().filter(e->e instanceof Track).count());
-		assertEquals(9, lines.stream().filter(e->e instanceof Region).count());
+		assertEquals(9, lines.stream().filter(e->e instanceof Peak).count());
 		assertEquals(9, lines.stream().filter(e->e instanceof Tracked).count());
 		assertEquals(0, lines.stream().filter(e->e instanceof Produces).count());
 	}
@@ -130,7 +130,7 @@ public class TrackConnectorTest extends AbstractDataFileTest {
 		List<Entity> lines = reader.stream().flatMap(b->connector.apply(b)).collect(Collectors.toList());
 
 		assertEquals(1, lines.stream().filter(e->e instanceof Track).count());
-		assertEquals(9, lines.stream().filter(e->e instanceof Region).count());
+		assertEquals(9, lines.stream().filter(e->e instanceof Peak).count());
 		assertEquals(9, lines.stream().filter(e->e instanceof Tracked).count());
 		assertEquals(0, lines.stream().filter(e->e instanceof Produces).count());
 	}
@@ -142,7 +142,7 @@ public class TrackConnectorTest extends AbstractDataFileTest {
 		List<Entity> lines = reader.stream().flatMap(b->connector.stream(b, null)).collect(Collectors.toList());
 
 		assertEquals(1, lines.stream().filter(e->e instanceof Track).count());
-		assertEquals(8, lines.stream().filter(e->e instanceof Region).count());
+		assertEquals(8, lines.stream().filter(e->e instanceof Peak).count());
 		assertEquals(8, lines.stream().filter(e->e instanceof Tracked).count());
 		assertEquals(0, lines.stream().filter(e->e instanceof VariantEffect).count());
 	}

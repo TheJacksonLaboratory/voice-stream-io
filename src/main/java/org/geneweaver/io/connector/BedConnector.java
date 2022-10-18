@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.NamedEntity;
-import org.geneweaver.domain.Region;
+import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Track;
 import org.geneweaver.domain.Tracked;
 import org.neo4j.ogm.session.Session;
@@ -60,10 +60,10 @@ public class BedConnector<N extends NamedEntity, E extends Entity> implements Co
         	currentTrack = (Track)bean;
         	return (Stream<E>) Stream.of(bean);
         	
-        } else if (bean instanceof Region) {
+        } else if (bean instanceof Peak) {
         	
         	if (currentTrack!=null) {
-        		return (Stream<E>)Stream.of(bean, new Tracked((Region)bean, currentTrack));
+        		return (Stream<E>)Stream.of(bean, new Tracked((Peak)bean, currentTrack));
         	} else {
         		return (Stream<E>)Stream.of(bean);
         	}

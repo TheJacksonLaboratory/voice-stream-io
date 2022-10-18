@@ -4,7 +4,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import org.geneweaver.domain.Overlap;
-import org.geneweaver.domain.Region;
+import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Variant;
 import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.junit.Before;
@@ -109,7 +109,7 @@ public class OverlapServiceTest extends AbstractDataFileTest  {
 		v.setStart(vs);
 		v.setEnd(ve);
 		
-		Region p = new Region();
+		Peak p = new Peak();
 		p.setStart(ps);
 		p.setEnd(pe);
 		return iservice.intersection(v, p);

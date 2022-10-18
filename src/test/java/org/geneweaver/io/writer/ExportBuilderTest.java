@@ -2,10 +2,10 @@ package org.geneweaver.io.writer;
 
 
 import static org.geneweaver.io.DirectSave.save;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,9 +15,13 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.Entity;
+import org.geneweaver.domain.Variant;
 import org.geneweaver.io.Timer;
+import org.geneweaver.io.connector.OverlapConnector;
 import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.geneweaver.io.reader.ReaderException;
+import org.geneweaver.io.reader.ReaderFactory;
+import org.geneweaver.io.reader.ReaderRequest;
 import org.geneweaver.io.reader.StreamReader;
 import org.junit.Test;
 
@@ -195,8 +199,61 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 			builder.export();
 		}
 		
-		assertTrue(Files.exists(dir.resolve("Region.csv.gz")));
-		assertTrue(Files.size(dir.resolve("Region.csv.gz"))>10000);
-		assertTrue(Files.exists(dir.resolve("Region-header.csv")));
+		assertTrue(Files.exists(dir.resolve("Peak.csv.gz")));
+		assertTrue(Files.size(dir.resolve("Peak.csv.gz"))>10000);
+		assertTrue(Files.exists(dir.resolve("Peak-header.csv")));
+	}
+	
+	@Test
+	public void testBedExportWithOverlaps() throws Exception {
+		
+		Path rpath = getPath("data/bed_peaks/some.bed");
+
+		Path dir = Paths.get("./tmp/testBedExportWithOverlaps");
+		FileUtils.deleteQuietly(dir.toFile());
+		dir.toFile().mkdirs();
+
+		try(ExportBuilder builder = new ExportBuilder().setSpecies("Homo sapiens")
+				   .setChunkProperty("1000")
+				   .setDir(dir)
+				   .setInput(rpath)
+				   .setDefaultChunkSize(10000)) {
+			
+			builder.export();
+		}
+		assertTrue(Files.exists(dir.resolve("Peak.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("Peak-header.csv")));
+		
+		Path vpath = getPath("data/bed_peaks/some.gvf");
+		
+		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>()) {
+			conn.setLocation(dir);
+			conn.add(0, rpath);
+			conn.create();
+			
+			try(ExportBuilder builder = new ExportBuilder().setSpecies("Homo sapiens")
+					   .setChunkProperty("1000")
+					   .addConnector(conn)
+					   .setDir(dir)
+					   .setInput(vpath)
+					   .setDefaultChunkSize(10000)) {
+				
+				builder.export();
+			}
+		}
+		assertTrue(Files.exists(dir.resolve("Overlap.csv.gz")));
+		ReaderRequest reader = new ReaderRequest("test", dir.resolve("Overlap.csv.gz"));
+		reader.setReaderHint("MapCSVReader");
+		assertEquals(29, ReaderFactory.getReader(reader).stream().count());
+		assertTrue(Files.size(dir.resolve("Overlap.csv.gz"))>100);
+		assertTrue(Files.exists(dir.resolve("Overlap-header.csv")));
+		assertTrue(Files.exists(dir.resolve("Peak.csv.gz")));
+		assertTrue(Files.size(dir.resolve("Peak.csv.gz"))>100);
+		assertTrue(Files.exists(dir.resolve("Peak-header.csv")));
+		assertTrue(Files.size(dir.resolve("Variant.csv.gz"))>100);
+		assertTrue(Files.exists(dir.resolve("Variant-header.csv")));
+		assertTrue(Files.exists(dir.resolve("regions.h2.mv.db")));
+
+
 	}
 }

@@ -334,4 +334,9 @@ public class Variant extends GeneticEntity {
 		return getRsId();
 	}
 
+	@Override
+	public String toString() {
+		return "Variant [rsId=" + rsId + " start="+getStart()+" end="+getEnd()+" ]";
+	}
+
 }

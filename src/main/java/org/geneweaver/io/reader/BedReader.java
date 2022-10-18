@@ -33,8 +33,8 @@ import java.util.stream.Stream;
 import org.apache.commons.beanutils.BeanMap;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.NamedEntity;
-import org.geneweaver.domain.Region;
-import org.geneweaver.domain.Region.Strand;
+import org.geneweaver.domain.Peak;
+import org.geneweaver.domain.Peak.Strand;
 import org.geneweaver.domain.Track;
 import org.geneweaver.io.connector.BedConnector;
 
@@ -90,10 +90,10 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 			
 		} else {
 			String[] rec = line.split(getDelimiter());
-			Region region = new Region();
-			region.setPeakId(UUID.randomUUID());
+			Peak peak = new Peak();
+			peak.setPeakId(UUID.randomUUID());
 			
-			BeanMap d = new BeanMap(region);
+			BeanMap d = new BeanMap(peak);
 			
 			d.put("chr", rec[0]);
 			d.put("start", rec[1]);
@@ -104,7 +104,7 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 			if (rec.length>6) d.put("thickStart",  rec[6]);
 			if (rec.length>7) d.put("thickEnd",    rec[7]);
 			if (rec.length>8) {
-				region.setItemRgb(getIntArray(rec[8], 3));
+				peak.setItemRgb(getIntArray(rec[8], 3));
 			}
 			if (rec.length>9) d.put("blockCount",  rec[9]);
 			if (rec.length>10) d.put("blockSizes",  getIntArray(rec[10], 1));
@@ -112,7 +112,7 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 			
 			parseName(d);
 			
-			ret = (N)region;
+			ret = (N)peak;
 		}
 		
 		ret.setSpecies(getSpecies());
