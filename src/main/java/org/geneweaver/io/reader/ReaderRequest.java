@@ -32,6 +32,7 @@ import java.util.zip.GZIPInputStream;
 
 import javax.annotation.processing.Generated;
 
+import org.apache.logging.log4j.message.LoggerNameAwareMessage;
 import org.geneweaver.domain.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -470,6 +471,36 @@ public class ReaderRequest {
 	 */
 	public void setReaderHint(String readerHint) {
 		this.readerHint = readerHint;
+	}
+	
+	private String generatedIdName;
+	
+	@JsonIgnore
+	public String generateIdName() {
+		
+		if (generatedIdName!=null) return generatedIdName;
+		
+		String lname = null;
+		if (file!=null) {
+			lname = file.getName();
+			if (lname.toLowerCase().endsWith(".gz")) {
+				lname = lname.substring(0,lname.length()-3);
+			}
+			if (lname.toLowerCase().matches("(.*)\\.[a-z0-9]{3}")) {
+				lname = lname.substring(0,lname.length()-4);
+			}
+		}
+		if (lname==null&&name!=null) lname = name;
+		if (lname==null&&source!=null) lname = source;
+		if (lname==null) lname = "empty";
+		
+		// Try to remove special characters.
+		lname = lname.replace("_", "");
+		lname = lname.replace(".", "");
+		lname = lname.replace(" ", "");
+		
+		generatedIdName = lname;
+		return generatedIdName;
 	}
 	
 }

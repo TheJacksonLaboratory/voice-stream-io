@@ -12,6 +12,8 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.Entity;
@@ -23,6 +25,7 @@ import org.geneweaver.io.reader.ReaderException;
 import org.geneweaver.io.reader.ReaderFactory;
 import org.geneweaver.io.reader.ReaderRequest;
 import org.geneweaver.io.reader.StreamReader;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ExportBuilderTest extends AbstractDataFileTest {
@@ -204,6 +207,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		assertTrue(Files.exists(dir.resolve("Peak-header.csv")));
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testBedExportWithOverlaps() throws Exception {
 		
@@ -231,9 +235,12 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 			conn.add(0, rpath);
 			conn.create();
 			
-			try(ExportBuilder builder = new ExportBuilder().setSpecies("Homo sapiens")
+			// TODO Should not be needed
+			Function<Entity, Stream<Entity>> func = v->conn.apply((Variant)v);
+			try (@SuppressWarnings("resource")
+				ExportBuilder builder = new ExportBuilder().setSpecies("Homo sapiens")
 					   .setChunkProperty("1000")
-					   .addConnector(conn)
+					   .addConnector(func)
 					   .setDir(dir)
 					   .setInput(vpath)
 					   .setDefaultChunkSize(10000)) {
@@ -255,5 +262,21 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		assertTrue(Files.exists(dir.resolve("regions.h2.mv.db")));
 
 
+	}
+	
+	@Ignore("This is the code for the full scale one")
+	@Test
+	public void testFullHumanMapping() throws Exception {
+		
+		Path hdir = Paths.get("/Volumes/Work/tmp/peaks/ftp.ensembl.org/pub/current_regulation/homo_sapiens");
+		Path dir = Paths.get("./tmp/testLARGEWholeHumanPeaks");
+		FileUtils.deleteQuietly(dir.toFile());
+		dir.toFile().mkdirs();
+
+		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>()) {
+			conn.setLocation(dir);
+			conn.addAll(hdir);
+			conn.create();
+		}
 	}
 }

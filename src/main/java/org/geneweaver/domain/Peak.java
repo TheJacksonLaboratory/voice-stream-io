@@ -20,7 +20,6 @@ package org.geneweaver.domain;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.UUID;
 
 import javax.annotation.processing.Generated;
 
@@ -95,7 +94,7 @@ public class Peak  extends NamedEntity {
 
 	@Index(unique=true)
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private UUID peakId;
+	private String peakId;
 
 	/**
 	 * The epigenome code from ensembl 
@@ -206,7 +205,9 @@ public class Peak  extends NamedEntity {
 		
 	}
 
-	public Peak(String species, String chr, int start, int end, String name, int score, Strand strand, int thickStart, int thickEnd) {
+	public Peak(String peakId, String species, String chr, int start, int end, String name, int score, Strand strand, int thickStart, int thickEnd) {
+		
+		this.peakId = peakId;
 		setSpecies(species);
 		this.chr = chr;
 		this.start = start;
@@ -219,7 +220,7 @@ public class Peak  extends NamedEntity {
 	}
 
 	public Peak(String speakId, int low, int high) {
-		this.peakId = UUID.fromString(speakId);
+		this.peakId = speakId;
 		this.start = low;
 		this.end = high;
 	}
@@ -483,14 +484,14 @@ public class Peak  extends NamedEntity {
 	/**
 	 * @return the peakId
 	 */
-	public UUID getPeakId() {
+	public String getPeakId() {
 		return peakId;
 	}
 
 	/**
 	 * @param peakId the peakId to set
 	 */
-	public void setPeakId(UUID peakId) {
+	public void setPeakId(String peakId) {
 		this.peakId = peakId;
 	}
 

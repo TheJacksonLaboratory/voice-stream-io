@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author gerrim
  *
  */
-public class ExportBuilder<F> implements AutoCloseable {
+public class ExportBuilder implements AutoCloseable {
 
 	/**
 	 * The directory in which to export
@@ -148,7 +148,7 @@ public class ExportBuilder<F> implements AutoCloseable {
 	/**
 	 * @param dir the dir to set
 	 */
-	public ExportBuilder<F> setDir(Path dir) {
+	public ExportBuilder setDir(Path dir) {
 		this.dir = dir;
 		return this;
 	}
@@ -163,7 +163,7 @@ public class ExportBuilder<F> implements AutoCloseable {
 	/**
 	 * @param inputs the inputs to set
 	 */
-	public ExportBuilder<F> setInputs(Collection<Path> inputs) {
+	public ExportBuilder setInputs(Collection<Path> inputs) {
 		this.inputs = inputs;
 		return this;
 	}
@@ -171,7 +171,7 @@ public class ExportBuilder<F> implements AutoCloseable {
 	/**
 	 * @param inputs the inputs to set
 	 */
-	public ExportBuilder<F> setInput(Path input) {
+	public ExportBuilder setInput(Path input) {
 		this.inputs = Arrays.asList(input);
 		return this;
 	}
@@ -179,7 +179,7 @@ public class ExportBuilder<F> implements AutoCloseable {
 	/**
 	 * @param inputs the inputs to set
 	 */
-	public ExportBuilder<F> addInput(Path input) {
+	public ExportBuilder addInput(Path input) {
 		if (this.inputs==null) this.inputs = new LinkedList<>();
 		this.inputs.add(input);
 		return this;
@@ -189,7 +189,7 @@ public class ExportBuilder<F> implements AutoCloseable {
 	/**
 	 * @param inputs the inputs to set
 	 */
-	public ExportBuilder<F> addConnector(Function<Entity, Stream<Entity>> conn) {
+	public ExportBuilder addConnector(Function<Entity, Stream<Entity>> conn) {
 		if (this.connectors==null) this.connectors = new LinkedList<>();
 		this.connectors.add(conn);
 		return this;
@@ -199,7 +199,7 @@ public class ExportBuilder<F> implements AutoCloseable {
 	/**
 	 * @param inputs the inputs to set
 	 */
-	public ExportBuilder<F> addInputs(Collection<Path> inputs) {
+	public ExportBuilder addInputs(Collection<Path> inputs) {
 		if (this.inputs==null) this.inputs = new LinkedList<>();
 		this.inputs.addAll(inputs);
 		return this;
@@ -215,7 +215,7 @@ public class ExportBuilder<F> implements AutoCloseable {
 	/**
 	 * @param defaultChunkSize the defaultChunkSize to set
 	 */
-	public ExportBuilder<F> setDefaultChunkSize(int defaultChunkSize) {
+	public ExportBuilder setDefaultChunkSize(int defaultChunkSize) {
 		this.defaultChunkSize = defaultChunkSize;
 		return this;
 	}
@@ -246,7 +246,7 @@ public class ExportBuilder<F> implements AutoCloseable {
 	 * @param exporter the exporter to set
 	 */
 	@JsonIgnore
-	public ExportBuilder<F> setExporter(Export exporter) {
+	public ExportBuilder setExporter(Export exporter) {
 		this.exporter = exporter;
 		return this;
 	}
@@ -281,7 +281,7 @@ public class ExportBuilder<F> implements AutoCloseable {
 	/**
 	 * @param chunkProperty the chunkProperty to set
 	 */
-	public ExportBuilder<F> setChunkProperty(String chunkProperty) {
+	public ExportBuilder setChunkProperty(String chunkProperty) {
 		this.chunkProperty = chunkProperty;
 		return this;
 	}
@@ -296,7 +296,7 @@ public class ExportBuilder<F> implements AutoCloseable {
 	/**
 	 * @param species the species to set
 	 */
-	public ExportBuilder<F> setSpecies(String species) {
+	public ExportBuilder setSpecies(String species) {
 		this.species = species;
 		return this;
 	}
@@ -312,7 +312,7 @@ public class ExportBuilder<F> implements AutoCloseable {
 			return true;
 		if (!(obj instanceof ExportBuilder))
 			return false;
-		ExportBuilder<?> other = (ExportBuilder<?>) obj;
+		ExportBuilder other = (ExportBuilder) obj;
 		return Objects.equals(chunkProperty, other.chunkProperty) && defaultChunkSize == other.defaultChunkSize
 				&& Objects.equals(dir, other.dir) && Objects.equals(inputs, other.inputs)
 				&& Objects.equals(species, other.species);

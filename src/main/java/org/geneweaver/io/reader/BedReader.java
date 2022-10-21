@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,6 +37,8 @@ import org.geneweaver.domain.Peak.Strand;
 import org.geneweaver.domain.Track;
 import org.geneweaver.io.connector.BedConnector;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Bed file format @see https://m.ensembl.org/info/website/upload/bed.html
  * @see https://en.wikipedia.org/wiki/BED_(file_format)#:~:text=is%20widely%20used.-,Description,coordinates%20of%20the%20sequences%20considered.
@@ -47,6 +48,7 @@ import org.geneweaver.io.connector.BedConnector;
  */
 public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	
+	private int peakIndex = 0;
 	/**
 	 * Create the reader by setting its data
 	 * 
@@ -91,7 +93,6 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		} else {
 			String[] rec = line.split(getDelimiter());
 			Peak peak = new Peak();
-			peak.setPeakId(UUID.randomUUID());
 			
 			BeanMap d = new BeanMap(peak);
 			
@@ -111,7 +112,8 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 			if (rec.length>11) d.put("blockStarts", getIntArray(rec[11], 1));
 			
 			parseName(d);
-			
+			createPeakId(peak);
+
 			ret = (N)peak;
 		}
 		
@@ -119,6 +121,25 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		return ret;
 	}
 	
+	public Stream<N> stream() {
+		peakIndex = 0;
+		return super.stream();
+	}
+	
+	private Peak createPeakId(Peak peak) {
+		
+		int start = peak.getStart();
+		int end = peak.getEnd();
+		String fname = this.request.generateIdName();
+		String peakId = createPeakId(fname, start, end, ++peakIndex);
+		peak.setPeakId(peakId);
+		return peak;
+	}
+
+	public static String createPeakId(String fname, int start, int end, int idx) {
+		return fname+"#"+idx+"@"+start+":"+end;
+	}
+
 	// Parse name in Ensembl format e.g. 
 	// BCL3_A549__Enriched_Site
 	// H3K4me1_embryonic_facial_prominence_embryonic_10_5_days__Enriched_Site

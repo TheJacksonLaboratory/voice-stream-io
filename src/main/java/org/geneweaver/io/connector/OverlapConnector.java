@@ -150,7 +150,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 						" (id int NOT NULL AUTO_INCREMENT, " + 
 						// Important UNIQUE means there is an index and
 						// that the later lookup will be fast.
-						" peakId VARCHAR(64) NOT NULL UNIQUE, " +  
+						" peakId VARCHAR(128) NOT NULL UNIQUE, " +  
 						" lower INTEGER," +
 						" upper INTEGER);"; 
 
@@ -167,6 +167,8 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 			for (Integer code : source.keySet()) {
 
 				File file = source.get(code);
+				System.out.println(file.getName()+" "+code+" of "+source.size());
+				
 				StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest(String.valueOf(code), file));
 				reader.stream()
 					  .forEach(reg -> storeRegion(reg, stmt));
