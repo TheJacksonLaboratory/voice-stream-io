@@ -58,6 +58,7 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public BedReader<N> init(ReaderRequest request) throws ReaderException {
+		this.generatedIdName = null;
 		super.setup(request);
 		setDelimiter("\\s+");
 		return this;
@@ -130,14 +131,58 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		
 		int start = peak.getStart();
 		int end = peak.getEnd();
-		String fname = this.request.generateIdName();
-		String peakId = createPeakId(fname, start, end, ++peakIndex);
+		String fname = generateIdName();
+		String peakId = createPeakId(fname, start, end, peakIndex++, false);
 		peak.setPeakId(peakId);
 		return peak;
 	}
 
-	public static String createPeakId(String fname, int start, int end, int idx) {
+	public static String createPeakId(String fname, int start, int end, int idx, boolean removeSpecialChars) {
+		if (removeSpecialChars) {
+			fname = removeExtension(fname);
+			fname = removeSpecials(fname);
+		}
 		return fname+"#"+idx+"@"+start+":"+end;
+	}
+
+	private String generatedIdName;
+	
+	@JsonIgnore
+	public String generateIdName() {
+		
+		if (generatedIdName!=null) return generatedIdName;
+		
+		String lname = null;
+		if (request.getFile().getName()!=null) {
+			lname = request.getFile().getName();
+			lname = removeExtension(lname);
+		}
+		if (lname==null&&request.getName()!=null) lname = request.getName();
+		if (lname==null&&request.getSource()!=null) lname = request.getSource();
+		if (lname==null) lname = "empty";
+		
+		lname = removeSpecials(lname);
+		
+		generatedIdName = lname;
+		return generatedIdName;
+	}
+	
+	private static String removeExtension(String lname) {
+		if (lname.toLowerCase().endsWith(".gz")) {
+			lname = lname.substring(0,lname.length()-3);
+		}
+		if (lname.toLowerCase().matches("(.*)\\.[a-z0-9]{3}")) {
+			lname = lname.substring(0,lname.length()-4);
+		}
+		return lname;
+	}
+
+	private static String removeSpecials(String lname) {
+		// Try to remove special characters.
+		lname = lname.replace("_", "");
+		lname = lname.replace(".", "");
+		lname = lname.replace(" ", "");
+		return lname;
 	}
 
 	// Parse name in Ensembl format e.g. 

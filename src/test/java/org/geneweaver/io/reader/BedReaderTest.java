@@ -61,15 +61,18 @@ public class BedReaderTest extends AbstractDataFileTest {
 
 	private void check04998(List<NamedEntity> lines) {
 		// line 0: chr1 959245 959305 NOC2L_1 900 - 959245 959256
-		Peak r0 = new Peak(null, "Homo sapiens", "chr1", 959245, 959305, "NOC2L_1", 900, Strand.REVERSE, 959245, 959256);
+		String peakId = BedReader.createPeakId("Hs_EPDnew_006_hg38.bed", 959245, 959305, 0, true);
+		Peak r0 = new Peak(peakId, "Homo sapiens", "chr1", 959245, 959305, "NOC2L_1", 900, Strand.REVERSE, 959245, 959256);
 		assertEquals(r0, lines.get(0));
 
 		// line 49: chr1 1727706 1727766 SLC35E2B_3 900 - 1727706 1727717
-		Peak r49 = new Peak(null, "Homo sapiens", "chr1", 1727706, 1727766, "SLC35E2B_3", 900, Strand.REVERSE, 1727706, 1727717);
+		peakId = BedReader.createPeakId("Hs_EPDnew_006_hg38.bed", 1727706, 1727766, 49, true);
+		Peak r49 = new Peak(peakId, "Homo sapiens", "chr1", 1727706, 1727766, "SLC35E2B_3", 900, Strand.REVERSE, 1727706, 1727717);
 		assertEquals(r49, lines.get(49));
 
 		// line 98: chr1 3752400 3752460 CCDC27_1 900 + 3752449 3752460
-		Peak r98 = new Peak(null, "Homo sapiens", "chr1", 3752400, 3752460, "CCDC27_1", 900, Strand.FORWARD, 3752449, 3752460);
+		peakId = BedReader.createPeakId("Hs_EPDnew_006_hg38.bed", 3752400, 3752460, 98, true);
+		Peak r98 = new Peak(peakId, "Homo sapiens", "chr1", 3752400, 3752460, "CCDC27_1", 900, Strand.FORWARD, 3752449, 3752460);
 		assertEquals(r98, lines.get(98));
 	}
 
