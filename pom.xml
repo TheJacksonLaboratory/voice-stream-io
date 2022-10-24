@@ -361,10 +361,6 @@
 		
 		Remember that .m2/settings.xml must have JIRA password for sonatype.
 		
-		
-		Get certificate if keystore does not have it.
-		echo | openssl s_client -servername oss.sonatype.org -connect oss.sonatype.org:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > certificate.crt
-		keytool -import -trustcacerts -alias oss.sonatype.org -file certificate.crt
 		-->
 		<profile>
 			<id>release-sign-artifacts</id>
