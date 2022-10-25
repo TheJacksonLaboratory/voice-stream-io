@@ -361,6 +361,9 @@
 		
 		Remember that .m2/settings.xml must have JIRA password for sonatype.
 		
+		If using 'ZScaler' from JAX you will need to stop it or the certificate for oss.sonatype.org will not be 
+		accepted.
+		
 		-->
 		<profile>
 			<id>release-sign-artifacts</id>

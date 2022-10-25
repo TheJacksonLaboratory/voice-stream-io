@@ -43,8 +43,11 @@ public class ExportBuilder implements AutoCloseable {
 	
 	/**
 	 * If the connectors are different from the default connector.
+	 * A connector must be a org.geneweaver.io.connector.Connector
+	 * or a Function which returns a stream of entities when passed
+	 * an entity.
 	 */
-	private Collection<Function<Entity, Stream<Entity>>> connectors;
+	private Collection<Function<?,?>> connectors;
 	
 	/**
 	 * The chunk size if there is none on the command line.
@@ -67,6 +70,14 @@ public class ExportBuilder implements AutoCloseable {
 	 * 
 	 */
 	private String species;
+	
+	/**
+	 * Set to always add the default connector as the first connector when 
+	 * making the connector list. If addConnector(..) has not been used,
+	 * this setting does nothing as the default connector will be used anyway,
+	 * however if 
+	 */
+	private boolean alwaysUseDefaultConnector = false;
 	
 	/**
 	 * Stream for printing messages of each export run.
@@ -104,9 +115,20 @@ public class ExportBuilder implements AutoCloseable {
 	    
 	    Collection<Function<Entity, Stream<Entity>>> conns = null;
 	    if (this.connectors==null || this.connectors.isEmpty()) {
-	    	conns = Arrays.asList(reader.getDefaultConnector());
+	    	Function<Entity, Stream<Entity>> def = reader.getDefaultConnector();
+	    	conns = Arrays.asList(def);
 	    } else {
-	    	conns = this.connectors;
+	    	conns = new LinkedList<>();
+	    	if (isAlwaysUseDefaultConnector()) {
+	    		conns.add(reader.getDefaultConnector());
+	    	}
+	    	
+	    	for (Function<?, ?> function : this.connectors) {
+	    		@SuppressWarnings("unchecked")
+	    		// If you add a function which cannot be cast
+				Function<Entity, Stream<Entity>> cast = (Function<Entity, Stream<Entity>>)function;
+		    	conns.add(cast);
+			}
 	    }
 		
 		Timer timer = createTimer();
@@ -189,7 +211,7 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * @param inputs the inputs to set
 	 */
-	public ExportBuilder addConnector(Function<Entity, Stream<Entity>> conn) {
+	public ExportBuilder addConnector(Function<?,?> conn) {
 		if (this.connectors==null) this.connectors = new LinkedList<>();
 		this.connectors.add(conn);
 		return this;
@@ -332,6 +354,21 @@ public class ExportBuilder implements AutoCloseable {
 	@JsonIgnore
 	public void setOut(PrintStream out) {
 		this.out = out;
+	}
+
+	/**
+	 * @return the alwaysUseDefaultConnector
+	 */
+	public boolean isAlwaysUseDefaultConnector() {
+		return alwaysUseDefaultConnector;
+	}
+
+	/**
+	 * @param alwaysUseDefaultConnector the alwaysUseDefaultConnector to set
+	 */
+	public ExportBuilder setAlwaysUseDefaultConnector(boolean alwaysUseDefaultConnector) {
+		this.alwaysUseDefaultConnector = alwaysUseDefaultConnector;
+		return this;
 	}
 
 }

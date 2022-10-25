@@ -12,8 +12,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.Entity;
@@ -207,7 +205,6 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		assertTrue(Files.exists(dir.resolve("Peak-header.csv")));
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testBedExportWithOverlaps() throws Exception {
 		
@@ -235,12 +232,11 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 			conn.add(0, rpath);
 			conn.create();
 			
-			// TODO Should not be needed
-			Function<Entity, Stream<Entity>> func = v->conn.apply((Variant)v);
 			try (@SuppressWarnings("resource")
 				ExportBuilder builder = new ExportBuilder().setSpecies("Homo sapiens")
 					   .setChunkProperty("1000")
-					   .addConnector(func)
+					   .setAlwaysUseDefaultConnector(true)
+					   .addConnector(conn)
 					   .setDir(dir)
 					   .setInput(vpath)
 					   .setDefaultChunkSize(10000)) {
@@ -260,8 +256,8 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		assertTrue(Files.size(dir.resolve("Variant.csv.gz"))>100);
 		assertTrue(Files.exists(dir.resolve("Variant-header.csv")));
 		assertTrue(Files.exists(dir.resolve("regions.h2.mv.db")));
-
-
+		assertTrue(Files.exists(dir.resolve("VariantEffect.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("VariantEffect-header.csv")));
 	}
 	
 	@Ignore("This is the code for the full scale one")
