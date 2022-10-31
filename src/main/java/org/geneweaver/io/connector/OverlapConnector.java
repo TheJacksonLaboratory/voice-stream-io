@@ -73,8 +73,8 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 				logger.debug(path+" is not a regular file and will not be used!");
 				return;
 			}
-			if (!path.getFileName().toString().toLowerCase().endsWith(".bed")) return;
-			if (!path.getFileName().toString().toLowerCase().endsWith(".bed.gz")) return;
+			if (!path.getFileName().toString().toLowerCase().endsWith(".bed.gz") && 
+				!path.getFileName().toString().toLowerCase().endsWith(".bed")	) return;
 			try {
 				if (limit>0 && source.size()>limit) return; // Do not add things after limit reached.
 				add(source.size(), path);
