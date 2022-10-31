@@ -176,7 +176,7 @@ public class HomologFunction<N extends HomologGene, E extends HomologGene> exten
 		try (Connection conn = createConnection();
 			 Statement stmt = conn.createStatement() ) {  
 
-			String sql =  "CREATE TABLE " + tableName + 
+			String sql =  "CREATE TABLE IF NOT EXISTS " + tableName + 
 						" (id int NOT NULL AUTO_INCREMENT, " + 
 						// Important UNIQUE means there is an index and
 						// that the later lookup will be fast.
