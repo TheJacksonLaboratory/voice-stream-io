@@ -39,7 +39,7 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * Iterable of paths from which we will export.
 	 */
-	private Collection<Path> inputs;
+	private Iterable<Path> inputs;
 	
 	/**
 	 * If the connectors are different from the default connector.
@@ -185,7 +185,7 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * @param inputs the inputs to set
 	 */
-	public ExportBuilder setInputs(Collection<Path> inputs) {
+	public ExportBuilder setInputs(Iterable<Path> inputs) {
 		this.inputs = inputs;
 		return this;
 	}
@@ -201,29 +201,9 @@ public class ExportBuilder implements AutoCloseable {
 	/**
 	 * @param inputs the inputs to set
 	 */
-	public ExportBuilder addInput(Path input) {
-		if (this.inputs==null) this.inputs = new LinkedList<>();
-		this.inputs.add(input);
-		return this;
-	}
-	
-
-	/**
-	 * @param inputs the inputs to set
-	 */
 	public ExportBuilder addConnector(Function<?,?> conn) {
 		if (this.connectors==null) this.connectors = new LinkedList<>();
 		this.connectors.add(conn);
-		return this;
-	}
-
-	
-	/**
-	 * @param inputs the inputs to set
-	 */
-	public ExportBuilder addInputs(Collection<Path> inputs) {
-		if (this.inputs==null) this.inputs = new LinkedList<>();
-		this.inputs.addAll(inputs);
 		return this;
 	}
 
