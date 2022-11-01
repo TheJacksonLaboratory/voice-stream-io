@@ -7,10 +7,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -21,6 +21,7 @@ import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.geneweaver.io.reader.ReaderFactory;
 import org.geneweaver.io.reader.ReaderRequest;
 import org.geneweaver.io.reader.StreamReader;
+import org.geneweaver.io.writer.ExportBuilder;
 import org.junit.Test;
 
 import com.google.common.base.Stopwatch;
@@ -32,7 +33,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 	public void badRegionFile1() throws Exception {
 		Path hFile = getPath("data/NOTTHERE");
 		try (OverlapConnector<Variant, Entity> func = new OverlapConnector<>()) {
-			func.add(0, hFile);
+			func.add(hFile);
 		}
 	}
 	
@@ -41,8 +42,8 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		Path mFile = getPath("data/bed_peaks/homo_sapiens/CD14_monocyte_1/H3K4me1/homo_sapiens.GRCh38.CD14_monocyte_1.H3K4me1.ccat_histone.peaks.20210107.bed.gz");
 		Path hFile = getPath("data/NOTTHERE");
 		try (OverlapConnector<Variant, Entity> func = new OverlapConnector<>()) {
-			func.add(0, mFile);
-			func.add(1, hFile);
+			func.add(mFile);
+			func.add(hFile);
 		}
 	}
 	
@@ -142,9 +143,10 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		
 		Path tdir = Paths.get("./tmp/"+testName);
 		FileUtils.deleteQuietly(tdir.toFile());
+		
 		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>()) {
 			conn.setLocation(tdir);
-			conn.add(0, rpath);
+			conn.add(rpath);
 			conn.create();
 			
 			StreamReader<Variant> vars = ReaderFactory.getReader(new ReaderRequest(testName, vpath));
@@ -155,5 +157,70 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 			assertNotNull(varsAndIntersections);
 			return varsAndIntersections;
 		}
+	}
+	
+	/**
+	 * Trying to see speed of a full scale connectors.
+	 * The connector database may have to be copied backs from the k8s node. E.g.:
+	 * <pre>
+	 * kubectl cp $NAMESPACE/bulk-import-dev-7594b86847-qvp2n:/neo4j/bulk/ensembl-107/hs/peaks.mv.db /Volumes/Work/JAX/data/peaks.mv.db
+	 * </pre>
+	 * 
+	 * In the database for human peaks there are 170059268 rows in ensembl-107
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testMassiveDatabase() throws Exception {
+		
+		Path dir = Paths.get("./tmp/testBedExportWithMassiveOverlaps");
+		FileUtils.deleteQuietly(dir.toFile());
+		dir.toFile().mkdirs();
+
+		// Create a massive database
+		Path rpath = getPath("data/bed_peaks/some.bed");
+		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("peaks")) {
+			// 1. Create a database with things that match.
+			conn.setLocation(dir);
+			conn.add(rpath);
+			conn.create();
+			
+			// 2. Add random rows to this database, increase size to check performance of 
+			// many rows. 10mill is a reasonable test when it comes to our peaks which are
+			// size 170059268 for all ensembl-107 data (but splittable my chromosome).
+			int added = conn.testAddRandomRows("chr1", 100000);
+			System.out.println("Added "+added+" rows");
+		}
+		
+		long time = System.currentTimeMillis();
+		
+		// Test how long it takes to interact with it.
+		Path vpath = getPath("data/bed_peaks/some.gvf");
+		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("peaks")) {
+			conn.setLocation(dir);
+
+			try (@SuppressWarnings("resource")
+			ExportBuilder builder = new ExportBuilder().setSpecies("Homo sapiens")
+										.setChunkProperty("1000")
+										.setAlwaysUseDefaultConnector(true)
+										.addConnector(conn)
+										.setDir(dir)
+										.setInput(vpath)
+										.setDefaultChunkSize(10000)) {
+
+				builder.export();
+			}
+		}
+		System.out.println("Time to lookup ten = "+(System.currentTimeMillis()-time)+"ms");
+		
+		ReaderRequest reader = new ReaderRequest("test", dir.resolve("Overlap.csv.gz"));
+		reader.setReaderHint("MapCSVReader");
+		assertEquals(29, ReaderFactory.getReader(reader).stream().count());
+		assertTrue(Files.exists(dir.resolve("Overlap-header.csv")));
+		assertTrue(Files.size(dir.resolve("Variant.csv.gz"))>100);
+		assertTrue(Files.exists(dir.resolve("Variant-header.csv")));
+		assertTrue(Files.exists(dir.resolve("VariantEffect.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("VariantEffect-header.csv")));
+
 	}
 }

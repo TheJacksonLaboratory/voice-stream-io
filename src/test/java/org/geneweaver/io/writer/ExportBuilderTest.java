@@ -229,7 +229,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		
 		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>()) {
 			conn.setLocation(dir);
-			conn.add(0, rpath);
+			conn.add(rpath);
 			conn.create();
 			
 			try (@SuppressWarnings("resource")
@@ -255,7 +255,6 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		assertTrue(Files.exists(dir.resolve("Peak-header.csv")));
 		assertTrue(Files.size(dir.resolve("Variant.csv.gz"))>100);
 		assertTrue(Files.exists(dir.resolve("Variant-header.csv")));
-		assertTrue(Files.exists(dir.resolve("regions.h2.mv.db")));
 		assertTrue(Files.exists(dir.resolve("VariantEffect.csv.gz")));
 		assertTrue(Files.exists(dir.resolve("VariantEffect-header.csv")));
 	}

@@ -13,6 +13,8 @@ import org.geneweaver.domain.Variant;
  *
  */
 public class OverlapService {
+	
+	private static final int baseSize = Integer.parseInt(System.getenv().getOrDefault("BASE_SIZE", "10000"));
 
 	/**
 	 * Gets the intersection of the two objects. This
@@ -59,5 +61,23 @@ public class OverlapService {
 		ret.setIntersectFraction(intersectFaction);
 		
 		return ret;
+	}
+	
+	/**
+	 * Get the base of the location which is used for sharding.
+	 * @param loc
+	 * @return
+	 */
+	public int getShardBase(int loc) {
+		return Math.round(loc/baseSize);
+	}
+
+	public String getShardName(String chr, int loc) {
+		StringBuilder b = new StringBuilder();
+		b.append("_");
+		b.append(chr);
+		b.append("_");
+		b.append(getShardBase(loc));
+		return b.toString();
 	}
 }

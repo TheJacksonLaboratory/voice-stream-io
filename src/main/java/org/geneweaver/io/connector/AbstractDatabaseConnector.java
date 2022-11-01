@@ -116,9 +116,14 @@ public abstract class AbstractDatabaseConnector {
 	 */
 	protected abstract void parseSource() throws SQLException, ReaderException;
 
-	
 	protected Connection createConnection() throws SQLException {
-		return DriverManager.getConnection("jdbc:h2:"+dabasePath+";mode=MySQL","sa","");
+		return createConnection(false);
+	}
+
+	protected Connection createConnection(boolean readOnly) throws SQLException {
+		String uri = "jdbc:h2:"+dabasePath+";mode=MySQL";
+		if (readOnly) uri = uri+";ACCESS_MODE_DATA=r";
+		return DriverManager.getConnection(uri,"sa","");
 	}
 
 	public boolean exists() {
@@ -142,7 +147,7 @@ public abstract class AbstractDatabaseConnector {
 
 	public int size() throws SQLException {
 		
-		try (Connection conn = createConnection();
+		try (Connection conn = createConnection(true);
 			 Statement stmt = conn.createStatement() ) {  
 
 			String sql = "SELECT COUNT(1) FROM "+tableName+";";

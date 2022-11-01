@@ -1,18 +1,22 @@
 package org.geneweaver.io.connector;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.function.Function;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.geneweaver.domain.Entity;
@@ -35,20 +39,42 @@ import org.slf4j.LoggerFactory;
  * This connector should be used with Variants and return a stream of the
  * variant and all the Intersections of that variant with Regions form the bed files.
  * 
+ * The databases holding the peaks are sharded because these tables need to be smaller
+ * than 1mill and closer to 100k rows to be fast. In order to do this, we record the peak
+ * in two tables, once for its lower location and once for its upper (unless they are the same).
+ * Then when seeing if there is a connection to a Variant we take the base of its lower value
+ * and look up the peaks in that database. 
+ * 
  * @author gerrim
  *
  */
-public class OverlapConnector<N extends Entity, E extends Entity> extends AbstractDatabaseConnector implements Connector<N, E>, AutoCloseable  {
+public class OverlapConnector<N extends Entity, E extends Entity> implements Connector<N, E>, AutoCloseable  {
 
 	
 	private static Logger logger = LoggerFactory.getLogger(OverlapConnector.class);
+	private String tableName;
+	private String fileName;
+
+	private OverlapService oservice = new OverlapService();
+	private Object basePath;
+
+	private List<Path> source = new LinkedList<>();
+	private Map<String,Connection> connCache = new HashMap<>();
+	private Map<String,PreparedStatement>  insertCache = new HashMap<>();
+	private Map<String,PreparedStatement>  selectCache = new HashMap<>();
 
 	public OverlapConnector() {
-		this("regions.h2");
+		this("peaks");
 	}
 
+	/**
+	 * Create an overlap connector setting the base file name. 
+	 * The database is sharded by file so this
+	 * @param databaseFileName
+	 */
 	public OverlapConnector(String databaseFileName) {
-		super(System.getProperty("gweaver.mappingdb.tableName","REGIONS"), databaseFileName);
+		this.tableName = System.getProperty("gweaver.mappingdb.tableName","REGIONS");
+		this.fileName = databaseFileName;
 	}
 	
 	/**
@@ -75,18 +101,12 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 			}
 			if (!path.getFileName().toString().toLowerCase().endsWith(".bed.gz") && 
 				!path.getFileName().toString().toLowerCase().endsWith(".bed")	) return;
-			try {
-				if (limit>0 && source.size()>limit) return; // Do not add things after limit reached.
-				add(source.size(), path);
-			} catch (ClassNotFoundException | FileNotFoundException e) {
-				logger.error(path.toString(), e);
-			}
+			
+			if (limit>0 && source.size()>limit) return; // Do not add things after limit reached.
+			
+			source.add(path);
 		});
 	}
-
-	private Connection connection;
-	private PreparedStatement lookup;
-	private OverlapService oservice;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -97,19 +117,12 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 		if (!(ent instanceof Variant)) return (Stream<E>) Stream.of(ent);
 		Variant variant = (Variant)ent;
 		
-		if (connection==null) {
-			try {
-				connection = createConnection();
-			} catch (SQLException e) {
-				throw new RuntimeException(e.getMessage());
-			}
-		}
-		if (oservice==null) oservice = new OverlapService();
+		String shardName = oservice.getShardName(variant.getChr(), variant.getStart());
 
 		Collection<Entity> ret = new LinkedList<>();
 		ret.add(variant);
 		try {
-			if (lookup==null) lookup = connection.prepareStatement("SELECT peakId, lower, upper FROM "+tableName+" WHERE (?>=lower AND ?<=upper) OR (?>=lower AND ?<=upper);");
+			PreparedStatement lookup = getSelectStatement(shardName);
 			
 			int vlower = Math.min(variant.getStart(), variant.getEnd());
 			lookup.setInt(1, vlower);
@@ -129,60 +142,62 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 				}
 			}
 			
-		} catch (SQLException ne) {
+		} catch (Exception ne) {
 			logger.warn("Cannot map "+variant, ne);
 		}
 		
 		return (Stream<E>) ret.stream();
-
 	}
 
 	public void close() throws SQLException {
-		if (connection!=null) connection.close();
-		if (lookup!=null) lookup.close();
-	}
-
-	@Override
-	protected void createDatabase() throws IOException, SQLException {
-		try (Connection conn = createConnection();
-			 Statement stmt = conn.createStatement() ) {  
-
-			String sql =  "CREATE TABLE IF NOT EXISTS " + tableName + 
-						" (id int NOT NULL AUTO_INCREMENT, " + 
-						// Important UNIQUE means there is an index and
-						// that the later lookup will be fast.
-						" peakId VARCHAR(128) NOT NULL UNIQUE, " +  
-						" lower INTEGER," +
-						" upper INTEGER);"; 
-
-			stmt.executeUpdate(sql);
-			logger.info("Created table "+tableName);
+		
+		for (Connection conn : connCache.values()) {
+			conn.close();
 		}
-	}
-
-	@Override
-	protected void parseSource() throws SQLException, ReaderException {
-		try (Connection conn = createConnection();
-			 PreparedStatement stmt = conn.prepareStatement("INSERT INTO "+tableName+" (peakId, lower, upper) VALUES (?,?,?);") ) {  
-
-			for (Integer code : source.keySet()) {
-
-				File file = source.get(code);
-				System.out.println(file.getName()+" "+code+" of "+source.size());
-				
-				StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest(String.valueOf(code), file));
-				reader.stream()
-					  .forEach(reg -> storeRegion(reg, stmt));
-			} 
+		connCache.clear();
+		
+		for (Statement stmt : insertCache.values()) {
+			stmt.close();
 		}
+		insertCache.clear();
+		
+		for (Statement stmt : selectCache.values()) {
+			stmt.close();
+		}
+		selectCache.clear();
+	}
+	
+	public void create() throws SQLException, ReaderException, IOException {
+
+		for (Path path : source) {
+
+			System.out.println(path+" of "+source.size());
+
+			StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest(path.getFileName().toString(), path));
+			reader.stream()
+				  .forEach(reg -> storePeak(reg));
+		} 
 	}
 
-	private void storeRegion(Peak peak, PreparedStatement stmt) {
+	private void storePeak(Peak peak) {
+		
+		int lower = Math.min(peak.getStart(), peak.getEnd());
+		int upper = Math.max(peak.getStart(), peak.getEnd());
+		
+		String lshardName = oservice.getShardName(peak.getChr(), lower);
+		storePeakBase(lshardName, peak);
+		
+		String ubshardName = oservice.getShardName(peak.getChr(), upper);
+		if (!ubshardName.equals(lshardName)) storePeakBase(ubshardName, peak);
+	}
+
+
+	private void storePeakBase(String shardName, Peak peak) {
 		try {
-			
+			PreparedStatement stmt = getInsertStatement(shardName);
 			// Put the key in, lower case.
 			if (peak.getPeakId()==null) return; // We cannot map unnamed peaks.
-			stmt.setString(1, peak.getPeakId().toString());	
+			stmt.setString(1, peak.getPeakId());	
 			
 			int lower = Math.min(peak.getStart(), peak.getEnd());
 			stmt.setInt(2,lower);
@@ -196,5 +211,118 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 			throw new RuntimeException(ne);
 		}
 	}
+	
+	
+	private PreparedStatement getInsertStatement(String shardName) throws SQLException, IOException {
+		Connection conn = getConnection(shardName, true, false);
+		PreparedStatement stmt = insertCache.get(shardName);
+		if (stmt==null) {
+			stmt = conn.prepareStatement("INSERT INTO "+tableName+" (peakId, lower, upper) VALUES (?,?,?);");
+			insertCache.put(shardName, stmt);
+		}
+		return stmt;
+	}
+	
+	private PreparedStatement getSelectStatement(String shardName) throws SQLException, IOException {
+		
+		Connection conn = getConnection(shardName, false, true);
+		PreparedStatement stmt = selectCache.get(shardName);
+		if (stmt==null) {
+			String sql = "SELECT peakId, lower, upper FROM "+tableName+" WHERE (?>=lower AND ?<=upper) OR (?>=lower AND ?<=upper);";
+			stmt = conn.prepareStatement(sql);
+			selectCache.put(shardName, stmt);
+		}
+		return stmt;
+	}
+
+
+	private Connection getConnection(String shardName, boolean newTable, boolean readOnly) throws SQLException, IOException {
+		if (connCache.containsKey(shardName)) return connCache.get(shardName);
+		Connection ret = newConnection(shardName, newTable, readOnly);
+		connCache.put(shardName, ret);
+		return ret;
+	}
+
+	private Connection newConnection(String shardName, boolean newTable, boolean readOnly) throws SQLException, IOException {
+		
+		String path = this.basePath+shardName;
+		String uri = "jdbc:h2:"+path+";mode=MySQL";
+		if (readOnly) uri = uri+";ACCESS_MODE_DATA=r";
+		Connection conn = DriverManager.getConnection(uri,"sa","");
+		
+		if (newTable) {
+			try (Statement stmt = conn.createStatement() ) {  
+	
+				String sql =  "CREATE TABLE IF NOT EXISTS " + tableName + 
+							" (id int NOT NULL AUTO_INCREMENT, " + 
+							// Important UNIQUE means there is an index and
+							// that the later lookup will be fast.
+							" peakId VARCHAR(128) NOT NULL UNIQUE, " +  
+							" lower INTEGER," +
+							" upper INTEGER);"; 
+		
+				stmt.executeUpdate(sql);
+				logger.info("Create table if not exists "+shardName+":"+tableName);
+			} 
+		} else { // The file should exist
+			Path db = Paths.get(path+".mv.db");
+			if (!Files.exists(db)) throw new IOException("The shard file does not exist! "+db);
+		}
+		return conn;
+	}
+
+	/**
+	 * Method used to add random rows to the database.
+	 * 
+	 * @param nrows
+	 * @throws SQLException 
+	 */
+	int testAddRandomRows(String chr, int nrows) throws SQLException {
+		
+		for (int i = 0; i < nrows; i++) {
+
+			Peak peak = new Peak();
+			peak.setPeakId(UUID.randomUUID().toString());
+			peak.setStart((int)Math.round(Math.random()*10000));
+			peak.setEnd((int)Math.round(Math.random()*10000));
+			peak.setChr(chr);
+			storePeak(peak);
+			if (i%1000000 == 0) System.out.println("Added randoms, size "+i);
+		} 
+		return nrows;
+	}
+
+
+	/**
+	 * Set the location of the database. Sets the folder name.
+	 * The actual database name is always the mapping file name with ".h2" appended.
+	 * @param dir
+	 */
+	public void setLocation(Path dir) {
+		String path = dir.toAbsolutePath().toString();
+		this.basePath  = path+"/"+fileName;
+	}
+
+	public void add(Path hFile) throws FileNotFoundException {
+		if (!Files.exists(hFile)) throw new FileNotFoundException(hFile.toString());
+		this.source.add(hFile);
+	}
+
+	public long size() throws SQLException {
+		
+		long size = 0;
+		for (Connection conn : connCache.values()) {
+			try(Statement stmt = conn.createStatement()) {  
+
+				String sql = "SELECT COUNT(1) FROM "+tableName+";";
+				try(ResultSet res = stmt.executeQuery(sql)) {
+					res.next();
+					size += res.getLong(1);
+				}
+			}
+		}
+		return size;
+	}
+
 
 }

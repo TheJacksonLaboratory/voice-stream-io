@@ -197,6 +197,9 @@ public class BedReaderTest extends AbstractDataFileTest {
 				List<Peak> withDes = peaks.stream().filter(p->p.getTissueDescription()!=null).collect(Collectors.toList());
 				if (withDes.size() <= 0) fail("Could not find description for "+ename);
 				
+				boolean withChromo = peaks.stream().allMatch(p->p.getChr()!=null);
+				if (!withChromo) fail("Some peaks do not have chromosomes!");
+
 				System.out.println("Tested: "+bed);
 			} catch (ReaderException | IOException e) {
 				throw new RuntimeException(e);
