@@ -76,8 +76,8 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 			
 			Stopwatch timer = Stopwatch.createStarted();
 			func.create(); // Creates indexed database.
-			System.out.println("Created cache table size "+func.getTotalImportedSize()+" in "+timer.stop());
-			assertTrue(func.getTotalImportedSize()>10000);
+			System.out.println("Created cache table size "+func.size()+" in "+timer.stop());
+			assertTrue(func.size()>10000);
 		}
 	}
 	

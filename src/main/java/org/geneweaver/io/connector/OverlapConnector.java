@@ -6,11 +6,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -213,7 +215,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	
 	
 	private PreparedStatement getInsertStatement(String shardName) throws Exception {
-		Connection conn = getConnection(shardName, false);
+		Connection conn = getConnection(false);
 		PreparedStatement stmt = insertCache.get(shardName);
 		if (stmt==null) {
 			try (Statement create = conn.createStatement() ) {  
@@ -238,7 +240,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	
 	private PreparedStatement getSelectStatement(String shardName) throws Exception {
 		
-		Connection conn = getConnection(shardName, true);
+		Connection conn = getConnection(true);
 		PreparedStatement stmt = selectCache.get(shardName);
 		if (stmt==null) {
 			String sql = "SELECT peakId, lower, upper FROM "+tableName+shardName+" WHERE (?>=lower AND ?<=upper) OR (?>=lower AND ?<=upper);";
@@ -250,14 +252,14 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 
 	private Connection connection;
 
-	private Connection getConnection(String shardName, boolean readOnly) throws Exception {
+	private Connection getConnection(boolean readOnly) throws Exception {
 		if( connection == null) {
-			connection = newConnection(shardName, readOnly);
+			connection = newConnection(readOnly);
 		}
 		return connection;
 	}
 
-	private Connection newConnection(String shardName, boolean readOnly) throws SQLException, IOException {
+	private Connection newConnection(boolean readOnly) throws SQLException, IOException {
 		
 		//String path = this.basePath+shardName;
 		String path = this.basePath;
@@ -306,22 +308,34 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	/**
 	 * Size may be used only after importing all peaks to cache.
 	 * @return the size.
-	 * @throws SQLException
+	 * @throws Exception 
 	 */
-	public long getTotalImportedSize() throws SQLException {
+	public long size() throws Exception {
 		
-		long size = 0;
-		for (String shard : insertCache.keySet()) {
-			try(Statement stmt = connection.createStatement()) {  
-
-				String sql = "SELECT COUNT(1) FROM "+tableName+shard+";";
-				try(ResultSet res = stmt.executeQuery(sql)) {
-					res.next();
-					size += res.getLong(1);
+		Connection conn = getConnection(true);
+		try (Statement tabs = conn.createStatement()) {
+			
+			DatabaseMetaData md = conn.getMetaData();
+			ResultSet rs = md.getTables(null, null, "%", null);
+			List<String> names = new ArrayList<>();
+			while (rs.next()) {
+				String tname = rs.getString(3);
+				if (tname.startsWith(this.tableName)) names.add(tname);
+			}
+			
+			long size = 0;
+			for (String tname : names) {
+				try(Statement stmt = conn.createStatement()) {  
+	
+					String sql = "SELECT COUNT(1) FROM "+tname+";";
+					try(ResultSet res = stmt.executeQuery(sql)) {
+						res.next();
+						size += res.getLong(1);
+					}
 				}
 			}
+			return size;
 		}
-		return size;
 	}
 
 
