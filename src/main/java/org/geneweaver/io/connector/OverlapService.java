@@ -14,7 +14,7 @@ import org.geneweaver.domain.Variant;
  */
 public class OverlapService {
 	
-	private static final int baseSize = Integer.parseInt(System.getenv().getOrDefault("BASE_SIZE", "10000"));
+	private static final int baseSize = Integer.parseInt(System.getenv().getOrDefault("BASE_SIZE", "1000000"));
 
 	/**
 	 * Gets the intersection of the two objects. This
@@ -78,6 +78,9 @@ public class OverlapService {
 		b.append(chr);
 		b.append("_");
 		b.append(getShardBase(loc));
-		return b.toString();
+		String sname = b.toString();
+		// The name must be database legal
+		sname = sname.replaceAll("[^a-zA-Z_0-9]+", "");
+		return sname;
 	}
 }

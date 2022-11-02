@@ -56,12 +56,13 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	private String fileName;
 
 	private OverlapService oservice = new OverlapService();
-	private Object basePath;
+	private String basePath;
 
 	private List<Path> source = new LinkedList<>();
-	private Map<String,Connection> connCache = new HashMap<>();
-	private Map<String,PreparedStatement>  insertCache = new HashMap<>();
-	private Map<String,PreparedStatement>  selectCache = new HashMap<>();
+	
+	// These will get large
+	private Map<String,PreparedStatement>  insertCache = new HashMap<>(89);
+	private Map<String,PreparedStatement>  selectCache = new HashMap<>(89);
 
 	public OverlapConnector() {
 		this("peaks");
@@ -151,11 +152,6 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 
 	public void close() throws SQLException {
 		
-		for (Connection conn : connCache.values()) {
-			conn.close();
-		}
-		connCache.clear();
-		
 		for (Statement stmt : insertCache.values()) {
 			stmt.close();
 		}
@@ -165,10 +161,13 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 			stmt.close();
 		}
 		selectCache.clear();
+		
+		connection.close();
 	}
 	
 	public void create() throws SQLException, ReaderException, IOException {
 
+		if (source==null || source.isEmpty()) throw new IllegalArgumentException();
 		for (Path path : source) {
 
 			System.out.println(path+" of "+source.size());
@@ -213,47 +212,13 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	}
 	
 	
-	private PreparedStatement getInsertStatement(String shardName) throws SQLException, IOException {
-		Connection conn = getConnection(shardName, true, false);
+	private PreparedStatement getInsertStatement(String shardName) throws Exception {
+		Connection conn = getConnection(shardName, false);
 		PreparedStatement stmt = insertCache.get(shardName);
 		if (stmt==null) {
-			stmt = conn.prepareStatement("INSERT INTO "+tableName+" (peakId, lower, upper) VALUES (?,?,?);");
-			insertCache.put(shardName, stmt);
-		}
-		return stmt;
-	}
-	
-	private PreparedStatement getSelectStatement(String shardName) throws SQLException, IOException {
-		
-		Connection conn = getConnection(shardName, false, true);
-		PreparedStatement stmt = selectCache.get(shardName);
-		if (stmt==null) {
-			String sql = "SELECT peakId, lower, upper FROM "+tableName+" WHERE (?>=lower AND ?<=upper) OR (?>=lower AND ?<=upper);";
-			stmt = conn.prepareStatement(sql);
-			selectCache.put(shardName, stmt);
-		}
-		return stmt;
-	}
-
-
-	private Connection getConnection(String shardName, boolean newTable, boolean readOnly) throws SQLException, IOException {
-		if (connCache.containsKey(shardName)) return connCache.get(shardName);
-		Connection ret = newConnection(shardName, newTable, readOnly);
-		connCache.put(shardName, ret);
-		return ret;
-	}
-
-	private Connection newConnection(String shardName, boolean newTable, boolean readOnly) throws SQLException, IOException {
-		
-		String path = this.basePath+shardName;
-		String uri = "jdbc:h2:"+path+";mode=MySQL";
-		if (readOnly) uri = uri+";ACCESS_MODE_DATA=r";
-		Connection conn = DriverManager.getConnection(uri,"sa","");
-		
-		if (newTable) {
-			try (Statement stmt = conn.createStatement() ) {  
-	
-				String sql =  "CREATE TABLE IF NOT EXISTS " + tableName + 
+			try (Statement create = conn.createStatement() ) {  
+				
+				String sql =  "CREATE TABLE IF NOT EXISTS " + tableName+shardName + 
 							" (id int NOT NULL AUTO_INCREMENT, " + 
 							// Important UNIQUE means there is an index and
 							// that the later lookup will be fast.
@@ -261,14 +226,44 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 							" lower INTEGER," +
 							" upper INTEGER);"; 
 		
-				stmt.executeUpdate(sql);
+				create.executeUpdate(sql);
 				logger.info("Create table if not exists "+shardName+":"+tableName);
 			} 
-		} else { // The file should exist
-			Path db = Paths.get(path+".mv.db");
-			if (!Files.exists(db)) throw new IOException("The shard file does not exist! "+db);
+
+			stmt = conn.prepareStatement("INSERT INTO "+tableName+shardName+" (peakId, lower, upper) VALUES (?,?,?);");
+			insertCache.put(shardName, stmt);
+		} 
+		return stmt;
+	}
+	
+	private PreparedStatement getSelectStatement(String shardName) throws Exception {
+		
+		Connection conn = getConnection(shardName, true);
+		PreparedStatement stmt = selectCache.get(shardName);
+		if (stmt==null) {
+			String sql = "SELECT peakId, lower, upper FROM "+tableName+shardName+" WHERE (?>=lower AND ?<=upper) OR (?>=lower AND ?<=upper);";
+			stmt = conn.prepareStatement(sql);
+			selectCache.put(shardName, stmt);
+		} 
+		return stmt;
+	}
+
+	private Connection connection;
+
+	private Connection getConnection(String shardName, boolean readOnly) throws Exception {
+		if( connection == null) {
+			connection = newConnection(shardName, readOnly);
 		}
-		return conn;
+		return connection;
+	}
+
+	private Connection newConnection(String shardName, boolean readOnly) throws SQLException, IOException {
+		
+		//String path = this.basePath+shardName;
+		String path = this.basePath;
+		String uri = "jdbc:h2:"+path+";mode=MySQL";
+		if (readOnly) uri = uri+";ACCESS_MODE_DATA=r";
+		return DriverManager.getConnection(uri,"sa","");
 	}
 
 	/**
@@ -308,13 +303,18 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 		this.source.add(hFile);
 	}
 
-	public long size() throws SQLException {
+	/**
+	 * Size may be used only after importing all peaks to cache.
+	 * @return the size.
+	 * @throws SQLException
+	 */
+	public long getTotalImportedSize() throws SQLException {
 		
 		long size = 0;
-		for (Connection conn : connCache.values()) {
-			try(Statement stmt = conn.createStatement()) {  
+		for (String shard : insertCache.keySet()) {
+			try(Statement stmt = connection.createStatement()) {  
 
-				String sql = "SELECT COUNT(1) FROM "+tableName+";";
+				String sql = "SELECT COUNT(1) FROM "+tableName+shard+";";
 				try(ResultSet res = stmt.executeQuery(sql)) {
 					res.next();
 					size += res.getLong(1);
