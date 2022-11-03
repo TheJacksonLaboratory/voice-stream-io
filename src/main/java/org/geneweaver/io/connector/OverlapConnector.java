@@ -135,6 +135,9 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 		ret.add(variant);
 		try {
 			PreparedStatement lookup = getSelectStatement(variant.getChr(), shardName);
+			if (lookup==null) { // Not all peaks have reasonable chromosomes.
+				return (Stream<E>) ret.stream();
+			}
 			
 			int vlower = Math.min(variant.getStart(), variant.getEnd());
 			lookup.setInt(1, vlower);
@@ -208,6 +211,8 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	private void storePeakBase(String shardName, Peak peak) {
 		try {
 			PreparedStatement stmt = getInsertStatement(peak.getChr(), shardName);
+			if (stmt==null) return; // Not all peaks have reasonable chromosomes.
+			
 			// Put the key in, lower case.
 			if (peak.getPeakId()==null) return; // We cannot map unnamed peaks.
 			stmt.setString(1, peak.getPeakId());	
@@ -228,6 +233,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	
 	private PreparedStatement getInsertStatement(String chr, String shardName) throws Exception {
 		Connection conn = getConnection(chr, false);
+		if (conn==null) return null;
 		PreparedStatement stmt = insertCache.get(shardName);
 		if (stmt==null) {
 			try (Statement create = conn.createStatement() ) {  
@@ -253,6 +259,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	private PreparedStatement getSelectStatement(String chr, String shardName) throws Exception {
 		
 		Connection conn = getConnection(chr, true);
+		if (conn==null) return null;
 		PreparedStatement stmt = selectCache.get(shardName);
 		if (stmt==null) {
 			String sql = "SELECT peakId, lower, upper FROM "+tableName+shardName+" WHERE (?>=lower AND ?<=upper) OR (?>=lower AND ?<=upper);";
@@ -273,7 +280,8 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 
 	private Connection newConnection(String chr, boolean readOnly) throws SQLException, IOException {
 		
-		chr = chr.replaceAll("[^a-zA-Z_0-9]+", "");
+		chr = oservice.getChromosome(chr);
+		if (chr==null) return null;
 		String path = this.basePath+"_"+chr;
 		String uri = "jdbc:h2:"+path+";mode=MySQL";
 		if (readOnly) uri = uri+";ACCESS_MODE_DATA=r";

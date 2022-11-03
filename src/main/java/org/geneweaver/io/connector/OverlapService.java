@@ -1,5 +1,8 @@
 package org.geneweaver.io.connector;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.geneweaver.domain.Overlap;
 import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Variant;
@@ -14,7 +17,7 @@ import org.geneweaver.domain.Variant;
  */
 public class OverlapService {
 	
-	private static final int baseSize = Integer.parseInt(System.getenv().getOrDefault("BASE_SIZE", "10000"));
+	private static final int baseSize = Integer.parseInt(System.getenv().getOrDefault("BASE_SIZE", "100000"));
 
 	/**
 	 * Gets the intersection of the two objects. This
@@ -74,13 +77,31 @@ public class OverlapService {
 
 	public String getShardName(String chr, int loc) {
 		StringBuilder b = new StringBuilder();
+		final String chrGood = getChromosome(chr);
 		b.append("_");
-		b.append(chr);
+		b.append(chrGood);
 		b.append("_");
 		b.append(getShardBase(loc));
-		String sname = b.toString();
-		// The name must be database legal
-		sname = sname.replaceAll("[^a-zA-Z_0-9]+", "");
-		return sname;
+		return b.toString();
+	}
+	
+	private static final String chromo = "(chr[0-9]{0,2}X?Y?(MT)?)";
+	private static final Pattern chromPattern = Pattern.compile("("+chromo+"|"+chromo+"_.*)");
+
+	/**
+	 * Returns null if the chromosome is not recognised.
+	 * @param chr
+	 * @return
+	 */
+	String getChromosome(String chr) {
+		if (chr.length()<4) return null;
+		Matcher matcher = chromPattern.matcher(chr);
+		if (matcher.matches()) {
+			String lchr = matcher.group(1);
+			int upos = lchr.indexOf('_');
+			if (upos>0) lchr = lchr.substring(0, upos);
+			return lchr;
+		}
+		return null;
 	}
 }
