@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.geneweaver.domain.Entity;
@@ -42,10 +43,15 @@ import org.slf4j.LoggerFactory;
  * variant and all the Intersections of that variant with Regions form the bed files.
  * 
  * The databases holding the peaks are sharded because these tables need to be smaller
- * than 1mill and closer to 100k rows to be fast. In order to do this, we record the peak
- * in two tables, once for its lower location and once for its upper (unless they are the same).
+ * than 200mill and closer to 100k rows to be fast. In order to do this, we record the peak
+ * in two tables if they straddle a shard boundary, once for its lower location and once 
+ * for its upper (unless they are the same).
  * Then when seeing if there is a connection to a Variant we take the base of its lower value
- * and look up the peaks in that database. 
+ * and look up the peaks in that table (shard). 
+ * 
+ * In addition we use separate files for each chromosome with a separate connection. This
+ * makes the connection somewhat faster because there can be 200mill base pairs in a chromosome
+ * therefore if the base pair shards are 10000, there can be 20000 tables.
  * 
  * @author gerrim
  *
@@ -62,9 +68,12 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 
 	private List<Path> source = new LinkedList<>();
 	
-	// These will get large
-	private Map<String,PreparedStatement>  insertCache = new HashMap<>(89);
-	private Map<String,PreparedStatement>  selectCache = new HashMap<>(89);
+	// Just done by chromosome
+	private Map<String,Connection>		   connCache   = new HashMap<>(23);
+
+	// These will get large e.g. ~20k depending on BASE_SIZE
+	private Map<String,PreparedStatement>  insertCache = new HashMap<>(1009);
+	private Map<String,PreparedStatement>  selectCache = new HashMap<>(1009);
 
 	public OverlapConnector() {
 		this("peaks");
@@ -125,7 +134,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 		Collection<Entity> ret = new LinkedList<>();
 		ret.add(variant);
 		try {
-			PreparedStatement lookup = getSelectStatement(shardName);
+			PreparedStatement lookup = getSelectStatement(variant.getChr(), shardName);
 			
 			int vlower = Math.min(variant.getStart(), variant.getEnd());
 			lookup.setInt(1, vlower);
@@ -164,7 +173,10 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 		}
 		selectCache.clear();
 		
-		connection.close();
+		for (Connection conn : connCache.values()) {
+			conn.close();
+		}
+		connCache.clear();
 	}
 	
 	public void create() throws SQLException, ReaderException, IOException {
@@ -195,7 +207,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 
 	private void storePeakBase(String shardName, Peak peak) {
 		try {
-			PreparedStatement stmt = getInsertStatement(shardName);
+			PreparedStatement stmt = getInsertStatement(peak.getChr(), shardName);
 			// Put the key in, lower case.
 			if (peak.getPeakId()==null) return; // We cannot map unnamed peaks.
 			stmt.setString(1, peak.getPeakId());	
@@ -214,8 +226,8 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	}
 	
 	
-	private PreparedStatement getInsertStatement(String shardName) throws Exception {
-		Connection conn = getConnection(false);
+	private PreparedStatement getInsertStatement(String chr, String shardName) throws Exception {
+		Connection conn = getConnection(chr, false);
 		PreparedStatement stmt = insertCache.get(shardName);
 		if (stmt==null) {
 			try (Statement create = conn.createStatement() ) {  
@@ -238,9 +250,9 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 		return stmt;
 	}
 	
-	private PreparedStatement getSelectStatement(String shardName) throws Exception {
+	private PreparedStatement getSelectStatement(String chr, String shardName) throws Exception {
 		
-		Connection conn = getConnection(true);
+		Connection conn = getConnection(chr, true);
 		PreparedStatement stmt = selectCache.get(shardName);
 		if (stmt==null) {
 			String sql = "SELECT peakId, lower, upper FROM "+tableName+shardName+" WHERE (?>=lower AND ?<=upper) OR (?>=lower AND ?<=upper);";
@@ -250,24 +262,26 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 		return stmt;
 	}
 
-	private Connection connection;
-
-	private Connection getConnection(boolean readOnly) throws Exception {
-		if( connection == null) {
-			connection = newConnection(readOnly);
+	private Connection getConnection(String chr, boolean readOnly) throws Exception {
+		
+		Connection ret = connCache.get(chr);
+		if (ret == null) {
+			ret = newConnection(chr, readOnly);
 		}
-		return connection;
+		return ret;
 	}
 
-	private Connection newConnection(boolean readOnly) throws SQLException, IOException {
+	private Connection newConnection(String chr, boolean readOnly) throws SQLException, IOException {
 		
-		//String path = this.basePath+shardName;
-		String path = this.basePath;
+		chr = chr.replaceAll("[^a-zA-Z_0-9]+", "");
+		String path = this.basePath+"_"+chr;
 		String uri = "jdbc:h2:"+path+";mode=MySQL";
 		if (readOnly) uri = uri+";ACCESS_MODE_DATA=r";
 		return DriverManager.getConnection(uri,"sa","");
 	}
 
+	private long roughBPperChr = 200000000;
+	
 	/**
 	 * Method used to add random rows to the database.
 	 * 
@@ -280,8 +294,8 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 
 			Peak peak = new Peak();
 			peak.setPeakId(UUID.randomUUID().toString());
-			peak.setStart((int)Math.round(Math.random()*10000));
-			peak.setEnd((int)Math.round(Math.random()*10000));
+			peak.setStart((int)(Math.random()*roughBPperChr));
+			peak.setEnd((int)(Math.random()*roughBPperChr));
 			peak.setChr(chr);
 			storePeak(peak);
 			if (i%1000000 == 0) System.out.println("Added randoms, size "+i);
@@ -312,31 +326,46 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	 */
 	public long size() throws Exception {
 		
-		Connection conn = getConnection(true);
-		try (Statement tabs = conn.createStatement()) {
-			
-			DatabaseMetaData md = conn.getMetaData();
-			ResultSet rs = md.getTables(null, null, "%", null);
-			List<String> names = new ArrayList<>();
-			while (rs.next()) {
-				String tname = rs.getString(3);
-				if (tname.startsWith(this.tableName)) names.add(tname);
-			}
-			
-			long size = 0;
-			for (String tname : names) {
-				try(Statement stmt = conn.createStatement()) {  
-	
-					String sql = "SELECT COUNT(1) FROM "+tname+";";
-					try(ResultSet res = stmt.executeQuery(sql)) {
-						res.next();
-						size += res.getLong(1);
+		// We get the size of the tables in the dir
+		Path dir = Paths.get(this.basePath).getParent();
+		List<Path> files = Files.list(dir)
+				                .filter(Files::isRegularFile)
+				                .filter(p->p.getFileName().toString().toLowerCase().endsWith(".mv.db"))
+				                .collect(Collectors.toList());
+		
+		long size = 0;
+		for (Path path : files) {
+			try (Connection conn = createConnection(path);
+			     Statement tabs = conn.createStatement()) {
+				
+				DatabaseMetaData md = conn.getMetaData();
+				ResultSet rs = md.getTables(null, null, "%", null);
+				List<String> names = new ArrayList<>();
+				while (rs.next()) {
+					String tname = rs.getString(3);
+					if (tname.startsWith(this.tableName)) names.add(tname);
+				}
+				
+				for (String tname : names) {
+					try(Statement stmt = conn.createStatement()) {  
+		
+						String sql = "SELECT COUNT(1) FROM "+tname+";";
+						try(ResultSet res = stmt.executeQuery(sql)) {
+							res.next();
+							size += res.getLong(1);
+						}
 					}
 				}
 			}
-			return size;
 		}
+		return size;
 	}
-
+	
+	private Connection createConnection(Path path) throws SQLException {
+		
+		String spath = path.toString().substring(0, path.toString().toLowerCase().lastIndexOf(".mv.db"));
+		String uri = "jdbc:h2:"+spath+";mode=MySQL;ACCESS_MODE_DATA=r";
+		return DriverManager.getConnection(uri,"sa","");
+	}
 
 }

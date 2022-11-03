@@ -188,7 +188,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 			// 2. Add random rows to this database, increase size to check performance of 
 			// many rows. 10mill is a reasonable test when it comes to our peaks which are
 			// size 170059268 for all ensembl-107 data (but splittable my chromosome).
-			int added = conn.testAddRandomRows("chr1", 100000);
+			int added = conn.testAddRandomRows("chr1", 10000);
 			System.out.println("Added "+added+" rows");
 		}
 		
@@ -211,11 +211,17 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 				builder.export();
 			}
 		}
-		System.out.println("Time to lookup ten = "+(System.currentTimeMillis()-time)+"ms");
+		
+		long interval = (System.currentTimeMillis()-time);
+		System.out.println("Time to lookup = "+interval+"ms");
+		StreamReader<Variant> gvf =  ReaderFactory.getReader(new ReaderRequest("Homo testicus", vpath));
+		long size = gvf.stream().count();
+		
+		System.out.println(String.format("This is %3.2f ms per variant.", interval/(double)size));
 		
 		ReaderRequest reader = new ReaderRequest("test", dir.resolve("Overlap.csv.gz"));
 		reader.setReaderHint("MapCSVReader");
-		assertEquals(29, ReaderFactory.getReader(reader).stream().count());
+		assertTrue(ReaderFactory.getReader(reader).stream().count() >= 29); // There are 29 but some randoms might collide.
 		assertTrue(Files.exists(dir.resolve("Overlap-header.csv")));
 		assertTrue(Files.size(dir.resolve("Variant.csv.gz"))>100);
 		assertTrue(Files.exists(dir.resolve("Variant-header.csv")));
@@ -223,4 +229,5 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		assertTrue(Files.exists(dir.resolve("VariantEffect-header.csv")));
 
 	}
+	
 }
