@@ -60,13 +60,14 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 
 	
 	private static Logger logger = LoggerFactory.getLogger(OverlapConnector.class);
+
 	private String tableName;
 	private String fileName;
 
 	private OverlapService oservice = new OverlapService();
 	private String basePath;
 
-	private List<Path> source = new LinkedList<>();
+	private List<Path> source = new ArrayList<>();
 	
 	// Just done by chromosome
 	private Map<String,Connection>		   connCache   = new HashMap<>(23);
@@ -166,7 +167,8 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 
 	public void close() throws SQLException {
 		
-		for (Statement stmt : insertCache.values()) {
+		for (String shard : insertCache.keySet()) {
+			Statement stmt = insertCache.get(shard);
 			stmt.close();
 		}
 		insertCache.clear();
@@ -187,7 +189,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 		if (source==null || source.isEmpty()) throw new IllegalArgumentException();
 		for (Path path : source) {
 
-			System.out.println(path+" of "+source.size());
+			System.out.println(path+" "+source.indexOf(path)+" of "+source.size());
 
 			StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest(path.getFileName().toString(), path));
 			reader.stream()
@@ -274,6 +276,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 		Connection ret = connCache.get(chr);
 		if (ret == null) {
 			ret = newConnection(chr, readOnly);
+			if (ret != null) connCache.put(chr, ret);
 		}
 		return ret;
 	}

@@ -59,9 +59,10 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 	public void addAllMouse() throws Exception {
 		testCreate("regionsAllMouse", getPath("data/bed_peaks/mus_musculus/"), 2);
 	}
+	
 	@Test
 	public void addAllHuman() throws Exception {
-		testCreate("regionsAllHuman", getPath("data/bed_peaks/homo_sapiens/"), 2);
+		testCreate("regionsAllHuman", getPath("data/bed_peaks/homo_sapiens/"), -1);
 	}
 	
 	public void testCreate(String testName, Path ddir, int limit) throws Exception {
@@ -76,8 +77,10 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 			
 			Stopwatch timer = Stopwatch.createStarted();
 			func.create(); // Creates indexed database.
-			System.out.println("Created cache table size "+func.size()+" in "+timer.stop());
+			Stopwatch done = timer.stop();
+			System.out.println("Created cache table size "+func.size()+" in "+done);
 			assertTrue(func.size()>10000);
+			assertTrue(done.elapsed().toMillis()<60000);
 		}
 	}
 	

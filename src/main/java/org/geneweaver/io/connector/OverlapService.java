@@ -1,5 +1,7 @@
 package org.geneweaver.io.connector;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -87,6 +89,7 @@ public class OverlapService {
 	
 	private static final String chromo = "(chr[0-9]{0,2}X?Y?(MT)?)";
 	private static final Pattern chromPattern = Pattern.compile("("+chromo+"|"+chromo+"_.*)");
+	private static final Map<String,String> chrCache = new HashMap<>();
 
 	/**
 	 * Returns null if the chromosome is not recognised.
@@ -94,14 +97,18 @@ public class OverlapService {
 	 * @return
 	 */
 	String getChromosome(String chr) {
+		
+		if (chrCache.containsKey(chr)) return chrCache.get(chr);
 		if (chr.length()<4) return null;
 		Matcher matcher = chromPattern.matcher(chr);
 		if (matcher.matches()) {
 			String lchr = matcher.group(1);
 			int upos = lchr.indexOf('_');
 			if (upos>0) lchr = lchr.substring(0, upos);
+			chrCache.put(chr, lchr);
 			return lchr;
 		}
+		chrCache.put(chr, null);
 		return null;
 	}
 }
