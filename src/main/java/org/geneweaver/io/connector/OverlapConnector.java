@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,11 +71,11 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	private List<Path> source = new ArrayList<>();
 	
 	// Just done by chromosome
-	private Map<String,Connection>		   connCache   = new HashMap<>(23);
+	private Map<String,Connection>		   connCache   =  Collections.synchronizedMap(new HashMap<>(23));
 
 	// These will get large e.g. ~20k depending on BASE_SIZE
-	private Map<String,PreparedStatement>  insertCache = new HashMap<>(1009);
-	private Map<String,PreparedStatement>  selectCache = new HashMap<>(1009);
+	private Map<String,PreparedStatement>  insertCache =  Collections.synchronizedMap(new HashMap<>(1009));
+	private Map<String,PreparedStatement>  selectCache =  Collections.synchronizedMap(new HashMap<>(1009));
 
 	public OverlapConnector() {
 		this("peaks");
@@ -139,7 +140,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 			if (lookup==null) { // Not all peaks have reasonable chromosomes.
 				return (Stream<E>) ret.stream();
 			}
-			
+
 			int vlower = Math.min(variant.getStart(), variant.getEnd());
 			lookup.setInt(1, vlower);
 			lookup.setInt(2, vlower);
@@ -239,15 +240,15 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 		PreparedStatement stmt = insertCache.get(shardName);
 		if (stmt==null) {
 			try (Statement create = conn.createStatement() ) {  
-				
+
 				String sql =  "CREATE TABLE IF NOT EXISTS " + tableName+shardName + 
-							" (id int NOT NULL AUTO_INCREMENT, " + 
-							// Important UNIQUE means there is an index and
-							// that the later lookup will be fast.
-							" peakId VARCHAR(128) NOT NULL UNIQUE, " +  
-							" lower INTEGER," +
-							" upper INTEGER);"; 
-		
+						" (id int NOT NULL AUTO_INCREMENT, " + 
+						// Important UNIQUE means there is an index and
+						// that the later lookup will be fast.
+						" peakId VARCHAR(128) NOT NULL UNIQUE, " +  
+						" lower INTEGER," +
+						" upper INTEGER);"; 
+
 				create.executeUpdate(sql);
 				logger.info("Create table if not exists "+shardName+":"+tableName);
 			} 
@@ -258,15 +259,19 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 		return stmt;
 	}
 	
-	private PreparedStatement getSelectStatement(String chr, String shardName) throws Exception {
+	private synchronized PreparedStatement getSelectStatement(String chr, String shardName) throws Exception {
+		
+		String name = Thread.currentThread().getName();
+		String cacheKey = name+"/"+shardName;
+		PreparedStatement stmt = selectCache.get(cacheKey);
+		if (stmt!=null) return stmt;
 		
 		Connection conn = getConnection(chr, true);
 		if (conn==null) return null;
-		PreparedStatement stmt = selectCache.get(shardName);
 		if (stmt==null) {
 			String sql = "SELECT peakId, lower, upper FROM "+tableName+shardName+" WHERE (?>=lower AND ?<=upper) OR (?>=lower AND ?<=upper);";
 			stmt = conn.prepareStatement(sql);
-			selectCache.put(shardName, stmt);
+			selectCache.put(cacheKey, stmt);
 		} 
 		return stmt;
 	}

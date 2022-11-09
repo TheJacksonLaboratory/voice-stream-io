@@ -7,10 +7,13 @@ import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -80,6 +83,12 @@ public class ExportBuilder implements AutoCloseable {
 	private boolean alwaysUseDefaultConnector = false;
 	
 	/**
+	 * If there are multiple files, when calling export a
+	 * parallel exporter will run each file with a separate thread.
+	 */
+	private boolean parallelFiles = false;
+	
+	/**
 	 * Stream for printing messages of each export run.
 	 */
 	@JsonIgnore
@@ -89,20 +98,81 @@ public class ExportBuilder implements AutoCloseable {
 	 * Map of writers cached while we write all the files.
 	 */
 	@JsonIgnore
-	private Map<Class<? extends Entity>, BufferedWriter> writers = new HashMap<>();
+	private Map<Class<? extends Entity>, BufferedWriter> writers = Collections.synchronizedMap(new HashMap<>());
+
+	private Collection<Throwable> errors = new LinkedList<>();
 	
 	public ExportBuilder() {
 		
 	}
 	
 	public void export() throws Exception {
+		try {
+			if (isParallelFiles()) {
+				parallelExport();
+			} else {
+				singleThreadExport();
+			}
+		} catch (Exception ne) {
+			errors.add(ne);
+			throw ne;
+		}
+	}
+	
+	private void singleThreadExport() throws Exception {
 		// Process one or more paths into the bulk file.
 		for (Path input : inputs) {
 			String message = exporter.export(this, input);
 			out.println(message);
 		}		
 	}
+
+	private void parallelExport() throws InterruptedException {
+		
+		ThreadGroup pool = new ThreadGroup("Exporters");
+		
+		// Have to use list as inputs is just an iterator and
+		// does not know its size.
+		List<CountDownLatch> latches = new LinkedList<>();
+		
+		// Mostly the number of files is around 23 for all the chromosome
+		// files. 23 long running threads should be reasonably efficient without
+		// using executor service. If swapping small tasks would use.
+		for (Path input : inputs) {
+			CountDownLatch latch = new CountDownLatch(1);
+			latches.add(latch);
+			
+			Thread thread = new Thread(pool, ()->exportQuietly(input, latch));
+			thread.setName("Export "+input.getFileName());
+			thread.start();
+		}
+		
+		for (CountDownLatch latch : latches) {
+			latch.await();
+		}
+	}
+
+	private void exportQuietly(Path input, CountDownLatch count) {
+		try {
+			exporter.export(this, input);
+		} catch (Exception e) {
+			errors.add(e);
+		} finally {
+			count.countDown();
+		}
+	}
 	
+	public String status() {
+		if (errors.isEmpty()) return "Complete";
+		
+		String message = "";
+		for (Throwable err : errors) {
+			err.printStackTrace(out);
+			message = message+err.getMessage()+"\n";
+		}
+		return message;
+	}
+
 	/**
 	 * Default save stream the reader, gets its connector and writes the lot to file.
 	 * 
@@ -348,6 +418,21 @@ public class ExportBuilder implements AutoCloseable {
 	 */
 	public ExportBuilder setAlwaysUseDefaultConnector(boolean alwaysUseDefaultConnector) {
 		this.alwaysUseDefaultConnector = alwaysUseDefaultConnector;
+		return this;
+	}
+
+	/**
+	 * @return the parallel
+	 */
+	public boolean isParallelFiles() {
+		return parallelFiles;
+	}
+
+	/**
+	 * @param parallel the parallel to set
+	 */
+	public ExportBuilder setParallelFiles(boolean parallel) {
+		this.parallelFiles = parallel;
 		return this;
 	}
 

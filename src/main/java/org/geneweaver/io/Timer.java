@@ -81,7 +81,8 @@ public class Timer {
 		long time = System.currentTimeMillis()-start;
 		double tpn = ((double)time)/inodes;
 		
-		String msg = String.format("Total %d in %d ms. Time per node %.2f ms", inodes, time, tpn);
+		String threadName = Thread.currentThread().getName();
+		String msg = String.format("Total %d in %d ms. Time per node %.4f ms (Thread %s)", inodes, time, tpn, threadName);
 		consumer.accept(msg);
 	}
 

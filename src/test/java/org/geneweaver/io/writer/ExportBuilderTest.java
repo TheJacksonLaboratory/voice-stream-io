@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -225,7 +226,15 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		assertTrue(Files.exists(dir.resolve("Peak.csv.gz")));
 		assertTrue(Files.exists(dir.resolve("Peak-header.csv")));
 		
+		// We make 23 copies of the input in order to test 
+		// in parallel mode.
 		Path vpath = getPath("data/bed_peaks/some.gvf");
+		List<Path> copies = new LinkedList<>();
+		for (int i = 0; i < 24; i++) {
+			Path tmp = dir.resolve("copy"+i+".gvf");
+			Files.copy(vpath, tmp);
+			copies.add(tmp);
+		}
 		
 		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>()) {
 			conn.setLocation(dir);
@@ -238,27 +247,35 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 					   .setAlwaysUseDefaultConnector(true)
 					   .addConnector(conn)
 					   .setDir(dir)
-					   .setInput(vpath)
+					   .setInputs(copies) // Each copy should invoke separate thread.
+					   .setParallelFiles(true)
 					   .setDefaultChunkSize(10000)) {
 				
 				builder.export();
 			}
 		}
-		assertTrue(Files.exists(dir.resolve("Overlap.csv.gz")));
-		ReaderRequest reader = new ReaderRequest("test", dir.resolve("Overlap.csv.gz"));
-		reader.setReaderHint("MapCSVReader");
-		assertEquals(29, ReaderFactory.getReader(reader).stream().count());
-		assertTrue(Files.size(dir.resolve("Overlap.csv.gz"))>100);
+		
+		assertNumber(dir, "Variant.csv.gz", 815);
+		assertNumber(dir, "Overlap.csv.gz", 719);
+
 		assertTrue(Files.exists(dir.resolve("Overlap-header.csv")));
 		assertTrue(Files.exists(dir.resolve("Peak.csv.gz")));
 		assertTrue(Files.size(dir.resolve("Peak.csv.gz"))>100);
 		assertTrue(Files.exists(dir.resolve("Peak-header.csv")));
-		assertTrue(Files.size(dir.resolve("Variant.csv.gz"))>100);
-		assertTrue(Files.exists(dir.resolve("Variant-header.csv")));
 		assertTrue(Files.exists(dir.resolve("VariantEffect.csv.gz")));
 		assertTrue(Files.exists(dir.resolve("VariantEffect-header.csv")));
 	}
 	
+	private void assertNumber(Path dir, String name, int size) throws IOException, ReaderException {
+		
+		assertTrue(Files.exists(dir.resolve(name)));
+		assertTrue(Files.size(dir.resolve(name))>100);
+		ReaderRequest reader = new ReaderRequest("test", dir.resolve(name));
+		reader.setReaderHint("MapCSVReader");		
+
+		assertEquals(size, ReaderFactory.getReader(reader).stream().count());
+	}
+
 	@Ignore("This is the code for the full scale one")
 	@Test
 	public void testFullHumanMapping() throws Exception {

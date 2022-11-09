@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -191,7 +192,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 			// 2. Add random rows to this database, increase size to check performance of 
 			// many rows. 10mill is a reasonable test when it comes to our peaks which are
 			// size 170059268 for all ensembl-107 data (but splittable my chromosome).
-			int added = conn.testAddRandomRows("chr1", 10000);
+			int added = conn.testAddRandomRows("chr1", 100000);
 			System.out.println("Added "+added+" rows");
 		}
 		
@@ -199,6 +200,13 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		
 		// Test how long it takes to interact with it.
 		Path vpath = getPath("data/bed_peaks/some.gvf");
+		List<Path> copies = new LinkedList<>();
+		for (int i = 0; i < 24; i++) {
+			Path tmp = dir.resolve("copy"+i+".gvf");
+			Files.copy(vpath, tmp);
+			copies.add(tmp);
+		}
+
 		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("peaks")) {
 			conn.setLocation(dir);
 
@@ -208,10 +216,12 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 										.setAlwaysUseDefaultConnector(true)
 										.addConnector(conn)
 										.setDir(dir)
-										.setInput(vpath)
+										.setInputs(copies)
+										.setParallelFiles(true)
 										.setDefaultChunkSize(10000)) {
 
 				builder.export();
+				System.out.println(builder.status());
 			}
 		}
 		
@@ -224,7 +234,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		
 		ReaderRequest reader = new ReaderRequest("test", dir.resolve("Overlap.csv.gz"));
 		reader.setReaderHint("MapCSVReader");
-		assertTrue(ReaderFactory.getReader(reader).stream().count() >= 29); // There are 29 but some randoms might collide.
+		assertTrue(ReaderFactory.getReader(reader).stream().count() >= 719); // There are 719 but some randoms might collide.
 		assertTrue(Files.exists(dir.resolve("Overlap-header.csv")));
 		assertTrue(Files.size(dir.resolve("Variant.csv.gz"))>100);
 		assertTrue(Files.exists(dir.resolve("Variant-header.csv")));

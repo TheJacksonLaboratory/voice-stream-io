@@ -25,7 +25,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -55,34 +54,39 @@ public class DirectSave {
 	}
 	
 	/**
-	 * This function uses the map to passed in to cache writers.
+	 * This function uses the map passed in to cache writers.
+	 * It is synchronized to avoid writing to the same file at the same
+	 * time if multiple threads are used. 
+	 * 
 	 * @param e
 	 * @param writers
 	 * @param dir
-	 * @param timer
+	 * @param timer - may be null
 	 * @return
 	 */
 	public static Entity save(Entity e, Map<Class<? extends Entity>, BufferedWriter> writers, Path dir, Timer timer, boolean append) {
 		
-		try {
-			if (!writers.containsKey(e.getClass())) {
-				BufferedWriter header = Files.newBufferedWriter(dir.resolve(e.getClass().getSimpleName()+"-header.csv"));
-				header.write(e.getHeader());
-				header.newLine();
-				header.close();
-	
-				Path pbody = dir.resolve(e.getClass().getSimpleName()+".csv.gz");
-				BufferedWriter body = createWriter(pbody, append);
-				writers.put(e.getClass(), body);
+		synchronized(e.getClass()) {
+			try {
+				if (!writers.containsKey(e.getClass())) {
+					BufferedWriter header = Files.newBufferedWriter(dir.resolve(e.getClass().getSimpleName()+"-header.csv"));
+					header.write(e.getHeader());
+					header.newLine();
+					header.close();
+		
+					Path pbody = dir.resolve(e.getClass().getSimpleName()+".csv.gz");
+					BufferedWriter body = createWriter(pbody, append);
+					writers.put(e.getClass(), body);
+				}
+		
+				writers.get(e.getClass()).write(e.toCsv());
+				writers.get(e.getClass()).newLine();
+				if (timer!=null) {
+					timer.time();
+				}
+			} catch (IOException ne) {
+				throw new RuntimeException(ne);
 			}
-	
-			writers.get(e.getClass()).write(e.toCsv());
-			writers.get(e.getClass()).newLine();
-			if (timer!=null) {
-				timer.time();
-			}
-		} catch (IOException ne) {
-			throw new RuntimeException(ne);
 		}
 
 		return e;
