@@ -26,8 +26,10 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.geneweaver.domain.NamedEntity;
@@ -61,17 +63,17 @@ public class BedReaderTest extends AbstractDataFileTest {
 
 	private void check04998(String fileName, List<NamedEntity> lines) {
 		// line 0: chr1 959245 959305 NOC2L_1 900 - 959245 959256
-		String peakId = BedReader.createPeakId(fileName, 959245, 959305, 0, true);
+		String peakId = BedReader.createPeakId(null, "chr1", null, 959245, 959305, 0, true);
 		Peak r0 = new Peak(peakId, "Homo sapiens", "chr1", 959245, 959305, "NOC2L_1", 900, Strand.REVERSE, 959245, 959256);
 		assertEquals(r0, lines.get(0));
 
 		// line 49: chr1 1727706 1727766 SLC35E2B_3 900 - 1727706 1727717
-		peakId = BedReader.createPeakId(fileName, 1727706, 1727766, 49, true);
+		peakId = BedReader.createPeakId(null, "chr1", null, 1727706, 1727766, 49, true);
 		Peak r49 = new Peak(peakId, "Homo sapiens", "chr1", 1727706, 1727766, "SLC35E2B_3", 900, Strand.REVERSE, 1727706, 1727717);
 		assertEquals(r49, lines.get(49));
 
 		// line 98: chr1 3752400 3752460 CCDC27_1 900 + 3752449 3752460
-		peakId = BedReader.createPeakId(fileName, 3752400, 3752460, 98, true);
+		peakId = BedReader.createPeakId(null, "chr1", null, 3752400, 3752460, 98, true);
 		Peak r98 = new Peak(peakId, "Homo sapiens", "chr1", 3752400, 3752460, "CCDC27_1", 900, Strand.FORWARD, 3752449, 3752460);
 		assertEquals(r98, lines.get(98));
 	}
@@ -265,6 +267,10 @@ public class BedReaderTest extends AbstractDataFileTest {
 		List<String> idsPass1 = reader.stream().map(p->p.getPeakId().toString()).collect(Collectors.toList());
 		List<String> idsPass2 = reader.stream().map(p->p.getPeakId().toString()).collect(Collectors.toList());
 		assertEquals(idsPass1, idsPass2);
+		
+		// Make sure no duplicates
+		Set<String> unique = new HashSet<>(idsPass1);
+		assertEquals(idsPass1.size(), unique.size());
 	}
 
 }

@@ -16,9 +16,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -148,14 +150,22 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 			lookup.setInt(3, vupper);
 			lookup.setInt(4, vupper);
 
+			Set<String> usedIds = new HashSet<>();
 			try (ResultSet res = lookup.executeQuery()) {
 				while(res.next()) {
 					String peakId = res.getString(1);
+					if (usedIds.contains(peakId)) {
+						logger.info("Encountered duplicate peakID: "+peakId);
+						continue;
+					}
 					int rlow = res.getInt(2);
 					int rup  = res.getInt(3);
 					
 					Overlap o = oservice.intersection(variant, new Peak(peakId, rlow, rup));
-					if (o!=null) ret.add(o);
+					if (o!=null) {
+						ret.add(o);
+						usedIds.add(peakId);
+					}
 				}
 			}
 			
@@ -194,6 +204,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 
 			StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest(path.getFileName().toString(), path));
 			reader.stream()
+				  .filter(OverlapService::isValidChromosome)
 				  .forEach(reg -> storePeak(reg));
 		} 
 	}
@@ -233,7 +244,6 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 		}
 	}
 	
-	
 	private PreparedStatement getInsertStatement(String chr, String shardName) throws Exception {
 		Connection conn = getConnection(chr, false);
 		if (conn==null) return null;
@@ -245,7 +255,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 						" (id int NOT NULL AUTO_INCREMENT, " + 
 						// Important UNIQUE means there is an index and
 						// that the later lookup will be fast.
-						" peakId VARCHAR(128) NOT NULL UNIQUE, " +  
+						" peakId VARCHAR(128) NOT NULL, " +  
 						" lower INTEGER," +
 						" upper INTEGER);"; 
 

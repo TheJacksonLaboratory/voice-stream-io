@@ -96,8 +96,9 @@ public class OverlapService {
 	 * @param chr
 	 * @return
 	 */
-	String getChromosome(String chr) {
+	static String getChromosome(String chr) {
 		
+		if (chr == null) return null;
 		if (chrCache.containsKey(chr)) return chrCache.get(chr);
 		if (chr.length()<4) return null;
 		Matcher matcher = chromPattern.matcher(chr);
@@ -110,5 +111,15 @@ public class OverlapService {
 		}
 		chrCache.put(chr, null);
 		return null;
+	}
+	
+	/**
+	 * If we cannot figure out the chromo, do not use the peak.
+	 * @param peak
+	 * @return
+	 */
+	public static boolean isValidChromosome(Peak peak) {
+		String chr = getChromosome(peak.getChr());
+		return chr!=null;
 	}
 }

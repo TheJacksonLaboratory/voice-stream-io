@@ -37,8 +37,6 @@ import org.geneweaver.domain.Peak.Strand;
 import org.geneweaver.domain.Track;
 import org.geneweaver.io.connector.BedConnector;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 /**
  * Bed file format @see https://m.ensembl.org/info/website/upload/bed.html
  * @see https://en.wikipedia.org/wiki/BED_(file_format)#:~:text=is%20widely%20used.-,Description,coordinates%20of%20the%20sequences%20considered.
@@ -58,7 +56,6 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public BedReader<N> init(ReaderRequest request) throws ReaderException {
-		this.generatedIdName = null;
 		super.setup(request);
 		setDelimiter("\\s+");
 		return this;
@@ -131,58 +128,15 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		
 		int start = peak.getStart();
 		int end = peak.getEnd();
-		String fname = generateIdName();
-		String peakId = createPeakId(fname, start, end, peakIndex++, false);
+		String peakId = createPeakId(peak.getFeatureType(), peak.getChr(), peak.getEpigenome(), start, end, peakIndex++, false);
 		peak.setPeakId(peakId);
 		return peak;
 	}
 
-	public static String createPeakId(String fname, int start, int end, int idx, boolean removeSpecialChars) {
-		if (removeSpecialChars) {
-			fname = removeExtension(fname);
-			fname = removeSpecials(fname);
-		}
-		return fname+"#"+idx+"@"+start+":"+end;
-	}
-
-	private String generatedIdName;
-	
-	@JsonIgnore
-	public String generateIdName() {
+	public static String createPeakId(String featureName, String chr, String egenome, int start, int end, int idx, boolean removeSpecialChars) {
 		
-		if (generatedIdName!=null) return generatedIdName;
-		
-		String lname = null;
-		if (request.getFile().getName()!=null) {
-			lname = request.getFile().getName();
-			lname = removeExtension(lname);
-		}
-		if (lname==null&&request.getName()!=null) lname = request.getName();
-		if (lname==null&&request.getSource()!=null) lname = request.getSource();
-		if (lname==null) lname = "empty";
-		
-		lname = removeSpecials(lname);
-		
-		generatedIdName = lname;
-		return generatedIdName;
-	}
-	
-	private static String removeExtension(String lname) {
-		if (lname.toLowerCase().endsWith(".gz")) {
-			lname = lname.substring(0,lname.length()-3);
-		}
-		if (lname.toLowerCase().matches("(.*)\\.[a-z0-9]{3}")) {
-			lname = lname.substring(0,lname.length()-4);
-		}
-		return lname;
-	}
-
-	private static String removeSpecials(String lname) {
-		// Try to remove special characters.
-		lname = lname.replace("_", "");
-		lname = lname.replace(".", "");
-		lname = lname.replace(" ", "");
-		return lname;
+		egenome = egenome!=null ? egenome.replaceAll("[^a-zA-Z0-9]", "") : null;
+		return featureName+"_"+egenome+"@"+chr+"#"+idx+"@"+start+":"+end;
 	}
 
 	// Parse name in Ensembl format e.g. 
