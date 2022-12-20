@@ -91,6 +91,7 @@ public class OverlapService {
 	}
 	
 	private static final String chromo = "(chr[0-9]{0,2}X?Y?(MT)?)";
+	private static final Pattern strictChromPattern = Pattern.compile("^("+chromo+")$");
 	private static final Pattern chromPattern = Pattern.compile("("+chromo+"|"+chromo+"_.*)");
 	private static final Map<String,String> chrCache = new HashMap<>();
 
@@ -104,6 +105,16 @@ public class OverlapService {
 		if (chr == null) return null;
 		if (chrCache.containsKey(chr)) return chrCache.get(chr);
 		if (chr.length()<4) return null;
+		
+		if (Boolean.getBoolean("strict")) {
+			Matcher matcher = strictChromPattern.matcher(chr);
+			if (matcher.matches()) {
+				String lchr = matcher.group(1);
+				if (lchr!=null) return lchr;
+			}
+			return null;
+		}
+		
 		Matcher matcher = chromPattern.matcher(chr);
 		if (matcher.matches()) {
 			String lchr = matcher.group(1);
@@ -124,5 +135,9 @@ public class OverlapService {
 	public static boolean isValidChromosome(Peak peak) {
 		String chr = getChromosome(peak.getChr());
 		return chr!=null;
+	}
+
+	public static void clearCache() {
+		chrCache.clear();
 	}
 }
