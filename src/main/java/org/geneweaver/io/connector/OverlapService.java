@@ -110,8 +110,12 @@ public class OverlapService {
 			Matcher matcher = strictChromPattern.matcher(chr);
 			if (matcher.matches()) {
 				String lchr = matcher.group(1);
-				if (lchr!=null) return lchr;
+				if (lchr!=null) {
+					chrCache.put(chr, lchr);
+					return lchr;
+				}
 			}
+			chrCache.put(chr, null);
 			return null;
 		}
 		
