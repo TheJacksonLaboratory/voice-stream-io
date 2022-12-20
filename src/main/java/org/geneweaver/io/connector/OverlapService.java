@@ -79,7 +79,10 @@ public class OverlapService {
 
 	public String getShardName(String chr, int loc) {
 		StringBuilder b = new StringBuilder();
+		
+		// Must have a valid chromosome for a shard.
 		final String chrGood = getChromosome(chr);
+		if (chrGood==null) return null;
 		b.append("_");
 		b.append(chrGood);
 		b.append("_");

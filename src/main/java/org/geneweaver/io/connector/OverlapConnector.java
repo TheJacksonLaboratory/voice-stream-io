@@ -215,9 +215,17 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 		int upper = Math.max(peak.getStart(), peak.getEnd());
 		
 		String lshardName = oservice.getShardName(peak.getChr(), lower);
+		if (lshardName==null) {
+			logger.warn("Could not find shard for "+peak.getChr());
+			return; // No shard
+		}
 		storePeakBase(lshardName, peak);
 		
 		String ubshardName = oservice.getShardName(peak.getChr(), upper);
+		if (ubshardName==null) {
+			logger.warn("Could not find shard for "+peak.getChr());
+			return; // No shard
+		}
 		if (!ubshardName.equals(lshardName)) storePeakBase(ubshardName, peak);
 	}
 
