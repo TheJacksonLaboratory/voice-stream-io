@@ -137,40 +137,43 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 
 		Collection<Entity> ret = new LinkedList<>();
 		ret.add(variant);
-		try {
-			PreparedStatement lookup = getSelectStatement(variant.getChr(), shardName);
-			if (lookup==null) { // Not all peaks have reasonable chromosomes.
-				return (Stream<E>) ret.stream();
-			}
-
-			int vlower = Math.min(variant.getStart(), variant.getEnd());
-			lookup.setInt(1, vlower);
-			lookup.setInt(2, vlower);
-			int vupper = Math.max(variant.getStart(), variant.getEnd());
-			lookup.setInt(3, vupper);
-			lookup.setInt(4, vupper);
-
-			Set<String> usedIds = new HashSet<>();
-			try (ResultSet res = lookup.executeQuery()) {
-				while(res.next()) {
-					String peakId = res.getString(1);
-					if (usedIds.contains(peakId)) {
-						logger.info("Encountered duplicate peakID: "+peakId);
-						continue;
-					}
-					int rlow = res.getInt(2);
-					int rup  = res.getInt(3);
-					
-					Overlap o = oservice.intersection(variant, new Peak(peakId, rlow, rup));
-					if (o!=null) {
-						ret.add(o);
-						usedIds.add(peakId);
+		
+		if (shardName!=null) {
+	 		try {
+				PreparedStatement lookup = getSelectStatement(variant.getChr(), shardName);
+				if (lookup==null) { // Not all peaks have reasonable chromosomes.
+					return (Stream<E>) ret.stream();
+				}
+	
+				int vlower = Math.min(variant.getStart(), variant.getEnd());
+				lookup.setInt(1, vlower);
+				lookup.setInt(2, vlower);
+				int vupper = Math.max(variant.getStart(), variant.getEnd());
+				lookup.setInt(3, vupper);
+				lookup.setInt(4, vupper);
+	
+				Set<String> usedIds = new HashSet<>();
+				try (ResultSet res = lookup.executeQuery()) {
+					while(res.next()) {
+						String peakId = res.getString(1);
+						if (usedIds.contains(peakId)) {
+							logger.info("Encountered duplicate peakID: "+peakId);
+							continue;
+						}
+						int rlow = res.getInt(2);
+						int rup  = res.getInt(3);
+						
+						Overlap o = oservice.intersection(variant, new Peak(peakId, rlow, rup));
+						if (o!=null) {
+							ret.add(o);
+							usedIds.add(peakId);
+						}
 					}
 				}
+				
+			} catch (Exception ne) {
+				logger.warn("Cannot map "+variant, ne);
 			}
-			
-		} catch (Exception ne) {
-			logger.warn("Cannot map "+variant, ne);
 		}
 		
 		return (Stream<E>) ret.stream();
@@ -231,6 +234,8 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 
 
 	private void storePeakBase(String shardName, Peak peak) {
+		
+		if (shardName==null) return;
 		try {
 			PreparedStatement stmt = getInsertStatement(peak.getChr(), shardName);
 			if (stmt==null) return; // Not all peaks have reasonable chromosomes.
