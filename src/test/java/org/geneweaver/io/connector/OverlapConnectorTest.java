@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -243,4 +244,30 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 
 	}
 	
+	@Test
+	public void ignoreOlderBedFilesMouse() throws Exception {
+		Path dir = getPath("data/bed_peaks/mus_musculus");
+		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("peaks")) {
+			Collection<Path> added = conn.addAll(dir);
+			
+			// e.g. ...peaks.20201021.bed.gz
+			// and  ...peaks.20201003.bed.gz
+			// Should only take newer.
+			assertTrue(added.stream().allMatch(p->p.getFileName().toString().endsWith("20201021.bed.gz")));
+		}
+	}
+	
+	@Test
+	public void ignoreOlderBedFilesHuman() throws Exception {
+		Path dir = getPath("data/bed_peaks/homo_sapiens");
+		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("peaks")) {
+			Collection<Path> added = conn.addAll(dir);
+			
+			// e.g. ...peaks.20201021.bed.gz
+			// and  ...peaks.20201003.bed.gz
+			// Should only take newer.
+			assertTrue(added.stream().allMatch(p->p.getFileName().toString().endsWith("20210107.bed.gz")));
+		}
+	}
+
 }

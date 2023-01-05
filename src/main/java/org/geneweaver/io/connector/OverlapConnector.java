@@ -17,11 +17,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -70,7 +75,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	private OverlapService oservice = new OverlapService();
 	private String basePath;
 
-	private List<Path> source = new ArrayList<>();
+	private Collection<Path> source = new TreeSet<>();
 	
 	// Just done by chromosome
 	private Map<String,Connection>		   connCache   =  Collections.synchronizedMap(new HashMap<>(23));
@@ -98,8 +103,8 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	 * @param dir
 	 * @throws IOException 
 	 */
-	public void addAll(Path dir) throws IOException {
-		addAll(dir, -1);
+	public Collection<Path> addAll(Path dir) throws IOException {
+		return addAll(dir, -1);
 	}
 	
 	/**
@@ -109,7 +114,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	 * @param limit
 	 * @throws IOException 
 	 */
-	void addAll(Path dir, int limit) throws IOException {
+	Collection<Path> addAll(Path dir, int limit) throws IOException {
 		Files.walk(dir).forEach(path->{
 			if (!Files.isRegularFile(path)) {
 				logger.debug(path+" is not a regular file and will not be used!");
@@ -120,8 +125,46 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 			
 			if (limit>0 && source.size()>limit) return; // Do not add things after limit reached.
 			
+			// The paths can have duplicates, especially for mouse. 
+			// We must take the newer one.
 			source.add(path);
 		});
+		this.source = removeOlderNames(source);
+		return source;
+	}
+
+	// e.g.
+	// mus_musculus.GRCm39.forebrain_embryonic_10_5_days.H3K36me3.ccat_histone.peaks.20201003.bed.gz
+	// mus_musculus.GRCm39.forebrain_embryonic_10_5_days.H3K36me3.ccat_histone.peaks.20201021.bed.gz
+	private static final Pattern datedName = Pattern.compile("^(.*)\\.peaks\\.(\\d+)\\.bed\\.gz$");
+	/**
+	 * The paths are sorted. Remove the older ones in the sorted stack.
+	 * @param source2
+	 */
+	private Collection<Path> removeOlderNames(Collection<Path> paths) {
+		
+		List<Path> rev = new ArrayList<>(paths);
+		
+		// Review of the sorted order works because the file name ends with the numeric date.
+		// Reverse puts the older ones later.
+		Collections.reverse(rev);
+		
+		// Hold the stub names we have checked.
+		Collection<String> checked = new HashSet<>();
+		for (Iterator<Path> it = rev.iterator(); it.hasNext();) {
+			Path path = it.next();
+			String fileName = path.getFileName().toString();
+			Matcher matcher = datedName.matcher(fileName);
+			if (matcher.matches()) {
+				String stub = matcher.group(1);
+				if (checked.contains(stub)) {
+					it.remove(); // Older duplicate removed.
+					continue;
+				}
+				checked.add(stub);
+			}
+		}
+		return rev;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -201,9 +244,11 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	public void create() throws SQLException, ReaderException, IOException {
 
 		if (source==null || source.isEmpty()) throw new IllegalArgumentException();
+		int index = -1;
 		for (Path path : source) {
 
-			System.out.println(path+" "+source.indexOf(path)+" of "+source.size());
+			++index;
+			System.out.println(path+" "+index+" of "+source.size());
 
 			StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest(path.getFileName().toString(), path));
 			reader.stream()
