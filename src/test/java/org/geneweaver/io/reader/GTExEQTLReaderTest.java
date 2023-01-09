@@ -111,7 +111,7 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 		}
 		
 		checkSize(dir, 283774+499, line->{
-			boolean is = line.trim().endsWith("±EQTL");
+			boolean is = line.trim().endsWith("|EQTL");
 			return is;
 		});
 	}
@@ -176,7 +176,7 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 	}
 	
 	private void checkSize(Path dir, long size) throws Exception {
-		checkSize(dir, size, line->line.matches("^r\\d+FAKE.*ENSG\\d+\\±EQTL$"));
+		checkSize(dir, size, line->line.matches("^r\\d+FAKE.*ENSG\\d+\\|EQTL$"));
 	}
 	
 	private void checkSize(Path dir, long size, Predicate<String> test) throws Exception {

@@ -112,6 +112,6 @@ public interface Entity {
 	default String getDelimiter() {
 		// We purposely use a character unlikely, the default character "," appears in some values.
 		// You can override the delimier or set it if not writing bulk import files.
-		return System.getProperty("delimiter", "±");// Character used for delimiter in bulk import files.
+		return System.getProperty("delimiter", "|");// Character used for delimiter in bulk import files.
 	}
 }
