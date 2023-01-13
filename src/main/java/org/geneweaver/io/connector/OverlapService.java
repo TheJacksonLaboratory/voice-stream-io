@@ -55,9 +55,15 @@ public class OverlapService {
 		if (b<0) b = 0;
 		
 		int intersectRange = ve-vs-a-b;
+		
+		// There is not enough of an overlap
+		// We could process these overlaps but we would end up with 
+		// too many hits.
+		if (intersectRange==0) return null; 
+		
 		double intersectFaction = intersectRange>0&&(ve-vs)>0
-				                ? intersectRange/(ve-vs)
-				                : 0;
+				                ? (double)intersectRange/(double)(ve-vs)
+				                : 0d;
 		
 		Overlap ret = new Overlap();
 		ret.setPeak(peak);
