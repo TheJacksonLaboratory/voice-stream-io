@@ -64,17 +64,17 @@ public class OverlapServiceTest extends AbstractDataFileTest  {
 
 	@Test
 	public void enclosedPeak0() throws Exception {
-		assertNotNull(intersection(10, 10, 10, 10));
+		assertNull(intersection(10, 10, 10, 10));
 	}
 
 	@Test
 	public void enclosedPeak1() throws Exception {
-		assertNotNull(intersection(10, 20, 10, 10));
+		assertNotNull(intersection(10, 20, 10, 11));
 	}
 
 	@Test
 	public void enclosedPeak2() throws Exception {
-		assertNotNull(intersection(10, 20, 11, 11));
+		assertNotNull(intersection(10, 20, 11, 12));
 	}
 
 	@Test
@@ -84,12 +84,12 @@ public class OverlapServiceTest extends AbstractDataFileTest  {
 
 	@Test
 	public void enclosedPeak4() throws Exception {
-		assertNotNull(intersection(10, 20, 20, 20));
+		assertNotNull(intersection(10, 21, 20, 21));
 	}
 	
 	@Test
 	public void peakSmaller1() throws Exception {
-		assertNotNull(intersection(10, 20, 10, 10));
+		assertNotNull(intersection(10, 20, 10, 11));
 	}
 	
 	@Test
@@ -104,7 +104,7 @@ public class OverlapServiceTest extends AbstractDataFileTest  {
 	
 	@Test
 	public void peakGreater2() throws Exception {
-		assertNotNull(intersection(10, 20, 20, 20));
+		assertNotNull(intersection(10, 21, 20, 21));
 	}
 	
 	@Test

@@ -45,28 +45,28 @@ public class OverlapService {
 		
 		int ps = Math.min(peak.getStart(), peak.getEnd());
 		int pe = Math.max(peak.getStart(), peak.getEnd());
-
-		// TODO There is probably some much better math for
-		// finding the overlap of two lines.
-		int intersectRange = 0;
-		if (ps>=vs && pe<=ve) {
-			intersectRange = pe-ps;
-		} else if (vs>=ps && ve<=pe) {
-			intersectRange = ve-vs;
-		} else if (ps<vs && pe<ve && pe>=vs) {
-			intersectRange = pe-vs;
-		} else if (ps>vs && pe>ve && ve>=ps) {
-			intersectRange = ve-ps;
-		} else {
-			return null;
-		}
 		
-		// Similar Cypher:
-//		 MATCH (v:Gene) WHERE v.geneName="AP3M2" MATCH(p:Peak) WHERE p.chr = v.chr AND 
-//		 ((p.start>=v.start AND p.end<=v.end) OR 
-//		  (v.start>=p.start AND v.end<=p.end) OR 
-//		  (p.start<v.start AND p.end<v.end AND p.end>=v.start) OR 
-//		  (p.start>v.start AND p.end>v.end AND v.end>=p.start)) RETURN p.peakId, p.chr, p.epigenome, p.featureType, p.start, p.end;
+		// We rule out peaks of size 1
+		// This is in an effort to reduce the number of hits.
+		if (pe-ps <= 0) return null;
+
+		// This is the part that weeds out non overlap peaks fast.
+		if (ps>ve) return null;
+		if (pe<vs) return null;
+		
+		// TODO There is probably some much better math for
+		// finding the overlap of two lines but this is fast.
+		int a = ps-vs;
+		int b = ve-pe;
+		if (a<0) a = 0;
+		if (b<0) b = 0;
+		
+		int intersectRange = ve-vs-a-b;
+		
+		// We do not currently make an overlap if it is 1 base pair long.
+		// This is to reduce the overlaps which do not fit if we allow all the 
+		// possible ones.
+		if (intersectRange<=0) return null;
 		
 		double intersectFaction = intersectRange>0&&(ve-vs)>0
 				                ? (double)intersectRange/(double)(ve-vs)
