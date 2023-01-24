@@ -105,7 +105,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		assertEquals(peak2, ((Overlap)ret.get(13)).getPeak().getPeakId());
 		assertEquals(peak2, ((Overlap)ret.get(15)).getPeak().getPeakId());
 	}
-	
+
 	@Test
 	public void testNone() throws Exception {
 		Path vpath = getPath("data/bed_peaks/none.gvf");

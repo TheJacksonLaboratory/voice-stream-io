@@ -235,7 +235,7 @@ public class Peak  extends NamedEntity {
 		StringBuilder buf = new StringBuilder();
 		String fields = delimify("peakId:ID(Peak-Id)",
 				"epigenome", "tissueDescription", "featureType", "filterType",
-				"start:int", "end:int", "chr", "score:init", "strand", ":LABEL");
+				"start:int", "end:int", "chr", "score:int", "strand", ":LABEL");
 		buf.append(fields);
 		
 		String sheader = super.getHeader();

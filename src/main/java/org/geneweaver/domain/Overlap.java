@@ -38,7 +38,7 @@ public class Overlap extends AbstractEntity {
 	 * intersectFraction = intersectRange / (v.e-v.s)
 	 */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private double intersectFraction;
+	private float intersectFraction;
 
 	
 	/**
@@ -53,7 +53,7 @@ public class Overlap extends AbstractEntity {
 		buf.append(getDelimiter());
 		buf.append("intersectRange:int");
 		buf.append(getDelimiter());
-		buf.append("intersectFraction:double");
+		buf.append("intersectFraction:float");
 		buf.append(getDelimiter());
 		buf.append(":END_ID(Peak-Id)");
 		buf.append(getDelimiter());
@@ -126,14 +126,14 @@ public class Overlap extends AbstractEntity {
 	/**
 	 * @return the intersectFraction
 	 */
-	public double getIntersectFraction() {
+	public float getIntersectFraction() {
 		return intersectFraction;
 	}
 
 	/**
 	 * @param intersectFraction the intersectFraction to set
 	 */
-	public void setIntersectFraction(double intersectFraction) {
+	public void setIntersectFraction(float intersectFraction) {
 		this.intersectFraction = intersectFraction;
 	}
 

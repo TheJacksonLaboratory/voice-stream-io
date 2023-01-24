@@ -115,7 +115,7 @@ public abstract class GeneticEntity extends AbstractEntity implements Species {
 		buf.append(getDelimiter());
 		buf.append("sequenceId");
 		buf.append(getDelimiter());
-		buf.append("score:int");
+		buf.append("score");
 		buf.append(getDelimiter());
 		buf.append(":LABEL");
 		return buf.toString();

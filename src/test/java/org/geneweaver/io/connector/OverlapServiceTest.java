@@ -33,6 +33,16 @@ public class OverlapServiceTest extends AbstractDataFileTest  {
 	}
 
 	@Test
+	public void enclosedVariant1OverlapGt0() throws Exception {
+		try {
+			System.setProperty("min.overlap", "1");
+			assertNull(intersection(10, 10, 7, 12));
+		} finally {
+			System.getProperties().remove("min.overlap");
+		}
+	}
+
+	@Test
 	public void enclosedVariant2() throws Exception {
 		assertNotNull(intersection(10, 11, 7, 12));
 	}

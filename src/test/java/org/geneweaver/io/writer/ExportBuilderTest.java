@@ -256,7 +256,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		}
 		
 		assertNumber(dir, "Variant.csv.gz", 815);
-		assertNumber(dir, "Overlap.csv.gz", 719);
+		assertNumber(dir, "Overlap.csv.gz", 719); 
 
 		assertTrue(Files.exists(dir.resolve("Overlap-header.csv")));
 		assertTrue(Files.exists(dir.resolve("Peak.csv.gz")));

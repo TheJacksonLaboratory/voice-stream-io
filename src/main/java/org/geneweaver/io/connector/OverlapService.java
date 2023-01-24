@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import org.geneweaver.domain.Overlap;
 import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Variant;
+import org.geneweaver.io.CLI;
 
 /**
  * This class contains the raw mathematics for an intersection,
@@ -20,7 +21,15 @@ import org.geneweaver.domain.Variant;
 public class OverlapService {
 	
 	private static final int baseSize = Integer.parseInt(System.getenv().getOrDefault("BASE_SIZE", "100000"));
+	private static int minOverlap;
 
+	static {
+		// We do not currently make an overlap if it is 1 base pair long.
+		// This is to reduce the overlaps which do not fit if we allow all the 
+		// possible ones.
+		String smin = CLI.get("MIN_OVERLAP", "min.overlap", "1");
+		minOverlap = Integer.parseInt(smin);
+	}
 	/**
 	 * Gets the intersection of the two objects. This
 	 * is not designed to be run in an n*m loop, see above comment.
@@ -63,14 +72,11 @@ public class OverlapService {
 		
 		int intersectRange = ve-vs-a-b;
 		
-		// We do not currently make an overlap if it is 1 base pair long.
-		// This is to reduce the overlaps which do not fit if we allow all the 
-		// possible ones.
-		if (intersectRange<=0) return null;
+		if (intersectRange<(minOverlap-1)) return null;
 		
-		double intersectFaction = intersectRange>0&&(ve-vs)>0
-				                ? (double)intersectRange/(double)(ve-vs)
-				                : 0d;
+		float intersectFaction = intersectRange>0&&(ve-vs)>0
+				                ? (float)intersectRange/(float)(ve-vs)
+				                : 0f;
 
 		Overlap ret = new Overlap();
 		ret.setPeak(peak);
