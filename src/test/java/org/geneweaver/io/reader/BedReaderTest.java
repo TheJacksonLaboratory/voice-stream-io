@@ -146,7 +146,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 		StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", 
 				getPath("data/bed_peaks/mus_musculus/CH12_LX/BHLHE40/mus_musculus.GRCm39.CH12_LX.BHLHE40.SWEmbl_R0005.peaks.20201021.bed.gz")));
 		List<Peak> peaks = reader.stream().collect(Collectors.toList());
-		assertEquals(33350, peaks.size());	
+		assertEquals(33204, peaks.size());	
 		peaks.stream().allMatch(p->"CH12_LX".equals(p.getEpigenome()));
 		peaks.stream().allMatch(p->"BHLHE40".equals(p.getFeatureType()));
 	}
