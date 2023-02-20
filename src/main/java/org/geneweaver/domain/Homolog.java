@@ -58,7 +58,7 @@ public class Homolog extends AbstractEntity {
 	 * Instantiates a new ortholog.
 	 */
 	public Homolog() {
-		setChr(Entity.NO_CHR);
+		setChr(Entity.NO_CHR, true);
 	}
 
 	/**

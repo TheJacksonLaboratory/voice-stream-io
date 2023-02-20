@@ -24,6 +24,7 @@ import org.geneweaver.io.connector.ChromosomeService;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 public abstract class AbstractEntity implements Entity {
@@ -104,8 +105,17 @@ public abstract class AbstractEntity implements Entity {
 	 * @param chr the chr to set
 	 */
 	public void setChr(String chr) {
+		setChr(chr, false);
+	}
+	
+	/**
+	 * @param chr the chr to set
+	 */
+	@JsonIgnore
+	public void setChr(String chr, boolean force) {
 		// We standardize chromosome
-		chr = cservice.getChromosome(chr);
+		if (!force) chr = cservice.getChromosome(chr);
 		this.chr = chr;
 	}
+
 }

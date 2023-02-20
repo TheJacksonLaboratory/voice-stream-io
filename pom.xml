@@ -7,13 +7,13 @@
 	<groupId>org.geneweaver</groupId>
 	<artifactId>gweaver-stream-io</artifactId>
 	<packaging>jar</packaging>
-	<version>2.4.0-SNAPSHOT</version>
+	<version>2.4.0</version>
 	<name>Geneweaver Stream IO</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.target>11</maven.compiler.target>
-		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.source>17</maven.compiler.source>
 		<neo4j-ogm.version>3.2.37</neo4j-ogm.version>
 	</properties>
 
@@ -169,8 +169,8 @@
 					<compilerArgs>
 						<arg>-Xlint:unchecked</arg>
 					</compilerArgs>
-					<source>11</source>
-					<target>11</target>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
 					<encoding>UTF-8</encoding>
 					<forceJavacCompilerUse>true</forceJavacCompilerUse>
 				</configuration>

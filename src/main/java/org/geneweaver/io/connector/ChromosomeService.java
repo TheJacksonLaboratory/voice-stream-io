@@ -16,7 +16,7 @@ import org.geneweaver.domain.Peak;
  */
 public class ChromosomeService {
 
-	private static final String chromo = "(chr)?([0-9]{0,2}|x|y|m|(mt))";
+	private static final String chromo = "(chr)?([0-9]{0,2}|x|y|m|(mt)|na)";
 	private static final Pattern strictChromPattern = Pattern.compile("^("+chromo+")$");
 	private static final Pattern chromPattern = Pattern.compile("^("+chromo+"|"+chromo+"_.*)$");
 	private static final Map<String,String> chrCache = new HashMap<>();

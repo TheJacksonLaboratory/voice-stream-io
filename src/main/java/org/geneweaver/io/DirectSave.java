@@ -81,7 +81,9 @@ public class DirectSave {
 				
 				Map<String,BufferedWriter> brs = writers.get(e.getClass());
 				String chr = e.getChr();
-				if (chr==null) throw new IllegalArgumentException("Null chromosome encountered writing "+e);
+				if (chr==null) {
+					throw new IllegalArgumentException("Null chromosome encountered writing "+e);
+				}
 				if (!brs.containsKey(chr)) {
 					Path pbody;
 					if (chr.equals(Entity.NO_CHR)) {

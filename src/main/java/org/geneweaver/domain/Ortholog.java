@@ -106,7 +106,7 @@ public class Ortholog extends AbstractEntity {
 	 * Instantiates a new ortholog.
 	 */
 	public Ortholog() {
-		setChr(Entity.NO_CHR);
+		setChr(Entity.NO_CHR, true);
 	}
 	
 	/**
