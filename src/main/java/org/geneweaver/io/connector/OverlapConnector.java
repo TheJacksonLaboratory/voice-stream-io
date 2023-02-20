@@ -74,6 +74,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	private String fileName;
 
 	private OverlapService oservice = new OverlapService();
+	private ChromosomeService cservice = ChromosomeService.getInstance();
 	private String basePath;
 
 	private Collection<Path> source = new TreeSet<>();
@@ -254,7 +255,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 
 			StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest(path.getFileName().toString(), path));
 			reader.stream()
-				  .filter(OverlapService::isValidChromosome)
+				  .filter(ChromosomeService::isValidChromosome)
 				  .forEach(reg -> storePeak(reg));
 		} 
 	}
@@ -358,7 +359,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 
 	private Connection newConnection(String chr, boolean readOnly) throws SQLException, IOException {
 		
-		chr = oservice.getChromosome(chr);
+		chr = cservice.getChromosome(chr);
 		if (chr==null) return null;
 		String path = this.basePath+"_"+chr;
 		String uri = "jdbc:h2:"+path+";mode=MySQL";

@@ -36,6 +36,7 @@ import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Peak.Strand;
 import org.geneweaver.domain.Track;
 import org.geneweaver.io.connector.BedConnector;
+import org.geneweaver.io.connector.ChromosomeService;
 import org.geneweaver.io.connector.OverlapService;
 
 /**
@@ -48,6 +49,7 @@ import org.geneweaver.io.connector.OverlapService;
 public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	
 	private OverlapService oservice = new OverlapService();
+	private ChromosomeService cservice = ChromosomeService.getInstance();
 
 	/**
 	 * Create the reader by setting its data
@@ -98,7 +100,7 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 			
 			// At one time we allowed the bad chromosomes to
 			// come in through the peaks but now we do not.
-			String chrom = oservice.getChromosome(rec[0]);
+			String chrom = cservice.getChromosome(rec[0]);
 			if (chrom==null) return null;
 			d.put("chr", chrom);
 			d.put("start", rec[1]);

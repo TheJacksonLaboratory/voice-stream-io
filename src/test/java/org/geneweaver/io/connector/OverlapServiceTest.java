@@ -1,6 +1,5 @@
 package org.geneweaver.io.connector;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -15,16 +14,19 @@ import org.junit.Test;
 public class OverlapServiceTest extends AbstractDataFileTest  {
 	
 	private OverlapService iservice;
+	private ChromosomeService cservice;
 
 	@Before
 	public void create() {
 		this.iservice = new OverlapService();
-		iservice.clearCache();
+		cservice = ChromosomeService.getInstance();
+		ChromosomeService.clearCache();
 	}
 	
 	@After
 	public void dispose() {
-		iservice.clearCache();
+		cservice = ChromosomeService.getInstance();
+		ChromosomeService.clearCache();
 	}
 
 	@Test
@@ -132,57 +134,4 @@ public class OverlapServiceTest extends AbstractDataFileTest  {
 		p.setEnd(pe);
 		return iservice.intersection(v, p);
 	}
-	
-	@Test
-	public void checkGoodChromosomes() throws Exception {
-		assertEquals("chr1",  iservice.getChromosome("chr1"));
-		assertEquals("chr22", iservice.getChromosome("chr22"));
-		assertEquals("chrX",  iservice.getChromosome("chrX"));
-		assertEquals("chrMT", iservice.getChromosome("chrMT"));
-		assertEquals("chr22", iservice.getChromosome("chr22_KI270731v1_random"));
-		assertEquals("chr5",  iservice.getChromosome("chr5_GL000208v1_random"));
-	}
-	
-	@Test
-	public void checkBadChromosomes() throws Exception {
-		assertNull(iservice.getChromosome("chr"));
-		assertNull(iservice.getChromosome("CHR2"));
-		assertNull(iservice.getChromosome("fred"));
-		assertNull(iservice.getChromosome("chr111"));
-		assertNull(iservice.getChromosome("chrUn_KI270418v1"));
-		assertNull(iservice.getChromosome("chrUn"));
-	}
-
-	@Test
-	public void checkGoodChromosomesStrict() throws Exception {
-		try {
-			System.setProperty("strict", "true");
-			assertEquals("chr1",  iservice.getChromosome("chr1"));
-			assertEquals("chr22", iservice.getChromosome("chr22"));
-			assertEquals("chrX",  iservice.getChromosome("chrX"));
-			assertEquals("chrMT", iservice.getChromosome("chrMT"));
-			assertEquals(null, iservice.getChromosome("chr22_KI270731v1_random"));
-			assertEquals(null,  iservice.getChromosome("chr5_GL000208v1_random"));
-		} finally {
-			System.setProperty("strict", "false");
-		}
-	}
-
-	@Test
-	public void checkBadChromosomesStrict() throws Exception {
-		try {
-			System.setProperty("strict", "true");
-			assertNull(iservice.getChromosome("chr22_KI270731v1_random"));
-			assertNull(iservice.getChromosome("chr5_GL000208v1_random"));
-			assertNull(iservice.getChromosome("chr"));
-			assertNull(iservice.getChromosome("CHR2"));
-			assertNull(iservice.getChromosome("fred"));
-			assertNull(iservice.getChromosome("chr111"));
-			assertNull(iservice.getChromosome("chrUn_KI270418v1"));
-			assertNull(iservice.getChromosome("chrUn"));
-		} finally {
-			System.setProperty("strict", "false");
-		}
-	}
-
 }

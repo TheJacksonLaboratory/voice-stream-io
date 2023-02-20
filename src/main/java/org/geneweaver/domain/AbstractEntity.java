@@ -20,12 +20,15 @@ package org.geneweaver.domain;
 
 import java.util.Objects;
 
+import org.geneweaver.io.connector.ChromosomeService;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 public abstract class AbstractEntity implements Entity {
+	
+	private static ChromosomeService cservice = ChromosomeService.getInstance();
 
 	/** The uid. */
 	@Id
@@ -41,6 +44,7 @@ public abstract class AbstractEntity implements Entity {
 	/**
 	 * The chromosome on which this entity belongs.
 	 */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String chr;
 	
 	/**
@@ -100,6 +104,8 @@ public abstract class AbstractEntity implements Entity {
 	 * @param chr the chr to set
 	 */
 	public void setChr(String chr) {
+		// We standardize chromosome
+		chr = cservice.getChromosome(chr);
 		this.chr = chr;
 	}
 }

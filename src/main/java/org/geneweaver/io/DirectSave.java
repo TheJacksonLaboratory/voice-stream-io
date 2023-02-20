@@ -87,7 +87,7 @@ public class DirectSave {
 					if (chr.equals(Entity.NO_CHR)) {
 						pbody = dir.resolve(e.getClass().getSimpleName()+".csv.gz");
 					} else {
-						pbody = dir.resolve(e.getClass().getSimpleName()+"-"+chr+".csv.gz");
+						pbody = dir.resolve(e.getClass().getSimpleName()+"-chr"+chr+".csv.gz");
 					}
 					BufferedWriter body = createWriter(pbody, append);
 					brs.put(chr, body);
