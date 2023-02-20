@@ -58,7 +58,7 @@ public class Homolog extends AbstractEntity {
 	 * Instantiates a new ortholog.
 	 */
 	public Homolog() {
-		// TODO Auto-generated constructor stub
+		setChr(Entity.NO_CHR);
 	}
 
 	/**
@@ -69,6 +69,7 @@ public class Homolog extends AbstractEntity {
 	 * @param to the to
 	 */
 	public Homolog(Long hid, String geneIdFrom, String geneIdTo) {
+		this();
 		this.hid = hid;
 		this.geneIdFrom = geneIdFrom;
 		this.geneIdTo = geneIdTo;
@@ -81,6 +82,7 @@ public class Homolog extends AbstractEntity {
 	 * @param to the to
 	 */
 	public Homolog(HomologGene from, HomologGene to) {
+		this();
 		this.speciesFrom = from;
 		this.speciesTo = to;
 	}

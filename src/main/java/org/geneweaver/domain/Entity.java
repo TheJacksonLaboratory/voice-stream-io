@@ -32,6 +32,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public interface Entity {
 	
+	public static final String NO_CHR = "NO-CHROMOSOME";
+	
 	/** 
 	 * The chromosome on which this entity exists. 
 	 **/

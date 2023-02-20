@@ -83,7 +83,12 @@ public class DirectSave {
 				String chr = e.getChr();
 				if (chr==null) throw new IllegalArgumentException("Null chromosome encountered writing "+e);
 				if (!brs.containsKey(chr)) {
-					Path pbody = dir.resolve(e.getClass().getSimpleName()+"-"+chr+".csv.gz");
+					Path pbody;
+					if (chr.equals(Entity.NO_CHR)) {
+						pbody = dir.resolve(e.getClass().getSimpleName()+".csv.gz");
+					} else {
+						pbody = dir.resolve(e.getClass().getSimpleName()+"-"+chr+".csv.gz");
+					}
 					BufferedWriter body = createWriter(pbody, append);
 					brs.put(chr, body);
 				}

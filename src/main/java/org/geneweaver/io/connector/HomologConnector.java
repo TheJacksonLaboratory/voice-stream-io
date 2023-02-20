@@ -97,7 +97,6 @@ public class HomologConnector<N extends Entity, E extends Entity> implements Con
 				Collection<E> ret = new LinkedList<>();
 				for (HomologGene hg : mouse) {
 					Homolog hom = new Homolog(hg.getHid(), hg.getGeneId(), hgene.getGeneId());
-					hom.setChr(hgene.getChr());
 					hom.setSource(hgene.getSource());
 					ret.add((E)hom);
 				}

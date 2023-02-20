@@ -20,7 +20,6 @@ package org.geneweaver.io.reader;
 
 import static org.geneweaver.io.DirectSave.save;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -34,11 +33,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.FileUtils;
@@ -181,17 +180,28 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 	
 	private void checkSize(Path dir, long size, Predicate<String> test) throws Exception {
 		assertTrue(Files.exists(dir.resolve("EQTL-header.csv")));
-		assertTrue(Files.exists(dir.resolve("EQTL.csv.gz")));
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(dir.resolve("EQTL.csv.gz")))))) {
+		
+		List<Long> count = new ArrayList<Long>(1);
+		count.add(0L);
+		Files.list(dir).forEach(p->{
+			if (!p.getFileName().toString().startsWith("EQTL")) return;
+			if (!p.getFileName().toString().endsWith(".csv.gz")) return;
+			
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(p))))){
 
-			int lcount = 0;
-			String line = null;
-			while((line = reader.readLine())!=null) {
-				boolean isLine = test.test(line);
-				if (isLine)	lcount++;
+				int lcount = 0;
+				String line = null;
+				while((line = reader.readLine())!=null) {
+					boolean isLine = test.test(line);
+					if (isLine)	lcount++;
+				}
+				count.set(0, count.get(0)+lcount);
+			} catch (Exception ne) {
+				fail(ne.getMessage());
 			}
-			assertEquals(size, lcount);
-		}
+		});
+		assertEquals(size, count.get(0).longValue());
+
 	}
 
 	private String map(Path dir, ExportBuilder b, StreamReader<EQTL> eqtls, Path path) throws Exception {

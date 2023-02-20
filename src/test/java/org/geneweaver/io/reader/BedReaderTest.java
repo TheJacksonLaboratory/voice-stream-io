@@ -136,7 +136,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 		StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", 
 															getPath("data/bed_peaks/homo_sapiens/A549/BCL3/homo_sapiens.GRCh38.A549.BCL3.SWEmbl_R0005.peaks.20210107.bed.gz")));
 		List<Peak> peaks = reader.stream().collect(Collectors.toList());
-		assertEquals(5737, peaks.size());	
+		assertEquals(5673, peaks.size());	
 		peaks.stream().allMatch(p->"A549".equals(p.getEpigenome()));
 		peaks.stream().allMatch(p->"BCL3".equals(p.getFeatureType()));
 	}

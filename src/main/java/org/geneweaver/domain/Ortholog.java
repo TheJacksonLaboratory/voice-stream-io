@@ -85,6 +85,7 @@ public class Ortholog extends AbstractEntity {
 	 * @param to the to
 	 */
 	public Ortholog(String from, String to) {
+		this();
 		geneIdFrom = from;
 		geneIdTo = to;
 	}
@@ -96,18 +97,18 @@ public class Ortholog extends AbstractEntity {
 	 * @param to the to
 	 */
 	public Ortholog(Gene from, Gene to) {
+		this();
 		this.speciesFrom = from;
 		this.speciesTo = to;
 	}
 	
-
 	/**
 	 * Instantiates a new ortholog.
 	 */
 	public Ortholog() {
-		// TODO Auto-generated constructor stub
+		setChr(Entity.NO_CHR);
 	}
-
+	
 	/**
 	 * Gets the header.
 	 *

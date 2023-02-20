@@ -60,6 +60,8 @@ import org.slf4j.LoggerFactory;
  * makes the connection somewhat faster because there can be 200mill base pairs in a chromosome
  * therefore if the base pair shards are 10000, there can be 20000 tables.
  * 
+ * There are roughly 29 billion overlaps in the human variant to peak space on Ensembl.
+ * 
  * @author gerrim
  *
  */

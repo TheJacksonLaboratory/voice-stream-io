@@ -233,13 +233,13 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		
 		System.out.println(String.format("This is %3.2f ms per variant.", interval/(double)size));
 		
-		ReaderRequest reader = new ReaderRequest("test", dir.resolve("Overlap.csv.gz"));
+		ReaderRequest reader = new ReaderRequest("test", dir.resolve("Overlap-chr1.csv.gz"));
 		reader.setReaderHint("MapCSVReader");
 		assertTrue(ReaderFactory.getReader(reader).stream().count() >= 719); // There are 719 but some randoms might collide.
 		assertTrue(Files.exists(dir.resolve("Overlap-header.csv")));
-		assertTrue(Files.size(dir.resolve("Variant.csv.gz"))>100);
+		assertTrue(Files.size(dir.resolve("Variant-chr1.csv.gz"))>100);
 		assertTrue(Files.exists(dir.resolve("Variant-header.csv")));
-		assertTrue(Files.exists(dir.resolve("VariantEffect.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("VariantEffect-chr1.csv.gz")));
 		assertTrue(Files.exists(dir.resolve("VariantEffect-header.csv")));
 
 	}
