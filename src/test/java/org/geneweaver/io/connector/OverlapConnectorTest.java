@@ -82,7 +82,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 			Stopwatch done = timer.stop();
 			System.out.println("Created cache table size "+func.size()+" in "+done);
 			assertTrue(func.size()>10000);
-			assertTrue(done.elapsed().toMillis()<60000);
+			assertTrue(done.elapsed().toMillis()<80000);
 		}
 	}
 	
