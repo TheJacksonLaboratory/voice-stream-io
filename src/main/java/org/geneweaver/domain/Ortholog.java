@@ -289,4 +289,14 @@ public class Ortholog extends AbstractEntity {
 		return geneIdTo;
 	}
 
+	@JsonIgnore
+	public void setChr(String chr) {
+		super.setChr(chr);
+	}
+
+	@JsonIgnore
+	public String getChr() {
+		return super.getChr();
+	}
+
 }

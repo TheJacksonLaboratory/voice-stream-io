@@ -28,6 +28,9 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * The Class Ortholog.
  */
@@ -239,5 +242,14 @@ public class Homolog extends AbstractEntity {
 	}
 
 
+	@JsonIgnore
+	public void setChr(String chr) {
+		super.setChr(chr);
+	}
+
+	@JsonIgnore
+	public String getChr() {
+		return super.getChr();
+	}
 
 }
