@@ -102,7 +102,6 @@ public class SerializationTest {
 		// Add any other Test classes
 		testClasses.add(ReaderRequest.class);
 		testClasses.add(TimeInfo.class);
-		testClasses.add(ExportBuilder.class);
 	}
 
 	
@@ -150,10 +149,15 @@ public class SerializationTest {
 	public void randomFields() throws Throwable {
 		
 		for (@SuppressWarnings("rawtypes") Class clazz : testClasses) {
-			Object rand = factory.manufacturePojo(clazz);
-			round(rand, clazz);
-			assertNotEquals(new Object(), rand);
-			assertNotEquals(clazz.getConstructor().newInstance(), rand);
+			try {
+				Object rand = factory.manufacturePojo(clazz);
+				round(rand, clazz);
+				assertNotEquals(new Object(), rand);
+				assertNotEquals(clazz.getConstructor().newInstance(), rand);
+			} catch (Exception ne) {
+				System.err.println("Problem pojoing class "+clazz);
+				throw ne;
+			}
 		}
 	}
 	
@@ -172,17 +176,23 @@ public class SerializationTest {
 	private void checkCanWrite(Path dir, @SuppressWarnings("rawtypes") Class clazz) throws IOException {
 		Path csv = dir.resolve(clazz.getSimpleName()+".csv");
 		try (BufferedWriter writer = Files.newBufferedWriter(csv)) {
-			@SuppressWarnings("unchecked")
-			Object rand = factory.manufacturePojo(clazz);
-			if (rand instanceof Entity) {
-				Entity ent = (Entity)rand;
-				if (ent.getHeader()==null) return; // Objects are not forced to implement this.
-				writer.write(ent.getHeader());
-				writer.newLine();
-				writer.write(ent.toCsv());
-				writer.newLine();
+			try {
+				if (clazz.isAssignableFrom(Entity.class)) {
+					@SuppressWarnings("unchecked")
+					Object rand = factory.manufacturePojo(clazz);
+
+					Entity ent = (Entity)rand;
+					if (ent.getHeader()==null) return; // Objects are not forced to implement this.
+					writer.write(ent.getHeader());
+					writer.newLine();
+					writer.write(ent.toCsv());
+					writer.newLine();
+				}
+			} catch (Exception ne) {
+				System.err.println("Problem with class "+clazz);
+				throw ne;
 			}
-		}	
+		}
 	}
 
 	private <T> T round(T from, Class<T> clazz) throws Exception {

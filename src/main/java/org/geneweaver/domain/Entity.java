@@ -18,8 +18,6 @@
  */
 package org.geneweaver.domain;
 
-import java.util.Iterator;
-
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 
@@ -33,6 +31,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  */
 public interface Entity {
+	
+	/** 
+	 * The chromosome on which this entity exists. 
+	 **/
+	String getChr();
 	
 	/**
 	 * The unique Id of the entity set by Neo4j

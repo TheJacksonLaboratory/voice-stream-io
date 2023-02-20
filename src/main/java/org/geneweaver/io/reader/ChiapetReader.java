@@ -69,13 +69,16 @@ class ChiapetReader<N extends AnchoredEntity> extends AbstractXlsReader<N, Exper
 		
 		Cell cell = row.getCell(0);
 		if (cell==null) return null;
-		String first = cell.getStringCellValue();
-		if (first==null) return null;
-		if (!first.matches("chr(\\d+|X|Y|M)")) return null; // Null is filtered from the stream.
+		String chr = cell.getStringCellValue();
+		if (chr==null) return null;
+		if (!chr.matches("chr(\\d+|X|Y|M)")) return null; // Null is filtered from the stream.
 		
 		if (concrete == ChromatinInteraction.class) {
 			ChromatinInteraction c = new ChromatinInteraction();
-			c.setMeta(getMeta());
+			c.setChr(chr);
+			ExperimentMetadata meta = getMeta();
+			if (meta!=null) meta.setChr(chr);
+			c.setMeta(meta);
 			c.setLeft(createAnchor(row, 0,1,2));
 			c.setRight(createAnchor(row, 3,4,5));
 			c.setPetCount((int)Math.round(row.getCell(6).getNumericCellValue()));

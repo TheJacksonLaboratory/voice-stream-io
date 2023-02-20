@@ -58,11 +58,11 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		}
 		
 		assertTrue(Files.exists(dir.resolve("Gene-header.csv")));
-		assertTrue(Files.exists(dir.resolve("Gene.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("Gene-chr1.csv.gz")));
 		assertTrue(Files.exists(dir.resolve("Produces-header.csv")));
-		assertTrue(Files.exists(dir.resolve("Produces.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("Produces-chr1.csv.gz")));
 		assertTrue(Files.exists(dir.resolve("Transcript-header.csv")));
-		assertTrue(Files.exists(dir.resolve("Transcript.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("Transcript-chr1.csv.gz")));
 	}
 	
 	@Test
@@ -82,9 +82,9 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		}
 		
 		assertTrue(Files.exists(dir.resolve("Variant-header.csv")));
-		assertTrue(Files.exists(dir.resolve("Variant.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("Variant-chr2.csv.gz")));
 		assertTrue(Files.exists(dir.resolve("VariantEffect-header.csv")));
-		assertTrue(Files.exists(dir.resolve("VariantEffect.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("VariantEffect-chr2.csv.gz")));
 	}
 
 	@Test
@@ -105,11 +105,11 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		}
 		
 		assertTrue(Files.exists(dir.resolve("Gene-header.csv")));
-		assertTrue(Files.exists(dir.resolve("Gene.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("Gene-chr1.csv.gz")));
 		assertFalse(Files.exists(dir.resolve("Produces-header.csv")));
-		assertFalse(Files.exists(dir.resolve("Produces.csv.gz")));
+		assertFalse(Files.exists(dir.resolve("Produces-chr1.csv.gz")));
 		assertTrue(Files.exists(dir.resolve("Transcript-header.csv")));
-		assertTrue(Files.exists(dir.resolve("Transcript.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("Transcript-chr1.csv.gz")));
 
 	}
 	
@@ -131,7 +131,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		}
 		
 		assertTrue(Files.exists(dir.resolve("Variant-header.csv")));
-		assertTrue(Files.exists(dir.resolve("Variant.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("Variant-chr2.csv.gz")));
 		assertFalse(Files.exists(dir.resolve("VariantEffect-header.csv")));
 		assertFalse(Files.exists(dir.resolve("VariantEffect.csv.gz")));
 	}
@@ -166,18 +166,18 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 	public void testHumanBedFiles() throws Exception {
 		
 		// recursively process all bed files.
-		testBedExport("data/bed_peaks/homo_sapiens/");
+		testBedExport("data/bed_peaks/homo_sapiens/", "-human");
 	}
 	
 	@Test
 	public void testMouseBedFiles() throws Exception {
 		
 		// recursively process all bed files.
-		testBedExport("data/bed_peaks/mus_musculus/");
+		testBedExport("data/bed_peaks/mus_musculus/", "-mouse");
 	}
 
 
-	private void testBedExport(String spath) throws Exception {
+	private void testBedExport(String spath, String dirEnding) throws Exception {
 		
 		Path bedDir = getPath(spath);
 		List<Path> bfiles = new LinkedList<>();
@@ -187,7 +187,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 			}
 		});
 		
-		Path dir = Paths.get("./tmp/testBedExport");
+		Path dir = Paths.get("./tmp/testBedExport"+dirEnding);
 		FileUtils.deleteQuietly(dir.toFile());
 		dir.toFile().mkdirs();
 
@@ -201,9 +201,24 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 			builder.export();
 		}
 		
-		assertTrue(Files.exists(dir.resolve("Peak.csv.gz")));
-		assertTrue(Files.size(dir.resolve("Peak.csv.gz"))>10000);
 		assertTrue(Files.exists(dir.resolve("Peak-header.csv")));
+		for (int i = 1; i < 20; i++) {
+			assertTrue(Files.exists(dir.resolve("Peak-chr"+i+".csv.gz")));
+			assertTrue(Files.size(dir.resolve("Peak-chr"+i+".csv.gz"))>100);
+		}
+		assertTrue(Files.exists(dir.resolve("Peak-chrM.csv.gz")));
+		assertTrue(Files.size(dir.resolve("Peak-chrM.csv.gz"))>100);
+		assertTrue(Files.exists(dir.resolve("Peak-chrX.csv.gz")));
+		assertTrue(Files.size(dir.resolve("Peak-chrX.csv.gz"))>100);
+		assertTrue(Files.exists(dir.resolve("Peak-chrY.csv.gz")));
+		assertTrue(Files.size(dir.resolve("Peak-chrY.csv.gz"))>100);
+		
+		// Bad names should not be there.
+		assertFalse(Files.exists(dir.resolve("Peak-chr1_KI270713v1_random.csv.gz")));
+		assertFalse(Files.exists(dir.resolve("Peak-chr14_GL000225v1_random.csv.gz")));
+		assertFalse(Files.exists(dir.resolve("Peak-GL456372.1.csv.gz")));
+		assertFalse(Files.exists(dir.resolve("Peak-JH584300.1.csv.gz")));
+		assertFalse(Files.exists(dir.resolve("Peak-null.csv.gz")));
 	}
 	
 	@Test
@@ -223,7 +238,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 			
 			builder.export();
 		}
-		assertTrue(Files.exists(dir.resolve("Peak.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("Peak-chr1.csv.gz")));
 		assertTrue(Files.exists(dir.resolve("Peak-header.csv")));
 		
 		// We make 23 copies of the input in order to test 
@@ -255,14 +270,14 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 			}
 		}
 		
-		assertNumber(dir, "Variant.csv.gz", 815);
-		assertNumber(dir, "Overlap.csv.gz", 719); 
+		assertNumber(dir, "Variant-chr1.csv.gz", 815);
+		assertNumber(dir, "Overlap-chr1.csv.gz", 719); 
 
 		assertTrue(Files.exists(dir.resolve("Overlap-header.csv")));
-		assertTrue(Files.exists(dir.resolve("Peak.csv.gz")));
-		assertTrue(Files.size(dir.resolve("Peak.csv.gz"))>100);
+		assertTrue(Files.exists(dir.resolve("Peak-chr1.csv.gz")));
+		assertTrue(Files.size(dir.resolve("Peak-chr1.csv.gz"))>100);
 		assertTrue(Files.exists(dir.resolve("Peak-header.csv")));
-		assertTrue(Files.exists(dir.resolve("VariantEffect.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("VariantEffect-chr1.csv.gz")));
 		assertTrue(Files.exists(dir.resolve("VariantEffect-header.csv")));
 	}
 	

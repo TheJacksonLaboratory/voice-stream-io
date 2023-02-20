@@ -39,6 +39,11 @@ public abstract class AbstractEntity implements Entity {
 	private String delimiter = System.getProperty("delimiter", "|");// Character used for delimiter in bulk import files.
 	
 	/**
+	 * The chromosome on which this entity belongs.
+	 */
+	private String chr;
+	
+	/**
 	 * @return the delimiter
 	 */
 	public String getDelimiter() {
@@ -56,7 +61,7 @@ public abstract class AbstractEntity implements Entity {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(delimiter, uid);
+		return Objects.hash(chr, delimiter, uid);
 	}
 
 	@Override
@@ -66,7 +71,8 @@ public abstract class AbstractEntity implements Entity {
 		if (!(obj instanceof AbstractEntity))
 			return false;
 		AbstractEntity other = (AbstractEntity) obj;
-		return Objects.equals(delimiter, other.delimiter) && Objects.equals(uid, other.uid);
+		return Objects.equals(chr, other.chr) && Objects.equals(delimiter, other.delimiter)
+				&& Objects.equals(uid, other.uid);
 	}
 
 	/**
@@ -81,5 +87,19 @@ public abstract class AbstractEntity implements Entity {
 	 */
 	public final void setUid(Long uid) {
 		this.uid = uid;
+	}
+
+	/**
+	 * @return the chr
+	 */
+	public String getChr() {
+		return chr;
+	}
+
+	/**
+	 * @param chr the chr to set
+	 */
+	public void setChr(String chr) {
+		this.chr = chr;
 	}
 }

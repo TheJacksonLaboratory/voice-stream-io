@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -208,6 +207,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 						
 						Overlap o = oservice.intersection(variant, new Peak(peakId, rlow, rup));
 						if (o!=null) {
+							o.setChr(variant.getChr());
 							ret.add(o);
 							usedIds.add(peakId);
 						}

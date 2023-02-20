@@ -21,12 +21,11 @@ import org.geneweaver.io.CLI;
 public class OverlapService {
 	
 	private static final int baseSize = Integer.parseInt(System.getenv().getOrDefault("BASE_SIZE", "100000"));
-	private static int minOverlap;
+	static int minOverlap;
 
 	static {
-		// We do not currently make an overlap if it is 1 base pair long.
-		// This is to reduce the overlaps which do not fit if we allow all the 
-		// possible ones.
+		// An overlap of 1 or more is allowed as an overlap.
+		// Increasing this reduces the overlaps between variants and peaks which are large.
 		String smin = CLI.get("MIN_OVERLAP", "min.overlap", "1");
 		minOverlap = Integer.parseInt(smin);
 	}
@@ -109,7 +108,7 @@ public class OverlapService {
 		return b.toString();
 	}
 	
-	private static final String chromo = "(chr[0-9]{0,2}X?Y?(MT)?)";
+	private static final String chromo = "(chr[0-9]{0,2}X?Y?M?(MT)?)";
 	private static final Pattern strictChromPattern = Pattern.compile("^("+chromo+")$");
 	private static final Pattern chromPattern = Pattern.compile("("+chromo+"|"+chromo+"_.*)");
 	private static final Map<String,String> chrCache = new HashMap<>();
@@ -119,7 +118,7 @@ public class OverlapService {
 	 * @param chr
 	 * @return
 	 */
-	static String getChromosome(String chr) {
+	public String getChromosome(String chr) {
 		
 		if (chr == null) return null;
 		if (chrCache.containsKey(chr)) return chrCache.get(chr);
@@ -149,18 +148,19 @@ public class OverlapService {
 		chrCache.put(chr, null);
 		return null;
 	}
-	
+
 	/**
 	 * If we cannot figure out the chromo, do not use the peak.
 	 * @param peak
 	 * @return
 	 */
 	public static boolean isValidChromosome(Peak peak) {
-		String chr = getChromosome(peak.getChr());
+		String chr = peak.getChr();
 		return chr!=null;
 	}
 
 	public static void clearCache() {
 		chrCache.clear();
 	}
+
 }

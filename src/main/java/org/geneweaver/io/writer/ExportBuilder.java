@@ -98,7 +98,7 @@ public class ExportBuilder implements AutoCloseable {
 	 * Map of writers cached while we write all the files.
 	 */
 	@JsonIgnore
-	private Map<Class<? extends Entity>, BufferedWriter> writers = Collections.synchronizedMap(new HashMap<>());
+	private Map<Class<? extends Entity>, Map<String,BufferedWriter>> writers = Collections.synchronizedMap(new HashMap<>());
 
 	private Collection<Throwable> errors = new LinkedList<>();
 	
@@ -294,7 +294,11 @@ public class ExportBuilder implements AutoCloseable {
 
 	@Override
 	public void close() throws Exception {
-		for (BufferedWriter writer : writers.values()) writer.close();
+		for (Map<String,BufferedWriter> brs : writers.values()) {
+			for (BufferedWriter writer : brs.values()) {
+				writer.close();
+			}
+		}
 	}
 
 
@@ -302,7 +306,7 @@ public class ExportBuilder implements AutoCloseable {
 	 * @return the writers
 	 */
 	@JsonIgnore
-	public Map<Class<? extends Entity>, BufferedWriter> getWriters() {
+	public Map<Class<? extends Entity>, Map<String,BufferedWriter>> getWriters() {
 		return writers;
 	}
 

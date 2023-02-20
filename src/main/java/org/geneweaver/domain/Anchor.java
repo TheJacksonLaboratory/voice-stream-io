@@ -24,15 +24,12 @@ import java.util.Objects;
 
 import javax.annotation.processing.Generated;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Generated("POJO")
 public class Anchor extends AbstractEntity implements AnchoredEntity {
 
-	private String chrom;
+	private String chr;
 	
 	private int start;
 	
@@ -45,13 +42,13 @@ public class Anchor extends AbstractEntity implements AnchoredEntity {
 	}
 	
 	public Anchor(String chr, int start, int end) {
-		this.chrom = chr;
+		this.chr = chr;
 		this.start = start;
 		this.end   = end;
 	}
 	
 	public Anchor(String chr, int start, int end, int intensity) {
-		this.chrom = chr;
+		this.chr = chr;
 		this.start = start;
 		this.end   = end;
 		this.intensity   = intensity;
@@ -60,15 +57,15 @@ public class Anchor extends AbstractEntity implements AnchoredEntity {
 	/**
 	 * @return the chrom
 	 */
-	public String getChrom() {
-		return chrom;
+	public String getChr() {
+		return chr;
 	}
 
 	/**
 	 * @param chrom the chrom to set
 	 */
-	public void setChrom(String chrom) {
-		this.chrom = chrom;
+	public void setChr(String chrom) {
+		this.chr = chrom;
 	}
 
 	/**
@@ -103,7 +100,7 @@ public class Anchor extends AbstractEntity implements AnchoredEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(chrom, end, intensity, start);
+		result = prime * result + Objects.hash(chr, end, intensity, start);
 		return result;
 	}
 
@@ -116,7 +113,7 @@ public class Anchor extends AbstractEntity implements AnchoredEntity {
 		if (!(obj instanceof Anchor))
 			return false;
 		Anchor other = (Anchor) obj;
-		return Objects.equals(chrom, other.chrom) && end == other.end && intensity == other.intensity
+		return Objects.equals(chr, other.chr) && end == other.end && intensity == other.intensity
 				&& start == other.start;
 	}
 

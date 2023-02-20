@@ -7,7 +7,7 @@
 	<groupId>org.geneweaver</groupId>
 	<artifactId>gweaver-stream-io</artifactId>
 	<packaging>jar</packaging>
-	<version>2.3.19-SNAPSHOT</version>
+	<version>2.4.0-SNAPSHOT</version>
 	<name>Geneweaver Stream IO</name>
 
 	<properties>
@@ -77,7 +77,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>30.1-jre</version>
+			<version>31.1-jre</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/junit/junit -->
