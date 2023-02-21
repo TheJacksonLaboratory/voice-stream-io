@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 import org.geneweaver.domain.Entity;
+import static org.geneweaver.io.connector.ChromosomeService.na;
 
 /**
  * A simple function for importing static to find readers in a map 
@@ -42,7 +43,7 @@ import org.geneweaver.domain.Entity;
  *
  */
 public class DirectSave {
-
+	
 	/**
 	 * This function uses the map to passed in to cache writers.
 	 * @param e
@@ -81,9 +82,7 @@ public class DirectSave {
 				
 				Map<String,BufferedWriter> brs = writers.get(e.getClass());
 				String chr = e.getChr();
-				if (chr==null) {
-					throw new IllegalArgumentException("Null chromosome encountered writing "+e);
-				}
+				if (chr==null) chr = na;
 				if (!brs.containsKey(chr)) {
 					Path pbody;
 					if (chr.equals(Entity.NO_CHR)) {

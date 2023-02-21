@@ -16,6 +16,7 @@ import org.geneweaver.domain.Peak;
  */
 public class ChromosomeService {
 
+	public static final String na = "NA"; // Chromosome NA or not specified.
 	private static final String chromo = "(chr)?([0-9]{0,2}|x|y|m|(mt)|na)";
 	private static final Pattern strictChromPattern = Pattern.compile("^("+chromo+")$");
 	private static final Pattern chromPattern = Pattern.compile("^("+chromo+"|"+chromo+"_.*)$");
