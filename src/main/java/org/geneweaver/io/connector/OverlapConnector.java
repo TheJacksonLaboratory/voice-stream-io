@@ -1,13 +1,8 @@
 package org.geneweaver.io.connector;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,21 +10,18 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.geneweaver.domain.Entity;
+import org.geneweaver.domain.Located;
 import org.geneweaver.domain.Overlap;
 import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Variant;
@@ -38,8 +30,6 @@ import org.geneweaver.io.reader.ReaderFactory;
 import org.geneweaver.io.reader.ReaderRequest;
 import org.geneweaver.io.reader.StreamReader;
 import org.neo4j.ogm.session.Session;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This function reads all the regions from their separate files
@@ -65,26 +55,7 @@ import org.slf4j.LoggerFactory;
  * @author gerrim
  *
  */
-public class OverlapConnector<N extends Entity, E extends Entity> implements Connector<N, E>, AutoCloseable  {
-
-	
-	private static Logger logger = LoggerFactory.getLogger(OverlapConnector.class);
-
-	private String tableName;
-	private String fileName;
-
-	private OverlapService oservice = new OverlapService();
-	private ChromosomeService cservice = ChromosomeService.getInstance();
-	private String basePath;
-
-	private Collection<Path> source = new TreeSet<>();
-	
-	// Just done by chromosome
-	private Map<String,Connection>		   connCache   =  Collections.synchronizedMap(new HashMap<>(23));
-
-	// These will get large e.g. ~20k depending on BASE_SIZE
-	private Map<String,PreparedStatement>  insertCache =  Collections.synchronizedMap(new HashMap<>(1009));
-	private Map<String,PreparedStatement>  selectCache =  Collections.synchronizedMap(new HashMap<>(1009));
+public class OverlapConnector<N extends Entity, E extends Entity> extends AbstractOverlapConnector<N,E> {
 
 	public OverlapConnector() {
 		this("peaks");
@@ -98,15 +69,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	public OverlapConnector(String databaseFileName) {
 		this.tableName = System.getProperty("gweaver.mappingdb.tableName","REGIONS");
 		this.fileName = databaseFileName;
-	}
-	
-	/**
-	 * Adds all the bed.gz files to be cached recursively.
-	 * @param dir
-	 * @throws IOException 
-	 */
-	public Collection<Path> addAll(Path dir) throws IOException {
-		return addAll(dir, -1);
+		setFileFilters(".bed.gz", ".bed");
 	}
 	
 	/**
@@ -116,21 +79,9 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	 * @param limit
 	 * @throws IOException 
 	 */
+	@Override
 	Collection<Path> addAll(Path dir, int limit) throws IOException {
-		Files.walk(dir).forEach(path->{
-			if (!Files.isRegularFile(path)) {
-				logger.debug(path+" is not a regular file and will not be used!");
-				return;
-			}
-			if (!path.getFileName().toString().toLowerCase().endsWith(".bed.gz") && 
-				!path.getFileName().toString().toLowerCase().endsWith(".bed")	) return;
-			
-			if (limit>0 && source.size()>limit) return; // Do not add things after limit reached.
-			
-			// The paths can have duplicates, especially for mouse. 
-			// We must take the newer one.
-			source.add(path);
-		});
+		super.addAll(dir, limit);
 		this.source = removeOlderNames(source);
 		return source;
 	}
@@ -174,7 +125,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	public Stream<E> stream(N ent, Session session) {
 		
 		// Other streams may run through this connector, but
-		// if they sent other objects, we return them.
+		// if they send other objects, we return them.
 		if (!(ent instanceof Variant)) return (Stream<E>) Stream.of(ent);
 		Variant variant = (Variant)ent;
 		
@@ -225,148 +176,6 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 		return (Stream<E>) ret.stream();
 	}
 
-	public void close() throws SQLException {
-		
-		for (String shard : insertCache.keySet()) {
-			Statement stmt = insertCache.get(shard);
-			stmt.close();
-		}
-		insertCache.clear();
-		
-		for (Statement stmt : selectCache.values()) {
-			stmt.close();
-		}
-		selectCache.clear();
-		
-		for (Connection conn : connCache.values()) {
-			conn.close();
-		}
-		connCache.clear();
-	}
-	
-	public void create() throws SQLException, ReaderException, IOException {
-
-		if (source==null || source.isEmpty()) throw new IllegalArgumentException();
-		int index = -1;
-		for (Path path : source) {
-
-			++index;
-			System.out.println(path+" "+index+" of "+source.size());
-
-			StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest(path.getFileName().toString(), path));
-			reader.stream()
-				  .filter(ChromosomeService::isValidChromosome)
-				  .forEach(reg -> storePeak(reg));
-		} 
-	}
-
-	private void storePeak(Peak peak) {
-		
-		int lower = Math.min(peak.getStart(), peak.getEnd());
-		int upper = Math.max(peak.getStart(), peak.getEnd());
-		
-		String lshardName = oservice.getShardName(peak.getChr(), lower);
-		if (lshardName==null) {
-			logger.warn("Could not find shard for "+peak.getChr());
-			return; // No shard
-		}
-		storePeakBase(lshardName, peak);
-		
-		String ubshardName = oservice.getShardName(peak.getChr(), upper);
-		if (ubshardName==null) {
-			logger.warn("Could not find shard for "+peak.getChr());
-			return; // No shard
-		}
-		if (!ubshardName.equals(lshardName)) storePeakBase(ubshardName, peak);
-	}
-
-
-	private void storePeakBase(String shardName, Peak peak) {
-		
-		if (shardName==null) return;
-		try {
-			PreparedStatement stmt = getInsertStatement(peak.getChr(), shardName);
-			if (stmt==null) return; // Not all peaks have reasonable chromosomes.
-			
-			// Put the key in, lower case.
-			if (peak.getPeakId()==null) return; // We cannot map unnamed peaks.
-			stmt.setString(1, peak.getPeakId());	
-			
-			int lower = Math.min(peak.getStart(), peak.getEnd());
-			stmt.setInt(2,lower);
-			
-			int upper = Math.max(peak.getStart(), peak.getEnd());
-			stmt.setInt(3,upper);
-			stmt.execute();
-			
-		} catch (Exception ne) {
-			ne.printStackTrace();
-			throw new RuntimeException(ne);
-		}
-	}
-	
-	private PreparedStatement getInsertStatement(String chr, String shardName) throws Exception {
-		Connection conn = getConnection(chr, false);
-		if (conn==null) return null;
-		PreparedStatement stmt = insertCache.get(shardName);
-		if (stmt==null) {
-			try (Statement create = conn.createStatement() ) {  
-
-				String sql =  "CREATE TABLE IF NOT EXISTS " + tableName+shardName + 
-						" (id int NOT NULL AUTO_INCREMENT, " + 
-						// Important UNIQUE means there is an index and
-						// that the later lookup will be fast.
-						" peakId VARCHAR(128) NOT NULL, " +  
-						" lower INTEGER," +
-						" upper INTEGER);"; 
-
-				create.executeUpdate(sql);
-				logger.info("Create table if not exists "+shardName+":"+tableName);
-			} 
-
-			stmt = conn.prepareStatement("INSERT INTO "+tableName+shardName+" (peakId, lower, upper) VALUES (?,?,?);");
-			insertCache.put(shardName, stmt);
-		} 
-		return stmt;
-	}
-	
-	private synchronized PreparedStatement getSelectStatement(String chr, String shardName) throws Exception {
-		
-		String name = Thread.currentThread().getName();
-		String cacheKey = name+"/"+shardName;
-		PreparedStatement stmt = selectCache.get(cacheKey);
-		if (stmt!=null) return stmt;
-		
-		Connection conn = getConnection(chr, true);
-		if (conn==null) return null;
-		if (stmt==null) {
-			String sql = "SELECT peakId, lower, upper FROM "+tableName+shardName+" WHERE (?>=lower AND ?<=upper) OR (?>=lower AND ?<=upper);";
-			stmt = conn.prepareStatement(sql);
-			selectCache.put(cacheKey, stmt);
-		} 
-		return stmt;
-	}
-
-	private Connection getConnection(String chr, boolean readOnly) throws Exception {
-		
-		Connection ret = connCache.get(chr);
-		if (ret == null) {
-			ret = newConnection(chr, readOnly);
-			if (ret != null) connCache.put(chr, ret);
-		}
-		return ret;
-	}
-
-	private Connection newConnection(String chr, boolean readOnly) throws SQLException, IOException {
-		
-		chr = cservice.getChromosome(chr);
-		if (chr==null) return null;
-		String path = this.basePath+"_"+chr;
-		String uri = "jdbc:h2:"+path+";mode=MySQL";
-		if (readOnly) uri = uri+";ACCESS_MODE_DATA=r";
-		return DriverManager.getConnection(uri,"sa","");
-	}
-
 	private long roughBPperChr = 200000000;
 	
 	/**
@@ -384,75 +193,11 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 			peak.setStart((int)(Math.random()*roughBPperChr));
 			peak.setEnd((int)(Math.random()*roughBPperChr));
 			peak.setChr(chr);
-			storePeak(peak);
+			store(peak);
 			if (i%1000000 == 0) System.out.println("Added randoms, size "+i);
 		} 
 		return nrows;
 	}
 
-
-	/**
-	 * Set the location of the database. Sets the folder name.
-	 * The actual database name is always the mapping file name with ".h2" appended.
-	 * @param dir
-	 */
-	public void setLocation(Path dir) {
-		String path = dir.toAbsolutePath().toString();
-		this.basePath  = path+"/"+fileName;
-	}
-
-	public void add(Path hFile) throws FileNotFoundException {
-		if (!Files.exists(hFile)) throw new FileNotFoundException(hFile.toString());
-		this.source.add(hFile);
-	}
-
-	/**
-	 * Size may be used only after importing all peaks to cache.
-	 * @return the size.
-	 * @throws Exception 
-	 */
-	public long size() throws Exception {
-		
-		// We get the size of the tables in the dir
-		Path dir = Paths.get(this.basePath).getParent();
-		List<Path> files = Files.list(dir)
-				                .filter(Files::isRegularFile)
-				                .filter(p->p.getFileName().toString().toLowerCase().endsWith(".mv.db"))
-				                .collect(Collectors.toList());
-		
-		long size = 0;
-		for (Path path : files) {
-			try (Connection conn = createConnection(path);
-			     Statement tabs = conn.createStatement()) {
-				
-				DatabaseMetaData md = conn.getMetaData();
-				ResultSet rs = md.getTables(null, null, "%", null);
-				List<String> names = new ArrayList<>();
-				while (rs.next()) {
-					String tname = rs.getString(3);
-					if (tname.startsWith(this.tableName)) names.add(tname);
-				}
-				
-				for (String tname : names) {
-					try(Statement stmt = conn.createStatement()) {  
-		
-						String sql = "SELECT COUNT(1) FROM "+tname+";";
-						try(ResultSet res = stmt.executeQuery(sql)) {
-							res.next();
-							size += res.getLong(1);
-						}
-					}
-				}
-			}
-		}
-		return size;
-	}
-	
-	private Connection createConnection(Path path) throws SQLException {
-		
-		String spath = path.toString().substring(0, path.toString().toLowerCase().lastIndexOf(".mv.db"));
-		String uri = "jdbc:h2:"+spath+";mode=MySQL;ACCESS_MODE_DATA=r";
-		return DriverManager.getConnection(uri,"sa","");
-	}
 
 }

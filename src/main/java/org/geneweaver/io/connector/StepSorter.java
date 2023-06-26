@@ -1,8 +1,5 @@
-package org.geneweaver.ccsi;
+package org.geneweaver.io.connector;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -11,24 +8,28 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.geneweaver.io.reader.MapCSVReader;
 import org.geneweaver.io.reader.ReaderFactory;
 import org.geneweaver.io.reader.ReaderRequest;
 import org.geneweaver.io.reader.StreamReader;
-import org.junit.Test;
 
 /**
- * Sorts CCSI Data and performs a test of streaming.
+ * Sorts CCSI Data into mouse and human using the annotation list.
+ * 
+ * This action is needed once after downloading the CCSI data. It is not needed
+ * every rebuild of the data because we store the sorted data in directories and
+ * we annotate that data with the metadata required.
+ * 
  * @author gerrim
  *
  */
-public class CCSISorter extends AbstractDataFileTest {
+public class StepSorter {
 	
 	private static Map<String,String> prefixes;
 	static {
@@ -40,26 +41,23 @@ public class CCSISorter extends AbstractDataFileTest {
 	}
 
 	/**
-	 * This is actually not a test. I am using a test like a script here.
-	 * 
 	 * 1. Run prod/ccsi/download.sh to get the ccsi data. We actually sort and store this data
 	 * in case the ccsi website is taken down.
 	 * 
 	 * 2. Run this sorter to put it into the mouse and human directories. 
 	 * 
+	 * @param ccsiAnot e.g. "prod/ccsi/CCSI_annotation.csv" in test data.
 	 * @throws Exception
 	 */
-	@Test
-	public void sortCCSI() throws Exception {
+	public void sortCCSI(Path ccsiAnot) throws Exception {
 		
-		Path info = getPath("prod/ccsi/CCSI_annotation.csv");
-		assertTrue(Files.exists(info));
+		assert (Files.exists(ccsiAnot));
 		
-		Path dir = info.getParent();
+		Path dir = ccsiAnot.getParent();
 		dir.resolve("mm").toFile().mkdirs();
 		dir.resolve("hs").toFile().mkdirs();
 		
-		ReaderRequest req = new ReaderRequest(info.toFile());
+		ReaderRequest req = new ReaderRequest(ccsiAnot.toFile());
 		req.setReaderHint("MapCSVReader");
 		StreamReader<Map<String,String>> reader = ReaderFactory.getReader(req);
 		reader.stream()
@@ -81,11 +79,11 @@ public class CCSISorter extends AbstractDataFileTest {
 			Path file = dir.resolve(fileName);
 			if (!Files.exists(file)) {
 				meth = prefixes.get(meth);
-				assertNotNull("No mapping for: "+line.get("method"), meth);
+				if (meth == null) throw new NullPointerException("No mapping for: "+line.get("method"));
 				fileName = meth+"-"+num+".step.gz";
 			}
 			file = dir.resolve(fileName);
-			assertTrue(fileName+" does not exist", Files.exists(file));
+			if (!Files.exists(file)) throw new IllegalArgumentException(fileName+" does not exist");
 			
 			prepend(file, line);
 			
@@ -100,7 +98,8 @@ public class CCSISorter extends AbstractDataFileTest {
 			Files.delete(file);
 			
 		} catch (Exception ne) {
-			fail(ne.getMessage());
+			// Used in lambda so we wrap in a runtime.
+			throw new RuntimeException(ne.getMessage());
 		}
 		
 		return line;
@@ -127,7 +126,8 @@ public class CCSISorter extends AbstractDataFileTest {
 					writer.write(ln);
 					writer.newLine();
 				} catch (IOException e) {
-					fail(e.getMessage());
+					// Used in lambda so we wrap in a runtime.
+					throw new RuntimeException(e.getMessage());
 				}
 			});
 		}
@@ -135,5 +135,20 @@ public class CCSISorter extends AbstractDataFileTest {
 		Files.copy(tmp, file);
 		Files.delete(tmp);
 		return line;
+	}
+	
+	/**
+	 * entry point for running the sorting or can just use a unit
+	 * test to run this class. The action of running the sorter is
+	 * not needed regularly.
+	 * 
+	 * @param args
+	 * @throws Exception
+	 */
+	public static void main(String[] args) throws Exception {
+		if (args.length!=1) throw new IllegalArgumentException("One argument which is the CCSI_annotation CSV file please.");
+		Path annot = Paths.get(args[0]);
+		StepSorter sorter = new StepSorter();
+		sorter.sortCCSI(annot);
 	}
 }

@@ -89,7 +89,7 @@ blockStarts
  */
 @Generated("POJO")
 @NodeEntity(label="Peak")
-public class Peak  extends NamedEntity {
+public class Peak  extends NamedEntity implements Located {
 
 
 	@Index(unique=true)
@@ -130,13 +130,13 @@ public class Peak  extends NamedEntity {
 	 * Start position of the feature in standard chromosomal coordinates (i.e. first base is 0).
 	 */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private int start;
+	private Integer start;
 	
 	/**
 	 * End position of the feature in standard chromosomal coordinates.
 	 */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private int end;
+	private Integer end;
 	
 	/**
 	 * A score between 0 and 1000. See track lines, below, for ways to configure the display style of scored data.
@@ -274,7 +274,7 @@ public class Peak  extends NamedEntity {
 	/**
 	 * @return the start
 	 */
-	public int getStart() {
+	public Integer getStart() {
 		return start;
 	}
 
@@ -282,7 +282,7 @@ public class Peak  extends NamedEntity {
 	/**
 	 * @param start the start to set
 	 */
-	public void setStart(int start) {
+	public void setStart(Integer start) {
 		this.start = start;
 	}
 
@@ -290,7 +290,7 @@ public class Peak  extends NamedEntity {
 	/**
 	 * @return the end
 	 */
-	public int getEnd() {
+	public Integer getEnd() {
 		return end;
 	}
 
@@ -298,7 +298,7 @@ public class Peak  extends NamedEntity {
 	/**
 	 * @param end the end to set
 	 */
-	public void setEnd(int end) {
+	public void setEnd(Integer end) {
 		this.end = end;
 	}
 
@@ -529,6 +529,11 @@ public class Peak  extends NamedEntity {
 	 */
 	public void setFilterType(String filterType) {
 		this.filterType = filterType;
+	}
+
+	@Override
+	public String id() {
+		return getPeakId();
 	}
 
 }
