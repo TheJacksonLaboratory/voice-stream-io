@@ -22,9 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Located;
+import org.geneweaver.domain.Variant;
 import org.geneweaver.io.reader.ReaderException;
 import org.geneweaver.io.reader.ReaderFactory;
 import org.geneweaver.io.reader.ReaderRequest;
@@ -54,6 +56,14 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	protected Map<String,PreparedStatement>  selectCache =  Collections.synchronizedMap(new HashMap<>(1009));
 
 	protected List<String> fileFilters = new LinkedList<>();
+	
+	/**
+	 * For testing we can limit the numbers of genes or variants processed
+	 * into the database. This allows things to parse more quickly when create() is
+	 * called.
+	 */
+	private Long limit;
+	private Long skip;
 
 	public void add(Path hFile) throws FileNotFoundException {
 		if (!Files.exists(hFile)) throw new FileNotFoundException(hFile.toString());
@@ -118,12 +128,49 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			++index;
 			System.out.println(path+" "+index+" of "+source.size());
 
-			StreamReader<Located> reader = ReaderFactory.getReader(new ReaderRequest(path.getFileName().toString(), path));
-			reader.stream()
-				  .filter(ChromosomeService::isValidChromosome)
-				  .filter(l->isValidClass(l))
-				  .forEach(reg -> store(reg));
+			ReaderRequest request = new ReaderRequest(path.getFileName().toString(), path);
+			configure(request);
+			
+			StreamReader<?> reader = ReaderFactory.getReader(request);
+			Stream<?> raw = reader.stream();
+			
+			// The skip is not that accurate because
+			// we use it on the raw which might have other objects in.
+			// However they are used in testing and will be slow if we
+			// parse all the line in between.
+			if (skip!=null && skip>0) {
+				raw = raw.skip(skip.longValue());
+			}
+			
+			Stream<Located> stream = raw.map(e->coerce(e));
+			stream =  stream.filter(ChromosomeService::isValidChromosome)
+						    .filter(l->isValidClass(l));
+			
+			if (limit!=null && limit>0) {
+				stream = stream.limit(limit.longValue());
+			}
+			
+			stream.forEach(loc -> store(loc));
 		} 
+	}
+
+	/**
+	 * Override to configure the request.
+	 * @param request
+	 */
+	protected void configure(ReaderRequest request) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * Override for readers which read file formats whose objects
+	 * do not fit a normal read and need mapping to use with the connector.
+	 * @param e
+	 * @return
+	 */
+	protected Located coerce(Object e) {
+		return (Located)e;
 	}
 
 	/**
@@ -340,6 +387,34 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			conn.close();
 		}
 		connCache.clear();
+	}
+
+	/**
+	 * @return the limit
+	 */
+	public Long getLimit() {
+		return limit;
+	}
+
+	/**
+	 * @param limit the limit to set
+	 */
+	public void setLimit(Long limit) {
+		this.limit = limit;
+	}
+
+	/**
+	 * @return the skip
+	 */
+	public Long getSkip() {
+		return skip;
+	}
+
+	/**
+	 * @param skip the skip to set
+	 */
+	public void setSkip(Long skip) {
+		this.skip = skip;
 	}
 
 }

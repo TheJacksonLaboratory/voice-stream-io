@@ -453,10 +453,10 @@ public class Peak  extends NamedEntity implements Located {
 			return false;
 		Peak other = (Peak) obj;
 		return blockCount == other.blockCount && Arrays.equals(blockSizes, other.blockSizes)
-				&& Arrays.equals(blockStarts, other.blockStarts) && end == other.end
+				&& Arrays.equals(blockStarts, other.blockStarts) && Objects.equals(end, other.end)
 				&& Objects.equals(epigenome, other.epigenome) && Objects.equals(featureType, other.featureType)
 				&& Objects.equals(filterType, other.filterType) && Arrays.equals(itemRgb, other.itemRgb)
-				&& Objects.equals(peakId, other.peakId) && score == other.score && start == other.start
+				&& Objects.equals(peakId, other.peakId) && score == other.score && Objects.equals(start, other.start)
 				&& strand == other.strand && thickEnd == other.thickEnd && thickStart == other.thickStart
 				&& Objects.equals(tissueDescription, other.tissueDescription);
 	}

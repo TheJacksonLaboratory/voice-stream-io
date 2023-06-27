@@ -1,9 +1,13 @@
 package org.geneweaver.io.connector;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.geneweaver.domain.Entity;
+import org.geneweaver.domain.Gene;
 import org.geneweaver.domain.Located;
+import org.geneweaver.domain.Variant;
+import org.geneweaver.io.reader.ReaderRequest;
 import org.neo4j.ogm.session.Session;
 
 /**
@@ -24,7 +28,7 @@ public class StepConnector<N extends Entity, E extends Entity> extends AbstractO
 	private final Class<N> clazz;
 
 	public StepConnector(Class<N> clazz) {
-		this(clazz, "genes"); // Or variants, we have to process both.
+		this(clazz, clazz.getSimpleName()); // Or variants, we have to process both.
 	}
 
 	/**
@@ -39,6 +43,31 @@ public class StepConnector<N extends Entity, E extends Entity> extends AbstractO
 	}
 	
 	/**
+	 * Override for readers which read file formats whose objects
+	 * do not fit a normal read and need mapping to use with the connector.
+	 * @param e
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	protected Located coerce(Object e) {
+		if (clazz==Variant.class && e instanceof Map) {
+			return Entity.coerce((Map<String,Object>)e, new Variant());
+		}
+		if (clazz==Gene.class && e instanceof Gene) {
+			fixId((Gene)e);
+		}
+		return (Located)e;
+	}
+	
+	@Override
+	protected void configure(ReaderRequest request) {
+		if (clazz == Variant.class) {
+			request.setDelimiter("\t");
+			request.setIncludeAll(false);
+		}
+	}
+
+	/**
 	 * Override to filter class
 	 * @param l
 	 * @return true if class type is valid.
@@ -47,10 +76,22 @@ public class StepConnector<N extends Entity, E extends Entity> extends AbstractO
 		return l.getClass()==clazz;
 	}
 
+	/**
+	 * Method which gets the connections between Gene and Variant
+	 * using this dataset which are known as CONTACT
+	 */
 	@Override
 	public Stream<E> stream(N entity, Session session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	public static Gene fixId(Gene g) {
+		String geneId = g.getGeneId();
+		if (geneId.contains(".")) {
+			geneId = geneId.substring(0, geneId.indexOf('.'));
+			g.setGeneId(geneId);
+		}
+		return g;
+	}
 }

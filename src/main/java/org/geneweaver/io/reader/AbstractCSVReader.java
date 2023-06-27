@@ -112,13 +112,18 @@ public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 
 	}
 	
+	@SuppressWarnings("deprecation")
 	private CSVFormat getFormat(char delim) {
-		return format.withCommentMarker('#')
+		CSVFormat ret = format.withCommentMarker('#')
 				  .withFirstRecordAsHeader()
 				  .withDelimiter(delim)
 				  .withTrim(true)
 				  .withIgnoreEmptyLines()
 				  .withTrailingDelimiter();
+		if (!request.isIncludeAll()) {
+			ret = ret.withAllowMissingColumnNames();
+		}
+		return ret;
 	}
 
 	private Reader createReader(ReaderRequest req) throws IOException {

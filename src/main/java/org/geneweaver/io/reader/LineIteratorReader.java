@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -185,7 +186,10 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	 */
 	protected Object transfer(String propName, Map<String,String> from, String attrName, Map<Object,Object> to) {
 		if (from.containsKey(propName)) {
-			return to.put(attrName, from.get(propName));
+			Set<Object> fields = to.keySet();
+			if (fields.contains(attrName)) {
+				return to.put(attrName, from.get(propName));
+			}
 		}
 		return null;
 	}
@@ -499,7 +503,10 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	 */
 	protected void populate(BeanMap d, String[] rec) {
         d.put("sequenceId", rec[0]);
-        d.put("chr", "chr"+rec[0]);
+        
+        String chr = rec[0];
+        if (!chr.startsWith("chr")) chr = "chr"+chr;
+        d.put("chr", chr);
         d.put("source", rec[1]);
         d.put("type", rec[2]);
         d.put("start", rec[3]);

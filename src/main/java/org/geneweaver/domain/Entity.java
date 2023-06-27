@@ -18,6 +18,10 @@
  */
 package org.geneweaver.domain;
 
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.beanutils.BeanMap;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 
@@ -118,5 +122,20 @@ public interface Entity {
 		// We purposely use a character unlikely, the default character "," appears in some values.
 		// You can override the delimier or set it if not writing bulk import files.
 		return System.getProperty("delimiter", "|");// Character used for delimiter in bulk import files.
+	}
+
+	/**
+	 * Put all the properties in the map into the object.
+	 * @param <T>
+	 * @param props
+	 * @param entity
+	 * @return
+	 */
+	static <T extends Entity> T coerce(Map<String,Object> props, T entity) {
+		BeanMap map = new BeanMap(entity);
+		Set<Object> names = map.keySet();
+		props.keySet().retainAll(names);
+		map.putAll(props);
+		return entity;
 	}
 }
