@@ -63,17 +63,17 @@ public class BedReaderTest extends AbstractDataFileTest {
 
 	private void check04998(String fileName, List<NamedEntity> lines) {
 		// line 0: chr1 959245 959305 NOC2L_1 900 - 959245 959256
-		String peakId = BedReader.createPeakId(null, "chr1", null, 959245, 959305, 0, true);
+		String peakId = BedReader.createPeakId(null, "1", null, 959245, 959305, true);
 		Peak r0 = new Peak(peakId, "Homo sapiens", "chr1", 959245, 959305, "NOC2L_1", 900, Strand.REVERSE, 959245, 959256);
 		assertEquals(r0, lines.get(0));
 
 		// line 49: chr1 1727706 1727766 SLC35E2B_3 900 - 1727706 1727717
-		peakId = BedReader.createPeakId(null, "chr1", null, 1727706, 1727766, 49, true);
-		Peak r49 = new Peak(peakId, "Homo sapiens", "chr1", 1727706, 1727766, "SLC35E2B_3", 900, Strand.REVERSE, 1727706, 1727717);
+		peakId = BedReader.createPeakId(null, "1", null, 1727706, 1727766, true);
+		Peak r49 = new Peak(peakId, "Homo sapiens", "1", 1727706, 1727766, "SLC35E2B_3", 900, Strand.REVERSE, 1727706, 1727717);
 		assertEquals(r49, lines.get(49));
 
 		// line 98: chr1 3752400 3752460 CCDC27_1 900 + 3752449 3752460
-		peakId = BedReader.createPeakId(null, "chr1", null, 3752400, 3752460, 98, true);
+		peakId = BedReader.createPeakId(null, "1", null, 3752400, 3752460, true);
 		Peak r98 = new Peak(peakId, "Homo sapiens", "chr1", 3752400, 3752460, "CCDC27_1", 900, Strand.FORWARD, 3752449, 3752460);
 		assertEquals(r98, lines.get(98));
 	}
@@ -136,7 +136,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 		StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", 
 															getPath("data/bed_peaks/homo_sapiens/A549/BCL3/homo_sapiens.GRCh38.A549.BCL3.SWEmbl_R0005.peaks.20210107.bed.gz")));
 		List<Peak> peaks = reader.stream().collect(Collectors.toList());
-		assertEquals(5737, peaks.size());	
+		assertEquals(5673, peaks.size());	
 		peaks.stream().allMatch(p->"A549".equals(p.getEpigenome()));
 		peaks.stream().allMatch(p->"BCL3".equals(p.getFeatureType()));
 	}
@@ -146,7 +146,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 		StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", 
 				getPath("data/bed_peaks/mus_musculus/CH12_LX/BHLHE40/mus_musculus.GRCm39.CH12_LX.BHLHE40.SWEmbl_R0005.peaks.20201021.bed.gz")));
 		List<Peak> peaks = reader.stream().collect(Collectors.toList());
-		assertEquals(33350, peaks.size());	
+		assertEquals(33204, peaks.size());	
 		peaks.stream().allMatch(p->"CH12_LX".equals(p.getEpigenome()));
 		peaks.stream().allMatch(p->"BHLHE40".equals(p.getFeatureType()));
 	}

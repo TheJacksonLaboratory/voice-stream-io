@@ -82,6 +82,7 @@ public class GeneConnector<N extends GeneticEntity, E extends Entity> implements
         	} 
         	
         	Produces produces = new Produces(gene, transcript);
+        	produces.setChr(transcript.getChr());
         	return (Stream<E>) Stream.of(transcript, produces);
         }
         

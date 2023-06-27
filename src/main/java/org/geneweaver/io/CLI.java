@@ -150,4 +150,17 @@ public class CLI {
 		run(cmd, env);
 	}
 
+	/**
+	 * Get an env, a system or a default.
+	 * @param env
+	 * @param prop
+	 * @param def
+	 * @return value or default
+	 */
+	public static String get(String env, String prop, String def) {
+		String venv = System.getenv(env);
+		if (venv!=null && !venv.trim().isEmpty()) return venv;
+		return System.getProperty(prop, def);
+	}
+
 }

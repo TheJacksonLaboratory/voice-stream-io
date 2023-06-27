@@ -28,6 +28,9 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * The Class Ortholog.
  */
@@ -58,7 +61,7 @@ public class Homolog extends AbstractEntity {
 	 * Instantiates a new ortholog.
 	 */
 	public Homolog() {
-		// TODO Auto-generated constructor stub
+		setChr(Entity.NO_CHR, true);
 	}
 
 	/**
@@ -69,6 +72,7 @@ public class Homolog extends AbstractEntity {
 	 * @param to the to
 	 */
 	public Homolog(Long hid, String geneIdFrom, String geneIdTo) {
+		this();
 		this.hid = hid;
 		this.geneIdFrom = geneIdFrom;
 		this.geneIdTo = geneIdTo;
@@ -81,6 +85,7 @@ public class Homolog extends AbstractEntity {
 	 * @param to the to
 	 */
 	public Homolog(HomologGene from, HomologGene to) {
+		this();
 		this.speciesFrom = from;
 		this.speciesTo = to;
 	}
@@ -237,5 +242,14 @@ public class Homolog extends AbstractEntity {
 	}
 
 
+	@JsonIgnore
+	public void setChr(String chr) {
+		super.setChr(chr);
+	}
+
+	@JsonIgnore
+	public String getChr() {
+		return super.getChr();
+	}
 
 }

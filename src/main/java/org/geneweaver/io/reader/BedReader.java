@@ -36,6 +36,8 @@ import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Peak.Strand;
 import org.geneweaver.domain.Track;
 import org.geneweaver.io.connector.BedConnector;
+import org.geneweaver.io.connector.ChromosomeService;
+import org.geneweaver.io.connector.OverlapService;
 
 /**
  * Bed file format @see https://m.ensembl.org/info/website/upload/bed.html
@@ -46,7 +48,9 @@ import org.geneweaver.io.connector.BedConnector;
  */
 public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	
-	private int peakIndex = 0;
+	private OverlapService oservice = new OverlapService();
+	private ChromosomeService cservice = ChromosomeService.getInstance();
+
 	/**
 	 * Create the reader by setting its data
 	 * 
@@ -94,7 +98,11 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 			
 			BeanMap d = new BeanMap(peak);
 			
-			d.put("chr", rec[0]);
+			// At one time we allowed the bad chromosomes to
+			// come in through the peaks but now we do not.
+			String chrom = cservice.getChromosome(rec[0]);
+			if (chrom==null) return null;
+			d.put("chr", chrom);
 			d.put("start", rec[1]);
 			d.put("end",   rec[2]);
 			if (rec.length>3) d.put("name",  rec[3]);
@@ -119,8 +127,8 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		return ret;
 	}
 	
+
 	public Stream<N> stream() {
-		peakIndex = 0;
 		return super.stream();
 	}
 	
@@ -128,15 +136,28 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		
 		int start = peak.getStart();
 		int end = peak.getEnd();
-		String peakId = createPeakId(peak.getFeatureType(), peak.getChr(), peak.getEpigenome(), start, end, peakIndex++, false);
+		String peakId = createPeakId(peak.getFeatureType(), peak.getChr(), peak.getEpigenome(), start, end, false);
 		peak.setPeakId(peakId);
 		return peak;
 	}
 
-	public static String createPeakId(String featureName, String chr, String egenome, int start, int end, int idx, boolean removeSpecialChars) {
+	public static String createPeakId(String featureName, String chr, String egenome, int start, int end, boolean removeSpecialChars) {
 		
-		egenome = egenome!=null ? egenome.replaceAll("[^a-zA-Z0-9]", "") : null;
-		return featureName+"_"+egenome+"@"+chr+"#"+idx+"@"+start+":"+end;
+		// If the same peakId is generated twice, the graph will drop it. 
+		// This means that some features with multiple epigenetics will be lost
+		// We do this intentionally because it reduces peak count, however it is wrong.
+		
+		// TODO Should use egenome in the unique peakId.
+		//egenome = egenome!=null ? egenome.replaceAll("[^a-zA-Z0-9]", "") : null;
+		StringBuilder buf = new StringBuilder();
+		buf.append(featureName);
+		buf.append("@");
+		buf.append(chr);
+		buf.append("#");
+		buf.append(start);
+		buf.append(":");
+		buf.append(end);
+		return buf.toString();
 	}
 
 	// Parse name in Ensembl format e.g. 

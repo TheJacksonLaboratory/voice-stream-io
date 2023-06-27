@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +60,8 @@ import org.slf4j.LoggerFactory;
  * makes the connection somewhat faster because there can be 200mill base pairs in a chromosome
  * therefore if the base pair shards are 10000, there can be 20000 tables.
  * 
+ * There are roughly 29 billion overlaps in the human variant to peak space on Ensembl.
+ * 
  * @author gerrim
  *
  */
@@ -73,6 +74,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 	private String fileName;
 
 	private OverlapService oservice = new OverlapService();
+	private ChromosomeService cservice = ChromosomeService.getInstance();
 	private String basePath;
 
 	private Collection<Path> source = new TreeSet<>();
@@ -208,6 +210,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 						
 						Overlap o = oservice.intersection(variant, new Peak(peakId, rlow, rup));
 						if (o!=null) {
+							o.setChr(variant.getChr());
 							ret.add(o);
 							usedIds.add(peakId);
 						}
@@ -252,7 +255,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 
 			StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest(path.getFileName().toString(), path));
 			reader.stream()
-				  .filter(OverlapService::isValidChromosome)
+				  .filter(ChromosomeService::isValidChromosome)
 				  .forEach(reg -> storePeak(reg));
 		} 
 	}
@@ -356,7 +359,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> implements Con
 
 	private Connection newConnection(String chr, boolean readOnly) throws SQLException, IOException {
 		
-		chr = oservice.getChromosome(chr);
+		chr = cservice.getChromosome(chr);
 		if (chr==null) return null;
 		String path = this.basePath+"_"+chr;
 		String uri = "jdbc:h2:"+path+";mode=MySQL";

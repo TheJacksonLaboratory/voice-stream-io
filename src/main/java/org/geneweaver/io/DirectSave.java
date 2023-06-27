@@ -27,10 +27,13 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 import org.geneweaver.domain.Entity;
+import static org.geneweaver.io.connector.ChromosomeService.na;
 
 /**
  * A simple function for importing static to find readers in a map 
@@ -40,7 +43,7 @@ import org.geneweaver.domain.Entity;
  *
  */
 public class DirectSave {
-
+	
 	/**
 	 * This function uses the map to passed in to cache writers.
 	 * @param e
@@ -49,7 +52,7 @@ public class DirectSave {
 	 * @param timer
 	 * @return
 	 */
-	public static Entity save(Entity e, Map<Class<? extends Entity>, BufferedWriter> writers, Path dir, Timer timer) {
+	public static Entity save(Entity e, Map<Class<? extends Entity>, Map<String,BufferedWriter>> writers, Path dir, Timer timer) {
 		return save(e, writers, dir, timer, false);
 	}
 	
@@ -64,7 +67,7 @@ public class DirectSave {
 	 * @param timer - may be null
 	 * @return
 	 */
-	public static Entity save(Entity e, Map<Class<? extends Entity>, BufferedWriter> writers, Path dir, Timer timer, boolean append) {
+	public static Entity save(Entity e, Map<Class<? extends Entity>, Map<String,BufferedWriter>> writers, Path dir, Timer timer, boolean append) {
 		
 		synchronized(e.getClass()) {
 			try {
@@ -73,14 +76,27 @@ public class DirectSave {
 					header.write(e.getHeader());
 					header.newLine();
 					header.close();
-		
-					Path pbody = dir.resolve(e.getClass().getSimpleName()+".csv.gz");
-					BufferedWriter body = createWriter(pbody, append);
-					writers.put(e.getClass(), body);
+					
+					writers.put(e.getClass(), Collections.synchronizedMap(new HashMap<>()));
 				}
-		
-				writers.get(e.getClass()).write(e.toCsv());
-				writers.get(e.getClass()).newLine();
+				
+				Map<String,BufferedWriter> brs = writers.get(e.getClass());
+				String chr = e.getChr();
+				if (chr==null) chr = na;
+				if (!brs.containsKey(chr)) {
+					Path pbody;
+					if (chr.equals(Entity.NO_CHR)) {
+						pbody = dir.resolve(e.getClass().getSimpleName()+".csv.gz");
+					} else {
+						pbody = dir.resolve(e.getClass().getSimpleName()+"-chr"+chr+".csv.gz");
+					}
+					BufferedWriter body = createWriter(pbody, append);
+					brs.put(chr, body);
+				}
+				
+				BufferedWriter writer = writers.get(e.getClass()).get(chr);
+				writer.write(e.toCsv());
+				writer.newLine();
 				if (timer!=null) {
 					timer.time();
 				}

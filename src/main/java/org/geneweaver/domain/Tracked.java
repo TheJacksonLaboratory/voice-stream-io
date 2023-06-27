@@ -40,6 +40,8 @@ public class Tracked  extends AbstractEntity {
 	@EndNode
 	private Peak peak;
 
+	private String chr;
+
 	public Tracked() {
 		
 	}
@@ -47,6 +49,7 @@ public class Tracked  extends AbstractEntity {
 	public Tracked(Peak peak, Track track) {
 		this.peak = peak;
 		this.track = track;
+		this.chr = peak.getChr();
 	}
 
 	/**
@@ -107,6 +110,20 @@ public class Tracked  extends AbstractEntity {
 			return false;
 		Tracked other = (Tracked) obj;
 		return Objects.equals(peak, other.peak) && Objects.equals(track, other.track);
+	}
+
+	/**
+	 * @return the chr
+	 */
+	public String getChr() {
+		return chr;
+	}
+
+	/**
+	 * @param chr the chr to set
+	 */
+	public void setChr(String chr) {
+		this.chr = chr;
 	}
 
 

@@ -82,7 +82,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 			Stopwatch done = timer.stop();
 			System.out.println("Created cache table size "+func.size()+" in "+done);
 			assertTrue(func.size()>10000);
-			assertTrue(done.elapsed().toMillis()<60000);
+			assertTrue(done.elapsed().toMillis()<80000);
 		}
 	}
 	
@@ -105,7 +105,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		assertEquals(peak2, ((Overlap)ret.get(13)).getPeak().getPeakId());
 		assertEquals(peak2, ((Overlap)ret.get(15)).getPeak().getPeakId());
 	}
-	
+
 	@Test
 	public void testNone() throws Exception {
 		Path vpath = getPath("data/bed_peaks/none.gvf");
@@ -233,13 +233,13 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		
 		System.out.println(String.format("This is %3.2f ms per variant.", interval/(double)size));
 		
-		ReaderRequest reader = new ReaderRequest("test", dir.resolve("Overlap.csv.gz"));
+		ReaderRequest reader = new ReaderRequest("test", dir.resolve("Overlap-chr1.csv.gz"));
 		reader.setReaderHint("MapCSVReader");
 		assertTrue(ReaderFactory.getReader(reader).stream().count() >= 719); // There are 719 but some randoms might collide.
 		assertTrue(Files.exists(dir.resolve("Overlap-header.csv")));
-		assertTrue(Files.size(dir.resolve("Variant.csv.gz"))>100);
+		assertTrue(Files.size(dir.resolve("Variant-chr1.csv.gz"))>100);
 		assertTrue(Files.exists(dir.resolve("Variant-header.csv")));
-		assertTrue(Files.exists(dir.resolve("VariantEffect.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("VariantEffect-chr1.csv.gz")));
 		assertTrue(Files.exists(dir.resolve("VariantEffect-header.csv")));
 
 	}

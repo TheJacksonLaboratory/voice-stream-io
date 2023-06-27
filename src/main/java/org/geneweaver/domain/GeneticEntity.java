@@ -46,10 +46,6 @@ public abstract class GeneticEntity extends AbstractEntity implements Species {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean active = true;
     
-    /** The chr. */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-    private String chr;
-    
     /** The type. */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
     private String type;
@@ -182,29 +178,11 @@ public abstract class GeneticEntity extends AbstractEntity implements Species {
 		this.active = active;
 	}
 
-	/**
-	 * Gets the chr.
-	 *
-	 * @return the chr
-	 */
-	public String getChr() {
-		return chr;
-	}
-
-	/**
-	 * Sets the chr.
-	 *
-	 * @param chr the chr to set
-	 */
-	public void setChr(String chr) {
-		this.chr = chr;
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(active, build, chr, end, geneId, phase, score, sequenceId, source,
+		result = prime * result + Objects.hash(active, build, end, geneId, phase, score, sequenceId, source,
 				species, start, strand, type);
 		return result;
 	}
@@ -219,7 +197,7 @@ public abstract class GeneticEntity extends AbstractEntity implements Species {
 			return false;
 		GeneticEntity other = (GeneticEntity) obj;
 		return Objects.equals(active, other.active) && Objects.equals(build, other.build)
-				&& Objects.equals(chr, other.chr) && Objects.equals(end, other.end)
+				&& Objects.equals(end, other.end)
 				&& Objects.equals(geneId, other.geneId) && Objects.equals(phase, other.phase)
 				&& Objects.equals(score, other.score) && Objects.equals(sequenceId, other.sequenceId)
 				&& Objects.equals(source, other.source) && Objects.equals(species, other.species)

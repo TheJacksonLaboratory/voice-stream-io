@@ -126,10 +126,6 @@ public class Peak  extends NamedEntity {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String featureType;
 
-    /** The chromosome e.g. chr1 or X. */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
- 	private String chr;
-	
 	/**
 	 * Start position of the feature in standard chromosomal coordinates (i.e. first base is 0).
 	 */
@@ -209,7 +205,7 @@ public class Peak  extends NamedEntity {
 		
 		this.peakId = peakId;
 		setSpecies(species);
-		this.chr = chr;
+		setChr(chr);
 		this.start = start;
 		this.end = end;
 		this.setName(name);
@@ -235,7 +231,7 @@ public class Peak  extends NamedEntity {
 		StringBuilder buf = new StringBuilder();
 		String fields = delimify("peakId:ID(Peak-Id)",
 				"epigenome", "tissueDescription", "featureType", "filterType",
-				"start", "end", "chr", "score", "strand", ":LABEL");
+				"start:int", "end:int", "chr", "score:int", "strand", ":LABEL");
 		buf.append(fields);
 		
 		String sheader = super.getHeader();
@@ -274,22 +270,6 @@ public class Peak  extends NamedEntity {
 		if (s==null) return null;
 		return s.toString();
 	}
-
-	/**
-	 * @return the chr
-	 */
-	public String getChr() {
-		return chr;
-	}
-
-
-	/**
-	 * @param chr the chr to set
-	 */
-	public void setChr(String chrom) {
-		this.chr = chrom;
-	}
-
 
 	/**
 	 * @return the start
@@ -457,7 +437,7 @@ public class Peak  extends NamedEntity {
 		result = prime * result + Arrays.hashCode(blockSizes);
 		result = prime * result + Arrays.hashCode(blockStarts);
 		result = prime * result + Arrays.hashCode(itemRgb);
-		result = prime * result + Objects.hash(blockCount, chr, end, epigenome, featureType, filterType, peakId, score,
+		result = prime * result + Objects.hash(blockCount, end, epigenome, featureType, filterType, peakId, score,
 				start, strand, thickEnd, thickStart, tissueDescription);
 		return result;
 	}
@@ -473,7 +453,7 @@ public class Peak  extends NamedEntity {
 			return false;
 		Peak other = (Peak) obj;
 		return blockCount == other.blockCount && Arrays.equals(blockSizes, other.blockSizes)
-				&& Arrays.equals(blockStarts, other.blockStarts) && Objects.equals(chr, other.chr) && end == other.end
+				&& Arrays.equals(blockStarts, other.blockStarts) && end == other.end
 				&& Objects.equals(epigenome, other.epigenome) && Objects.equals(featureType, other.featureType)
 				&& Objects.equals(filterType, other.filterType) && Arrays.equals(itemRgb, other.itemRgb)
 				&& Objects.equals(peakId, other.peakId) && score == other.score && start == other.start

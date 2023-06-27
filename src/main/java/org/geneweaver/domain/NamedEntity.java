@@ -20,7 +20,7 @@ package org.geneweaver.domain;
 
 import java.util.Objects;
 
-public class NamedEntity extends AbstractEntity implements Species {
+public abstract class NamedEntity extends AbstractEntity implements Species {
 
 
 	private String name;

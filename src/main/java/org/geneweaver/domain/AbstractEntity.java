@@ -20,12 +20,16 @@ package org.geneweaver.domain;
 
 import java.util.Objects;
 
+import org.geneweaver.io.connector.ChromosomeService;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 public abstract class AbstractEntity implements Entity {
+	
+	private static ChromosomeService cservice = ChromosomeService.getInstance();
 
 	/** The uid. */
 	@Id
@@ -37,6 +41,12 @@ public abstract class AbstractEntity implements Entity {
 	// You can override the delimier or set it if not writing bulk import files.
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String delimiter = System.getProperty("delimiter", "|");// Character used for delimiter in bulk import files.
+	
+	/**
+	 * The chromosome on which this entity belongs.
+	 */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String chr;
 	
 	/**
 	 * @return the delimiter
@@ -56,7 +66,7 @@ public abstract class AbstractEntity implements Entity {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(delimiter, uid);
+		return Objects.hash(chr, delimiter, uid);
 	}
 
 	@Override
@@ -66,7 +76,8 @@ public abstract class AbstractEntity implements Entity {
 		if (!(obj instanceof AbstractEntity))
 			return false;
 		AbstractEntity other = (AbstractEntity) obj;
-		return Objects.equals(delimiter, other.delimiter) && Objects.equals(uid, other.uid);
+		return Objects.equals(chr, other.chr) && Objects.equals(delimiter, other.delimiter)
+				&& Objects.equals(uid, other.uid);
 	}
 
 	/**
@@ -82,4 +93,29 @@ public abstract class AbstractEntity implements Entity {
 	public final void setUid(Long uid) {
 		this.uid = uid;
 	}
+
+	/**
+	 * @return the chr
+	 */
+	public String getChr() {
+		return chr;
+	}
+
+	/**
+	 * @param chr the chr to set
+	 */
+	public void setChr(String chr) {
+		setChr(chr, false);
+	}
+	
+	/**
+	 * @param chr the chr to set
+	 */
+	@JsonIgnore
+	public void setChr(String chr, boolean force) {
+		// We standardize chromosome
+		if (!force) chr = cservice.getChromosome(chr);
+		this.chr = chr;
+	}
+
 }
