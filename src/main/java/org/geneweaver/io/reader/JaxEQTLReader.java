@@ -93,7 +93,8 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 	
 	private DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
 	
-	private void parseHeaders() throws ReaderException {
+	@Override
+	protected Map<String,Object> parseHeaders() throws ReaderException {
 		
 		if (header==null || header.isEmpty()) {
 			throw new ReaderException("JAX eQTL files must have a header!");
@@ -141,6 +142,7 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 			}
 			headerValues.put(name, value);
 		}
+		return headerValues;
 	}
 
 	protected void addHeader(String line) {

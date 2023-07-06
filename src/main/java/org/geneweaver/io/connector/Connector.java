@@ -33,7 +33,7 @@ import org.neo4j.ogm.session.Session;
  * 
  * @author gerrim
  * @param <T> Output of connection e.g. Produces or VariantEffect
- * @param<I> Input e.g. Transcript, Gene, Variant
+ * @param <I> Input e.g. Transcript, Gene, Variant
  * 
  * Function<? super T, ? extends Stream<? extends R>>
  */

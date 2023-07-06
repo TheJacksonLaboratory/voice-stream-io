@@ -50,6 +50,7 @@ public class ReaderFactory {
 		tmp.put("gvf", 			VariantReader.class);
 		tmp.put("vcf", 			FastVCFReader.class);
 		tmp.put("bed", 			BedReader.class);
+		tmp.put("step", 		StepReader.class);
 		
 		// If there are multiple xls formats, we will have to ask 
 		// if it is applicable for a given format and reader request.

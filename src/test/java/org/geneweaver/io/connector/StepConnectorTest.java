@@ -15,15 +15,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.geneweaver.domain.Contact;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Gene;
+import org.geneweaver.domain.Step;
 import org.geneweaver.domain.Variant;
 import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.geneweaver.io.reader.ReaderException;
 import org.geneweaver.io.reader.ReaderFactory;
 import org.geneweaver.io.reader.ReaderRequest;
 import org.geneweaver.io.reader.StreamReader;
-import org.junit.Ignore;
+import org.geneweaver.io.writer.ExportBuilder;
 import org.junit.Test;
 
 import com.google.common.base.Stopwatch;
@@ -33,7 +35,7 @@ public class StepConnectorTest extends AbstractDataFileTest {
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void noAdd() throws Exception {
-		try (StepConnector<Gene, Entity> func = new StepConnector<>(Gene.class)) {
+		try (StepConnector func = new StepConnector(Gene.class)) {
 			func.create(); // Creates indexed database.
 		}
 	}
@@ -42,7 +44,7 @@ public class StepConnectorTest extends AbstractDataFileTest {
 	public void badGeneFile() throws Exception {
 		Path mFile = getPath("data/1000/hs_gtf/hg38_2.gtf");
 		Path hFile = getPath("data/NOTTHERE");
-		try (StepConnector<Gene, Entity> func = new StepConnector<>(Gene.class)) {
+		try (StepConnector func = new StepConnector(Gene.class)) {
 			func.add(mFile);
 			func.add(hFile);
 		}
@@ -70,7 +72,7 @@ public class StepConnectorTest extends AbstractDataFileTest {
 		Path tdir = Paths.get("./tmp/"+testName);
 		FileUtils.deleteQuietly(tdir.toFile());
 		
-		try (StepConnector<?, Entity> func = new StepConnector<>(type)) {
+		try (StepConnector func = new StepConnector(type)) {
 			func.setLocation(tdir);
 			
 			// limit is used here just to avoid caching all the test files i.e. test goes quicker.
@@ -170,10 +172,10 @@ public class StepConnectorTest extends AbstractDataFileTest {
 		FileUtils.deleteQuietly(tdir.toFile());
 
 		Path file = getPath("prod/ccsi/mm/mm10.gtf.gz");
-		testRealParse(testName, file, Gene.class, 0L, 100000L);
+		testRealParse(testName, file, Gene.class, "ENS", 0L, 100000L);
 		
 		file = getPath("prod/ccsi/mm/snp137.txt.gz");
-		testRealParse(testName, file, Variant.class, 10000L, 100000L);
+		testRealParse(testName, file, Variant.class, "rs", 10000L, 100000L);
 		
 		assertTrue(Files.exists(Paths.get("tmp/mouse/Variant_1.mv.db")));
 		assertTrue(Files.exists(Paths.get("tmp/mouse/Gene_15.mv.db")));
@@ -188,17 +190,21 @@ public class StepConnectorTest extends AbstractDataFileTest {
 		FileUtils.deleteQuietly(tdir.toFile());
 
 		Path file = getPath("prod/ccsi/hs/hg38.gtf.gz");
-		testRealParse(testName, file, Gene.class, 0L, 100000L);
+		testRealParse(testName, file, Gene.class, "ENS", 0L, 100000L);
 		
 		file = getPath("prod/ccsi/hs/snp141.txt.gz");
-		testRealParse(testName, file, Variant.class, 10000L, 100000L);
+		testRealParse(testName, file, Variant.class, "rs", 10000L, 100000L);
 		
 		assertTrue(Files.exists(Paths.get("tmp/human/Variant_1.mv.db")));
 		assertTrue(Files.exists(Paths.get("tmp/human/Gene_22.mv.db")));
 	}
 	
 	// NOT FOR UNIT TESTS
-	@Test
+	// But need to test parsing whole file so that can run StepConnector 
+	// on cache.
+	
+	// Slow
+	//@Test
 	public void mouseFullVariantParse() throws Exception {
 		
 		String testName = "mouseFull";
@@ -206,25 +212,95 @@ public class StepConnectorTest extends AbstractDataFileTest {
 		FileUtils.deleteQuietly(tdir.toFile());
 
 		Path file = getPath("prod/ccsi/mm/mm10.gtf.gz");
-		testRealParse(testName, file, Gene.class, null, null);
+		testRealParse(testName, file, Gene.class,  "ENS", null, null);
 
 		file = getPath("prod/ccsi/mm/snp137.txt.gz");
-		testRealParse(testName, file, Variant.class, null, null);
+		testRealParse(testName, file, Variant.class, "rs", null, null);
+	}
+
+	// Slow
+	//@Test
+	public void humanFullVariantParse() throws Exception {
+		
+		String testName = "humanFull";
+		Path tdir = Paths.get("./tmp/"+testName);
+		FileUtils.deleteQuietly(tdir.toFile());
+
+		Path file = getPath("prod/ccsi/hs/hg38.gtf.gz");
+		testRealParse(testName, file, Gene.class, "ENS", null, null);
+
+		file = getPath("prod/ccsi/hs/snp141.txt.gz");
+		testRealParse(testName, file, Variant.class, "rs", null, null);
+	}
+	
+	// Must populate "./tmp/mouseFull" first
+	//@Test
+	public void parseMouseStepLocationsChia16() throws Exception {
+		
+		// Use the previously created dir.
+		Path tdir = Paths.get("./tmp/mouseFull");
+
+		StreamReader<Step> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("prod/ccsi/mm/chia-16.step.gz")));
+		try (StepConnector conn = new StepConnector()) {
+
+			conn.setParentDirectory(tdir);
+			
+			List<Contact> stream = reader.stream()
+										 .flatMap(step->conn.stream(step))
+										 .collect(Collectors.toList());
+				  
+			assertEquals(162, stream.size()); 
+			
+		}
+	}
+	
+	@Test
+	public void mouseBulkFileWrite() throws Exception {
+		
+		Path stepDir = getPath("prod/ccsi/mm/");
+		
+		List<Path> stepFiles = Files.list(stepDir)
+								 .filter(file -> file.getFileName().toString().toLowerCase().endsWith(".step.gz"))
+								 .collect(Collectors.toList());
+
+		Path dir = Paths.get("./tmp/mouseBulkWrite");
+		FileUtils.deleteQuietly(dir.toFile());
+		dir.toFile().mkdirs();
+
+		try (StepConnector conn = new StepConnector()) {
+			
+			// Use the previously created dir for the locations database
+			conn.setParentDirectory(Paths.get("./tmp/mouseFull"));
+
+			try (@SuppressWarnings("resource")
+				ExportBuilder builder = new ExportBuilder().setSpecies("Mus musculus")
+										.setChunkProperty("1000")
+										.addConnector(conn)
+										.setDir(dir)
+										.setInputs(stepFiles)
+										.setParallelFiles(false)
+										.setDefaultChunkSize(10000)) {
+
+				builder.export();
+				System.out.println(builder.status());
+			}
+		}
+
 	}
 
 
-	private Path testRealParse(String testName, Path file, Class<? extends Entity> type, Long skip, Long limit) throws Exception {
+	private Path testRealParse(String testName, Path file, Class<? extends Entity> type, String prefix, Long skip, Long limit) throws Exception {
 		
 		Path tdir = Paths.get("./tmp/"+testName);
 		assertTrue(Files.exists(file));
 		
-		try (StepConnector<?, Entity> func = new StepConnector<>(type)) {
+		try (StepConnector func = new StepConnector(type)) {
 			func.setLocation(tdir);
 			func.setSkip(skip);
 			func.setLimit(limit);
 			
 			func.add(file);
-			func.create(); // Creates indexed database.
+			func.create(prefix); // Creates indexed database.
 		}
 		return tdir;
 	}

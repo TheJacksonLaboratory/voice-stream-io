@@ -2,11 +2,9 @@ package org.geneweaver.io.connector;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,14 +19,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.geneweaver.domain.Entity;
-import org.geneweaver.domain.Located;
 import org.geneweaver.domain.Overlap;
 import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Variant;
-import org.geneweaver.io.reader.ReaderException;
-import org.geneweaver.io.reader.ReaderFactory;
-import org.geneweaver.io.reader.ReaderRequest;
-import org.geneweaver.io.reader.StreamReader;
 import org.neo4j.ogm.session.Session;
 
 /**
@@ -67,8 +60,8 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 	 * @param databaseFileName
 	 */
 	public OverlapConnector(String databaseFileName) {
-		this.tableName = System.getProperty("gweaver.mappingdb.tableName","REGIONS");
-		this.fileName = databaseFileName;
+		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
+		setFileName(databaseFileName);
 		setFileFilters(".bed.gz", ".bed");
 	}
 	
@@ -193,7 +186,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 			peak.setStart((int)(Math.random()*roughBPperChr));
 			peak.setEnd((int)(Math.random()*roughBPperChr));
 			peak.setChr(chr);
-			store(peak);
+			store(peak, null);
 			if (i%1000000 == 0) System.out.println("Added randoms, size "+i);
 		} 
 		return nrows;

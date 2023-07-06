@@ -22,6 +22,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -624,4 +625,17 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 		this.comment = comment;
 	}
 
+	protected Map<String, Object> parseHeaders() throws ReaderException {
+		if (header==null || header.isEmpty()) return Collections.emptyMap();
+		Map<String, Object> ret = new HashMap<>();
+		for (String line : header) {
+			line = line.trim();
+			if (line.startsWith("#")) line = line.substring(1);
+			String[] sa = null;
+			if (line.contains(":")) sa = line.split(":");
+			if (line.contains("=")) sa = line.split("=");
+			ret.put(sa[0].trim(), sa[1].trim());
+		}
+		return ret;
+	}
 }

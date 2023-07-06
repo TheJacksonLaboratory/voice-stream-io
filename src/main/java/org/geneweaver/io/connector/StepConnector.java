@@ -1,14 +1,26 @@
 package org.geneweaver.io.connector;
 
+import java.nio.file.Path;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
+import org.geneweaver.domain.Contact;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Gene;
 import org.geneweaver.domain.Located;
+import org.geneweaver.domain.Step;
 import org.geneweaver.domain.Variant;
 import org.geneweaver.io.reader.ReaderRequest;
 import org.neo4j.ogm.session.Session;
+
+import com.google.common.collect.Sets;
 
 /**
  * Class to create step file connections.
@@ -19,15 +31,29 @@ import org.neo4j.ogm.session.Session;
  * @author gerrim
  *
  */
-public class StepConnector<N extends Entity, E extends Entity> extends AbstractOverlapConnector<N,E>  {
+public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 
 	/**
 	 * Some of the input files are heterogeneous and
 	 * we only want one entity such as "Gene" from the file.
 	 */
-	private final Class<N> clazz;
+	private final Class<?> clazz;
 
-	public StepConnector(Class<N> clazz) {
+	private Path parentDirectory;
+	
+	/**
+	 * Used when mapping the step file.
+	 */
+	public StepConnector() {
+		clazz  = null;
+		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
+	}
+
+	/**
+	 * Used when caching the data sources.
+	 * @param clazz
+	 */
+	public StepConnector(Class<?> clazz) {
 		this(clazz, clazz.getSimpleName()); // Or variants, we have to process both.
 	}
 
@@ -36,10 +62,10 @@ public class StepConnector<N extends Entity, E extends Entity> extends AbstractO
 	 * The database is sharded by file so this
 	 * @param databaseFileName
 	 */
-	public StepConnector(Class<N> clazz, String databaseFileName) {
+	public StepConnector(Class<?> clazz, String databaseFileName) {
 		this.clazz = clazz;
-		this.tableName = System.getProperty("gweaver.mappingdb.tableName","REGIONS");
-		this.fileName = databaseFileName;
+		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
+		setFileName(databaseFileName);
 	}
 	
 	/**
@@ -81,9 +107,82 @@ public class StepConnector<N extends Entity, E extends Entity> extends AbstractO
 	 * using this dataset which are known as CONTACT
 	 */
 	@Override
-	public Stream<E> stream(N entity, Session session) {
-		// TODO Auto-generated method stub
-		return null;
+	public Stream<Contact> stream(Step step, Session session) {
+		
+		Located start = Located.at(step.getChr1(), step.getStart1(), step.getEnd1());		
+		Set<String> geneIds = lookup(start, Gene.class, "ens");
+
+		Located end = Located.at(step.getChr2(), step.getStart2(), step.getEnd2());		
+		Set<String> rsIds = lookup(end, Variant.class, "rs");
+		
+		if (geneIds.isEmpty() || rsIds.isEmpty()) {
+			return null;
+		}
+		return expand(step, geneIds, rsIds);
+	}
+	
+	private Stream<Contact> expand(Step step, Set<String> geneIds, Set<String> rsIds) {
+		Set<List<String>> combs = Sets.cartesianProduct(Arrays.asList(geneIds, rsIds));
+		return combs.stream()
+				    .map(ids->createContact(step, ids, geneIds, rsIds));
+	}
+
+	private Contact createContact(Step step, List<String> ids, Set<String> geneIds, Set<String> rsIds) {
+		
+		Contact contact = Contact.of(step);
+		contact.setGeneId(ids.get(0));
+		contact.setRsId(ids.get(1));
+		contact.setChr(step.getChr1());
+		return contact;
+	}
+
+	private Set<String> lookup(Located loc, Class<?> type, String prefix) {
+		
+		setFileName(type.getSimpleName());
+		setLocation(getParentDirectory()); // Sorts out paths to databases
+		
+		String shardName = oservice.getShardName(loc.getChr(), loc.getStart());
+		
+		if (shardName!=null) {
+	 		try {
+				PreparedStatement lookup = getSelectStatement(loc.getChr(), shardName);
+				if (lookup==null) { // Not all peaks have reasonable chromosomes.
+					return null;
+				}
+				
+				int vlower = Math.min(loc.getStart(), loc.getEnd());
+				lookup.setInt(1, vlower);
+				lookup.setInt(2, vlower);
+				int vupper = Math.max(loc.getStart(), loc.getEnd());
+				lookup.setInt(3, vupper);
+				lookup.setInt(4, vupper);
+
+				Set<String> usedIds = new LinkedHashSet<>();
+				try (ResultSet res = lookup.executeQuery()) {
+					while(res.next()) {
+						String id = res.getString(1);
+						if (usedIds.contains(id)) {
+							logger.info("Encountered duplicate id: "+id);
+							continue;
+						}
+						
+						if (prefix !=null && !id.toLowerCase().startsWith(prefix)) {
+							throw new IllegalArgumentException("The id '"+id+"' does not start with expected prefix "+prefix+" (case insensitive)!");
+						}
+						usedIds.add(id);
+					}
+				}
+				return usedIds;
+			
+	 		} catch (RuntimeException runtime) {
+	 			throw runtime;
+	 		} catch (Exception ne) {
+				logger.warn("Cannot map "+loc, ne);
+			}
+		}
+		
+		return Collections.emptySet();
+
 	}
 
 	public static Gene fixId(Gene g) {
@@ -93,5 +192,19 @@ public class StepConnector<N extends Entity, E extends Entity> extends AbstractO
 			g.setGeneId(geneId);
 		}
 		return g;
+	}
+
+	/**
+	 * @return the parentDirectory
+	 */
+	public Path getParentDirectory() {
+		return parentDirectory;
+	}
+
+	/**
+	 * @param parentDirectory the parentDirectory to set
+	 */
+	public void setParentDirectory(Path parentDirectory) {
+		this.parentDirectory = parentDirectory;
 	}
 }
