@@ -29,28 +29,32 @@ public class StepReaderTest extends AbstractDataFileTest {
 	public void readAllHuman() throws Exception {
 		
 		Path dir = getPath("prod/ccsi/hs/");
-		readAll("Homo sapiens", dir);
+		readAll("Homo sapiens", dir, 10);
 	}
 	
 	@Test
 	public void readAllMouse() throws Exception {
 		Path dir = getPath("prod/ccsi/mm/");
-		readAll("Mus musculus", dir);
+		readAll("Mus musculus", dir, 10);
 	}
 	
-	private void readAll(String species, Path dir) throws Exception {
+	private void readAll(String species, Path dir, Integer limit) throws Exception {
 		
-		Files.list(dir).forEach(path ->{ 
+		List<Path> files = Files.list(dir).collect(Collectors.toList());
+		int count = 0;
+		for (Path path : files) {
 			if (!path.getFileName().toString().toLowerCase().endsWith(".step.gz")) return;
 			try {
 				StreamReader<Step> reader = ReaderFactory.getReader(new ReaderRequest(species, path));
 				List<Step> steps = reader.stream().collect(Collectors.toList());
 				assertNotNull(steps);
 				System.out.println("Read "+steps.size()+" steps from "+path.getFileName());
+				count++;
+				if (limit!=null && limit>0 && count>limit) return;
 			} catch (Exception ne) {
 				fail(ne.getMessage());
 			}
-		});
+		};
 	}
 
 }

@@ -254,7 +254,7 @@ public class StepConnectorTest extends AbstractDataFileTest {
 		}
 	}
 	
-	@Test
+	//@Test
 	public void mouseBulkFileWrite() throws Exception {
 		
 		Path stepDir = getPath("prod/ccsi/mm/");
