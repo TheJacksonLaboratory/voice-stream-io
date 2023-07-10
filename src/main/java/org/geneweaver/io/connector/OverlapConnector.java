@@ -186,7 +186,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 			peak.setStart((int)(Math.random()*roughBPperChr));
 			peak.setEnd((int)(Math.random()*roughBPperChr));
 			peak.setChr(chr);
-			store(peak, null);
+			store(peak, null, null);
 			if (i%1000000 == 0) System.out.println("Added randoms, size "+i);
 		} 
 		return nrows;

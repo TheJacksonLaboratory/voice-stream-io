@@ -300,7 +300,7 @@ public class StepConnectorTest extends AbstractDataFileTest {
 			func.setLimit(limit);
 			
 			func.add(file);
-			func.create(prefix); // Creates indexed database.
+			func.create(prefix, System.out); // Creates indexed database.
 		}
 		return tdir;
 	}

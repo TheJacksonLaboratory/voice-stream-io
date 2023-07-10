@@ -2,6 +2,7 @@ package org.geneweaver.io.connector;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -119,7 +120,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 * @throws IOException
 	 */
 	public void create() throws SQLException, ReaderException, IOException {
-		create(null);
+		create(null, System.out);
 	}
 
 	/**
@@ -130,14 +131,14 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 * @throws ReaderException
 	 * @throws IOException
 	 */
-	public void create(String prefix) throws SQLException, ReaderException, IOException {
+	public void create(String prefix, PrintStream out) throws SQLException, ReaderException, IOException {
 
 		if (source==null || source.isEmpty()) throw new IllegalArgumentException();
 		int index = -1;
 		for (Path path : source) {
 
 			++index;
-			System.out.println(path+" "+index+" of "+source.size());
+			if (out!=null) out.println("Input "+path+" "+index+" of "+source.size());
 
 			ReaderRequest request = new ReaderRequest(path.getFileName().toString(), path);
 			configure(request);
@@ -161,7 +162,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 				stream = stream.limit(limit.longValue());
 			}
 			
-			stream.forEach(loc -> store(loc, prefix));
+			stream.forEach(loc -> store(loc, prefix, out));
 		} 
 	}
 
@@ -193,7 +194,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		return true;
 	}
 
-	protected <T extends Located> void store(T line, String prefix) {
+	protected <T extends Located> void store(T line, String prefix, PrintStream out) {
 		
 		int lower = Math.min(line.getStart(), line.getEnd());
 		int upper = Math.max(line.getStart(), line.getEnd());
@@ -203,22 +204,22 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			logger.warn("Could not find shard for "+line.getChr());
 			return; // No shard
 		}
-		storeBase(lshardName, line, prefix);
+		storeBase(lshardName, line, prefix, out);
 		
 		String ubshardName = oservice.getShardName(line.getChr(), upper);
 		if (ubshardName==null) {
 			logger.warn("Could not find shard for "+line.getChr());
 			return; // No shard
 		}
-		if (!ubshardName.equals(lshardName)) storeBase(ubshardName, line, prefix);
+		if (!ubshardName.equals(lshardName)) storeBase(ubshardName, line, prefix, out);
 	}
 
 
-	private <T extends Located> void storeBase(String shardName, T line, String prefix) {
+	private <T extends Located> void storeBase(String shardName, T line, String prefix, PrintStream out) {
 		
 		if (shardName==null) return;
 		try {
-			PreparedStatement stmt = getInsertStatement(line.getChr(), shardName);
+			PreparedStatement stmt = getInsertStatement(line.getChr(), shardName, out);
 			if (stmt==null) return; // Not all peaks have reasonable chromosomes.
 			
 			// Put the key in, lower case.
@@ -242,8 +243,8 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		}
 	}
 	
-	private PreparedStatement getInsertStatement(String chr, String shardName) throws Exception {
-		Connection conn = getConnection(chr, false);
+	private PreparedStatement getInsertStatement(String chr, String shardName, PrintStream out) throws Exception {
+		Connection conn = getConnection(chr, false, out);
 		if (conn==null) return null;
 		PreparedStatement stmt = insertCache.get(shardName);
 		if (stmt==null) {
@@ -274,7 +275,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		PreparedStatement stmt = selectCache.get(cacheKey);
 		if (stmt!=null) return stmt;
 		
-		Connection conn = getConnection(chr, true);
+		Connection conn = getConnection(chr, true, null);
 		if (conn==null) return null;
 		if (stmt==null) {
 			String sql = "SELECT entityId, lower, upper FROM "+tableName+shardName+" WHERE (?>=lower AND ?<=upper) OR (?>=lower AND ?<=upper);";
@@ -284,22 +285,23 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		return stmt;
 	}
 
-	protected Connection getConnection(String chr, boolean readOnly) throws Exception {
+	protected Connection getConnection(String chr, boolean readOnly, PrintStream out) throws Exception {
 		
 		String connKey = fileName+"/"+chr;
 		Connection ret = connCache.get(connKey);
 		if (ret == null) {
-			ret = newConnection(chr, readOnly);
+			ret = newConnection(chr, readOnly, out);
 			if (ret != null) connCache.put(connKey, ret);
 		}
 		return ret;
 	}
 
-	private Connection newConnection(String chr, boolean readOnly) throws SQLException, IOException {
+	private Connection newConnection(String chr, boolean readOnly, PrintStream out) throws SQLException, IOException {
 		
 		chr = cservice.getChromosome(chr);
 		if (chr==null) return null;
 		String path = this.basePath+"_"+chr;
+		if (out!=null) out.println("New database connection to file: "+path);
 		String uri = "jdbc:h2:"+path+";mode=MySQL";
 		if (readOnly) uri = uri+";ACCESS_MODE_DATA=r";
 		return DriverManager.getConnection(uri,"sa","");
