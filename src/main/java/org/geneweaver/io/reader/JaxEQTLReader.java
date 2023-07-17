@@ -71,16 +71,29 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		for(int i=0;i<headerNames.size();i++) {
 			String name = headerNames.get(i);
 			
-			if (name.equals("bpmm10")) continue; // TODO
-
 			// BeanMap autoboxes which is probably slowish and
 			// could be speeded up.
+			Object value = values[i];
+			if (value==null) continue;
+			value = values[i].trim();
+			
+			Class<?> type = d.getType(name);
+			if ("NA".equals(value) && Number.class.isAssignableFrom(type)) {
+				value = "0";
+			}
+			if (Integer.class.equals(type)) {
+				value = Double.valueOf(value.toString()).intValue();
+			} else if (Double.class.equals(type)) {
+				value = Double.valueOf(value.toString());
+			}
 			try {
-				if (values[i].trim().length()<1) continue;
-				d.put(name, values[i]);
+				if (value.toString().length()<1) continue;
+				d.put(name, value);
 			} catch (NumberFormatException ne) {
 				logger.info("The property '"+name+"' cannot have value: "+values[i]);
 				continue;
+			} catch (IllegalArgumentException ie) {
+				throw new ReaderException("Field "+name+" has type "+type+" which has not been parsed from "+value);
 			}
 		}
 		
@@ -111,6 +124,8 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 			name = name.replace("_", "");
 			if (name.equals("rsid")) name = "rsId";
 			if (name.equals("geneid")) name = "geneId";
+			if (name.equals("bpmm10")) name = "bp";
+			// TODO lod
 			headerNames.add(name);
 		}
 		
