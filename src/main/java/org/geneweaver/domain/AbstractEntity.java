@@ -117,5 +117,10 @@ public abstract class AbstractEntity implements Entity {
 		if (!force) chr = cservice.getChromosome(chr);
 		this.chr = chr;
 	}
+	
+	@Override
+	public String toString() {
+		return toCsv();
+	}
 
 }
