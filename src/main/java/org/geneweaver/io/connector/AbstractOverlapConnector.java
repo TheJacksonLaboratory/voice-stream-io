@@ -269,14 +269,14 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		return stmt;
 	}
 	
-	protected synchronized PreparedStatement getSelectStatement(String chr, String shardName) throws Exception {
+	protected synchronized PreparedStatement getSelectStatement(String chr, String shardName, PrintStream out) throws Exception {
 		
 		String name = Thread.currentThread().getName();
 		String cacheKey = name+"/"+fileName+"/"+shardName;
 		PreparedStatement stmt = selectCache.get(cacheKey);
 		if (stmt!=null) return stmt;
 		
-		Connection conn = getConnection(chr, true, null);
+		Connection conn = getConnection(chr, true, out);
 		if (conn==null) return null;
 		if (stmt==null) {
 			String sql = "SELECT entityId, lower, upper FROM "+tableName+shardName+" WHERE (?>=lower AND ?<=upper) OR (?>=lower AND ?<=upper);";

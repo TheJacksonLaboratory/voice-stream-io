@@ -132,13 +132,17 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 		Collection<Entity> ret = new LinkedList<>();
 		ret.add(variant);
 		
+		if (log!=null && count%frequency==0) {
+			log.println("Using shard: "+shardName);
+		}
+
 		if (shardName!=null) {
 	 		try {
-				PreparedStatement lookup = getSelectStatement(variant.getChr(), shardName);
+				PreparedStatement lookup = getSelectStatement(variant.getChr(), shardName, log);
 				if (lookup==null) { // Not all peaks have reasonable chromosomes.
 					return (Stream<E>) ret.stream();
 				}
-	
+				
 				int vlower = Math.min(variant.getStart(), variant.getEnd());
 				lookup.setInt(1, vlower);
 				lookup.setInt(2, vlower);
@@ -167,7 +171,6 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 							if (log!=null && count%frequency==0) {
 								log.println("Example of overlap found: "+o.toCsv());
 							}
-							count++;
 						}
 					}
 				}
@@ -176,6 +179,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 				logger.warn("Cannot map "+variant, ne);
 			}
 		}
+		count++;
 		
 		return (Stream<E>) ret.stream();
 	}

@@ -146,7 +146,7 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 		
 		if (shardName!=null) {
 	 		try {
-				PreparedStatement lookup = getSelectStatement(loc.getChr(), shardName);
+				PreparedStatement lookup = getSelectStatement(loc.getChr(), shardName, log);
 				if (lookup==null) { // Not all peaks have reasonable chromosomes.
 					return null;
 				}
