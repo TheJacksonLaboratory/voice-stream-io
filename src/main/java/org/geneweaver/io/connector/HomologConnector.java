@@ -18,6 +18,7 @@
  */
 package org.geneweaver.io.connector;
 
+import java.io.PrintStream;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
@@ -74,7 +75,7 @@ public class HomologConnector<N extends Entity, E extends Entity> implements Con
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Stream<E> stream(N entity, Session unused) {
+	public Stream<E> stream(N entity, Session unused, PrintStream log) {
 
 		HomologGene hgene = (HomologGene)entity;
 		if (hgene.getOrganismName().toLowerCase().startsWith("mouse")) {

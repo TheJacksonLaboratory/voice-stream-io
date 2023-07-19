@@ -1,7 +1,6 @@
 package org.geneweaver.io.writer;
 
 
-import static org.geneweaver.io.DirectSave.save;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -17,6 +16,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Variant;
+import org.geneweaver.io.DirectSave;
 import org.geneweaver.io.Timer;
 import org.geneweaver.io.connector.OverlapConnector;
 import org.geneweaver.io.reader.AbstractDataFileTest;
@@ -136,7 +136,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		assertFalse(Files.exists(dir.resolve("VariantEffect.csv.gz")));
 	}
 
-	private String exportNoConnector(Path dir, ExportBuilder b, Path input) {
+	private String exportNoConnector(Path dir, ExportBuilder b, Path input) throws Exception {
 	    StreamReader<Entity> reader;
 		try {
 			reader = b.createReader(input);
@@ -149,9 +149,9 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		Timer timer = b.createTimer();
 		
 		// Directly saving the streams with no chunks is fast.
-		try {
+		try (DirectSave saver = new DirectSave(null, false)){
 			long saved = reader.stream()
-							  .map(g->save(g, b.getWriters(), dir, timer, false))
+							  .map(g->saver.save(g, b.getPaths(), b.getWriters(), dir, timer, false))
 							  .count();
 	
 			return "Wrote bulk file(s) for '"+input.getFileName()+"' in "+timer.getFormattedTime()+" parsed "+saved+" objects.";
@@ -252,6 +252,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		}
 		
 		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>()) {
+			conn.setFrequency(100);
 			conn.setLocation(dir);
 			conn.add(rpath);
 			conn.create();
@@ -261,10 +262,12 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 					   .setChunkProperty("1000")
 					   .setAlwaysUseDefaultConnector(true)
 					   .addConnector(conn)
+					   .setVerbose(true)
+					   .setOut(System.out)
 					   .setDir(dir)
-					   .setInputs(copies) // Each copy should invoke separate thread.
+					   .setInputs(copies) 
 					   .setParallelFiles(true)
-					   .setDefaultChunkSize(10000)) {
+					   .setDefaultChunkSize(1000)) {
 				
 				builder.export();
 			}

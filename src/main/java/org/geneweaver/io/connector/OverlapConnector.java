@@ -1,6 +1,7 @@
 package org.geneweaver.io.connector;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -112,10 +113,14 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 		}
 		return rev;
 	}
+	
+	// Every so often we print that overlaps are found in verbose mode.
+	private volatile int count = 0;
+	private int frequency = 10000;
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Stream<E> stream(N ent, Session session) {
+	public Stream<E> stream(N ent, Session session, PrintStream log) {
 		
 		// Other streams may run through this connector, but
 		// if they send other objects, we return them.
@@ -147,6 +152,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 						String peakId = res.getString(1);
 						if (usedIds.contains(peakId)) {
 							logger.info("Encountered duplicate peakID: "+peakId);
+							if (log!=null) log.println("Encountered duplicate peakID: "+peakId);
 							continue;
 						}
 						int rlow = res.getInt(2);
@@ -157,6 +163,11 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 							o.setChr(variant.getChr());
 							ret.add(o);
 							usedIds.add(peakId);
+							
+							if (log!=null && count%frequency==0) {
+								log.println("Example of overlap found: "+o.toCsv());
+							}
+							count++;
 						}
 					}
 				}
@@ -190,6 +201,20 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 			if (i%1000000 == 0) System.out.println("Added randoms, size "+i);
 		} 
 		return nrows;
+	}
+
+	/**
+	 * @return the frequency
+	 */
+	public int getFrequency() {
+		return frequency;
+	}
+
+	/**
+	 * @param frequency the frequency to set
+	 */
+	public void setFrequency(int frequency) {
+		this.frequency = frequency;
 	}
 
 

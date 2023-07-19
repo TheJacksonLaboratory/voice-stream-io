@@ -43,15 +43,22 @@ public class Timer {
 		this.consumer = consumer;
 	}
 
-	
 	/**
 	 * Used for synchronous (non-chunked)
 	 * only.
 	 */
 	public void time() {
+		time(null, false);
+	}
+
+	/**
+	 * Used for synchronous (non-chunked)
+	 * only.
+	 */
+	public void time(String message, boolean verbose) {
 		++inodes;
 		if (inodes%timedChunkSize==0) {
-			printTiming();
+			printTiming(message, verbose);
 		}
 	}
 	
@@ -72,14 +79,18 @@ public class Timer {
 		long t5 = inodes/timedChunkSize;
 		if (t5>curT5) {
 			if (count<=0) return;
-			printTiming();
+			printTiming(null, false);
 			curT5 = t5;
 		}
 	}
 
-	private void printTiming() {
+	private void printTiming(String extraMessage, boolean verbose) {
 		long time = System.currentTimeMillis()-start;
 		double tpn = ((double)time)/inodes;
+		
+		if (verbose && extraMessage!=null) {
+			consumer.accept(extraMessage);
+		}
 		
 		String threadName = Thread.currentThread().getName();
 		String msg = String.format("Total %d in %d ms. Time per node %.4f ms (Thread %s)", inodes, time, tpn, threadName);

@@ -1,6 +1,5 @@
 package org.geneweaver.io.connector;
 
-import static org.geneweaver.io.DirectSave.save;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -14,9 +13,9 @@ import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Homolog;
 import org.geneweaver.domain.HomologGene;
+import org.geneweaver.io.DirectSave;
 import org.geneweaver.io.Timer;
 import org.geneweaver.io.reader.AbstractDataFileTest;
-import org.geneweaver.io.reader.ReaderException;
 import org.geneweaver.io.reader.StreamReader;
 import org.geneweaver.io.writer.ExportBuilder;
 import org.junit.Ignore;
@@ -98,21 +97,22 @@ public class HomologFunctionTest extends AbstractDataFileTest {
 		}
 	}
 
-	private String exportHomologs(ExportBuilder builder, Path input, HomologFunction<HomologGene, HomologGene> func) throws ReaderException {
+	private String exportHomologs(ExportBuilder builder, Path input, HomologFunction<HomologGene, HomologGene> func) throws Exception {
 		
 		StreamReader<HomologGene> reader = builder.createReader(input);
 		Function<HomologGene,Stream<Entity>> connector = reader.getDefaultConnector();
+		try (DirectSave saver = new DirectSave(System.out, true)) {
+			Timer timer = builder.createTimer();
+			long saved = reader.stream()
+								.map(h->func.apply(h)) // Around 520 of the 10's of k cannot be mapped
+								.filter(h->h.getGeneId()!=null)
+								.flatMap(h->connector.apply(h))
+								.filter(e->e instanceof Homolog)
+								.map(g->saver.save(g, builder.getPaths(), builder.getWriters(), builder.getDir(), timer, false))
+								.count();
+			assertEquals(17087, saved);
+			return "Wrote homologene import for '"+input.getFileName()+"' in "+timer.getFormattedTime()+" parsed "+saved+" objects.";
+		}
 		
-		Timer timer = builder.createTimer();
-		long saved = reader.stream()
-							.map(h->func.apply(h)) // Around 520 of the 10's of k cannot be mapped
-							.filter(h->h.getGeneId()!=null)
-							.flatMap(h->connector.apply(h))
-							.filter(e->e instanceof Homolog)
-							.map(g->save(g, builder.getWriters(), builder.getDir(), timer, false))
-							.count();
-		
-		assertEquals(17087, saved);
-		return "Wrote homologene import for '"+input.getFileName()+"' in "+timer.getFormattedTime()+" parsed "+saved+" objects.";
 	}
 }

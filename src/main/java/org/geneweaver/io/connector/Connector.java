@@ -18,6 +18,7 @@
  */
 package org.geneweaver.io.connector;
 
+import java.io.PrintStream;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -66,6 +67,19 @@ public interface Connector<I extends Entity, T extends Entity> extends Function<
 	 * @param session The current session, NOTE multiple sessions may be active.
 	 * @return Stream of connections including the original entity.
 	 */
-	Stream<T> stream(I entity, Session session);
+	default Stream<T> stream(I ent, Session session) {
+		return stream(ent, session, null);
+	}
+	
+	/**
+	 * Create a stream from the entity. Note that if threads and
+	 * multiple sessions are used the session should not be cached
+	 * between calls of this method, or anything.
+	 * @param entity From which we will create a stream of connections
+	 * @param session The current session, NOTE multiple sessions may be active.
+	 * @param log for logging usually set in a -v command line to generate more verbose messages. Null for a normal run.
+	 * @return Stream of connections including the original entity.
+	 */
+	abstract Stream<T> stream(I ent, Session session, PrintStream log);
 	
 }

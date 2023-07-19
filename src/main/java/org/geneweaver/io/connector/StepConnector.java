@@ -1,5 +1,6 @@
 package org.geneweaver.io.connector;
 
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -107,13 +108,13 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 	 * using this dataset which are known as CONTACT
 	 */
 	@Override
-	public Stream<Contact> stream(Step step, Session session) {
+	public Stream<Contact> stream(Step step, Session session, PrintStream log) {
 		
 		Located start = Located.at(step.getChr1(), step.getStart1(), step.getEnd1());		
-		Set<String> geneIds = lookup(start, Gene.class, "ens");
+		Set<String> geneIds = lookup(start, Gene.class, "ens", log);
 
 		Located end = Located.at(step.getChr2(), step.getStart2(), step.getEnd2());		
-		Set<String> rsIds = lookup(end, Variant.class, "rs");
+		Set<String> rsIds = lookup(end, Variant.class, "rs", log);
 		
 		if (geneIds.isEmpty() || rsIds.isEmpty()) {
 			return null;
@@ -136,7 +137,7 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 		return contact;
 	}
 
-	private Set<String> lookup(Located loc, Class<?> type, String prefix) {
+	private Set<String> lookup(Located loc, Class<?> type, String prefix, PrintStream log) {
 		
 		setFileName(type.getSimpleName());
 		setLocation(getParentDirectory()); // Sorts out paths to databases
@@ -159,10 +160,12 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 
 				Set<String> usedIds = new LinkedHashSet<>();
 				try (ResultSet res = lookup.executeQuery()) {
+					if (log!=null) log.println("Found "+res.getFetchSize()+" step overlaps.");
 					while(res.next()) {
 						String id = res.getString(1);
 						if (usedIds.contains(id)) {
 							logger.info("Encountered duplicate id: "+id);
+							if (log!=null) log.println("Encountered duplicate id: "+id);
 							continue;
 						}
 						

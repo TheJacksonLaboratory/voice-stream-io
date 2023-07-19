@@ -18,7 +18,6 @@
  */
 package org.geneweaver.io.reader;
 
-import static org.geneweaver.io.DirectSave.save;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -44,6 +43,7 @@ import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.EQTL;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.NamedEntity;
+import org.geneweaver.io.DirectSave;
 import org.geneweaver.io.connector.EQTLFunction;
 import org.geneweaver.io.writer.ExportBuilder;
 import org.junit.Ignore;
@@ -97,12 +97,14 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 		// This file has 499 new eQTLs to add.
 		File beta = getFile("data/eQTL/hs/BetaCells_independent_exon_500_eQTLs.txt");
 		
-		try (ExportBuilder builder = new ExportBuilder()) {
+		try (ExportBuilder builder = new ExportBuilder();
+			 DirectSave saver = new DirectSave(System.out, false)) {
+			
 			StreamReader<EQTL> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", beta));
 			long added = reader.stream()
 					.map(e-> {
 						// We purposely append the first file.
-						save(e, builder.getWriters(), dir, null, true);
+						saver.save(e, builder.getPaths(), builder.getWriters(), dir, null, true);
 						return e;
 					})
 					.count();
@@ -206,7 +208,8 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 
 	private String map(Path dir, ExportBuilder b, StreamReader<EQTL> eqtls, Path path) throws Exception {
 		
-		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(path, getPath("data/eQTL/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt.gz"))) {
+		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(path, getPath("data/eQTL/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt.gz"));
+				 DirectSave saver = new DirectSave(null, false)) {
 			func.setLocation(dir);
 			
 			func.create(); // Make the database.
@@ -216,7 +219,7 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 			eqtls.stream()
 				 .map(func::apply)
 				 .map(e-> {
-					 save(e, b.getWriters(), dir, null, false);
+					 saver.save(e, b.getPaths(), b.getWriters(), dir, null, false);
 					 return e;
 				 })
 				 .filter(e->e.getRsId()==null)

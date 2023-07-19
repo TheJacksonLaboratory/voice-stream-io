@@ -18,6 +18,7 @@
  */
 package org.geneweaver.io.connector;
 
+import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -93,7 +94,7 @@ public class GeneConnector<N extends GeneticEntity, E extends Entity> implements
 	 * @param session - not required.
 	 */
 	@Override
-	public Stream<E> stream(GeneticEntity bean, Session session) {
+	public Stream<E> stream(GeneticEntity bean, Session session, PrintStream log) {
 		return apply(bean);
 	}
 	
