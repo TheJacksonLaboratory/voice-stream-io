@@ -162,6 +162,10 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 						int rlow = res.getInt(2);
 						int rup  = res.getInt(3);
 						
+						if (log!=null && count%frequency==0) {
+							log.println("Example of peakId found: "+peakId);
+						}
+
 						Overlap o = oservice.intersection(variant, new Peak(peakId, rlow, rup));
 						if (o!=null) {
 							o.setChr(variant.getChr());

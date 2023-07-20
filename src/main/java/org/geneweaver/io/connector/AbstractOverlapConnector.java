@@ -202,14 +202,18 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		
 		String lshardName = oservice.getShardName(line.getChr(), lower);
 		if (lshardName==null) {
-			logger.warn("Could not find shard for "+line.getChr());
+			String msg = "Could not find shard for "+line.getChr();
+			logger.warn(msg);
+			out.println(msg);
 			return; // No shard
 		}
 		storeBase(lshardName, line, prefix, out);
 		
 		String ubshardName = oservice.getShardName(line.getChr(), upper);
 		if (ubshardName==null) {
-			logger.warn("Could not find shard for "+line.getChr());
+			String msg = "Could not find shard for "+line.getChr();
+			logger.warn(msg);
+			out.println(msg);
 			return; // No shard
 		}
 		if (!ubshardName.equals(lshardName)) storeBase(ubshardName, line, prefix, out);
