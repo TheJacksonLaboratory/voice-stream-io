@@ -156,7 +156,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 						String peakId = res.getString(1);
 						if (usedIds.contains(peakId)) {
 							logger.info("Encountered duplicate peakID: "+peakId);
-							if (log!=null) log.println("Encountered duplicate peakID: "+peakId);
+							//if (log!=null) log.println("Encountered duplicate peakID: "+peakId);
 							continue;
 						}
 						int rlow = res.getInt(2);
