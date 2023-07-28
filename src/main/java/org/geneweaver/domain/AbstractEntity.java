@@ -120,7 +120,11 @@ public abstract class AbstractEntity implements Entity {
 	
 	@Override
 	public String toString() {
-		return toCsv();
+		try {
+			return toCsv();
+		} catch (Exception ne) {
+			return super.toString();
+		}
 	}
 
 }

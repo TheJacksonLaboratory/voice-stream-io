@@ -19,6 +19,7 @@
 package org.geneweaver.io.reader;
 
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,7 +38,6 @@ import org.geneweaver.domain.Peak.Strand;
 import org.geneweaver.domain.Track;
 import org.geneweaver.io.connector.BedConnector;
 import org.geneweaver.io.connector.ChromosomeService;
-import org.geneweaver.io.connector.OverlapService;
 
 /**
  * Bed file format @see https://m.ensembl.org/info/website/upload/bed.html
@@ -48,7 +48,6 @@ import org.geneweaver.io.connector.OverlapService;
  */
 public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	
-	private OverlapService oservice = new OverlapService();
 	private ChromosomeService cservice = ChromosomeService.getInstance();
 
 	/**
@@ -118,7 +117,7 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 			if (rec.length>11) d.put("blockStarts", getIntArray(rec[11], 1));
 			
 			parseName(d);
-			createPeakId(peak);
+			createPeakId(peak, this.request.path());
 
 			ret = (N)peak;
 		}
@@ -126,31 +125,46 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		ret.setSpecies(getSpecies());
 		return ret;
 	}
-	
 
 	public Stream<N> stream() {
 		return super.stream();
 	}
 	
-	private Peak createPeakId(Peak peak) {
+	private Peak createPeakId(Peak peak, String path) {
 		
 		int start = peak.getStart();
 		int end = peak.getEnd();
-		String peakId = createPeakId(peak.getFeatureType(), peak.getChr(), peak.getEpigenome(), start, end, false);
+		String peakId = createPeakId(peak.getFeatureType(), peak.getChr(), peak.getEpigenome(), path, start, end, false);
 		peak.setPeakId(peakId);
 		return peak;
 	}
 
-	public static String createPeakId(String featureName, String chr, String egenome, int start, int end, boolean removeSpecialChars) {
+	/**
+	 * Try to make a repeatable unique peakId from the properties
+	 * of the peak.
+	 * 
+	 * @param featureName
+	 * @param chr
+	 * @param path
+	 * @param start
+	 * @param end
+	 * @param removeSpecialChars
+	 * @return the peak id as a string.
+	 */
+	public static String createPeakId(String featureName, String chr, String egenome, String path, int start, int end, boolean removeSpecialChars) {
 		
-		// If the same peakId is generated twice, the graph will drop it. 
-		// This means that some features with multiple epigenetics will be lost
-		// We do this intentionally because it reduces peak count, however it is wrong.
-		
-		// TODO Should use egenome in the unique peakId.
-		//egenome = egenome!=null ? egenome.replaceAll("[^a-zA-Z0-9]", "") : null;
 		StringBuilder buf = new StringBuilder();
 		buf.append(featureName);
+		if (egenome!=null) {
+			egenome = egenome.replaceAll("[^a-zA-Z0-9]", "");
+			buf.append("-");
+			buf.append(egenome.hashCode());
+		}
+		if (path!=null) {
+			buf.append("-");
+			buf.append(path.hashCode());
+		}
+
 		buf.append("@");
 		buf.append(chr);
 		buf.append("#");

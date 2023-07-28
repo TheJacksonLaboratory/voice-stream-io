@@ -20,6 +20,7 @@ package org.geneweaver.io.connector;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -80,24 +81,25 @@ public class TrackConnectorTest extends AbstractDataFileTest {
 	
 	@Test
 	public void hg38First100() throws Exception {
-		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg38.bed")));
+		File file = getFile("data/bed/Hs_EPDnew_006_hg38.bed");
+		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", file));
 		List<Entity> lines = reader.stream().flatMap(b->connector.apply(b)).limit(100).collect(Collectors.toList());
-		check04998("Hs_EPDnew_006_hg38.bed", lines);
+		check04998("Hs_EPDnew_006_hg38.bed", lines, file.getAbsolutePath());
 	}
 
-	private void check04998(final String fileName, List<Entity> lines) {
+	private void check04998(final String fileName, List<Entity> lines, String path) {
 		// line 0: chr1 959245 959305 NOC2L_1 900 - 959245 959256
-		String peakId = BedReader.createPeakId(null, "1", null, 959245, 959305, true);
+		String peakId = BedReader.createPeakId(null, "1", null, path, 959245, 959305, true);
 		Peak r0 = new Peak(peakId, "Homo sapiens", "chr1", 959245, 959305, "NOC2L_1", 900, Strand.REVERSE, 959245, 959256);
 		assertEquals(r0, lines.get(0));
 
 		// line 49: chr1 1727706 1727766 SLC35E2B_3 900 - 1727706 1727717
-		peakId = BedReader.createPeakId(null, "1", null, 1727706, 1727766, true);
+		peakId = BedReader.createPeakId(null, "1", null, path, 1727706, 1727766, true);
 		Peak r49 = new Peak(peakId, "Homo sapiens", "chr1", 1727706, 1727766, "SLC35E2B_3", 900, Strand.REVERSE, 1727706, 1727717);
 		assertEquals(r49, lines.get(49));
 
 		// line 98: chr1 3752400 3752460 CCDC27_1 900 + 3752449 3752460
-		peakId = BedReader.createPeakId(null, "1", null, 3752400, 3752460, true);
+		peakId = BedReader.createPeakId(null, "1", null, path, 3752400, 3752460, true);
 		Peak r98 = new Peak(peakId, "Homo sapiens", "chr1", 3752400, 3752460, "CCDC27_1", 900, Strand.FORWARD, 3752449, 3752460);
 		assertEquals(r98, lines.get(98));
 	}
@@ -110,9 +112,10 @@ public class TrackConnectorTest extends AbstractDataFileTest {
 	
 	@Test
 	public void hg38First100gz() throws Exception {
-		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/bed/Hs_EPDnew_006_hg381.bed.gz")));
+		final File file = getFile("data/bed/Hs_EPDnew_006_hg381.bed.gz");
+		StreamReader<NamedEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", file));
 		List<Entity> lines = reader.stream().flatMap(b->connector.stream(b)).limit(100).collect(Collectors.toList());
-		check04998("Hs_EPDnew_006_hg381.bed.gz", lines);
+		check04998("Hs_EPDnew_006_hg381.bed.gz", lines, file.getAbsolutePath());
 	}
 
 	@Test

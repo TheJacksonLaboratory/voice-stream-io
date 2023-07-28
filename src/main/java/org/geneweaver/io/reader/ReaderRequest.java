@@ -314,6 +314,12 @@ public class ReaderRequest {
 		if (name!=null) return name;
 		throw new IllegalArgumentException("A reader request must have a name for the resource!");
 	}
+	
+	@JsonIgnore
+	String path() {
+		if (file!=null) return file.getAbsolutePath();
+		return toString();
+	}
 
 	@JsonIgnore
 	public InputStream stream() throws FileNotFoundException {

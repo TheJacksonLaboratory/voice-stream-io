@@ -69,13 +69,13 @@ public class Overlap extends AbstractEntity {
 	@Override
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
-		buf.append(variant.id());
+		buf.append(variant!=null?variant.id():"NA");
 		buf.append(getDelimiter());
 		buf.append(getIntersectRange());
 		buf.append(getDelimiter());
 		buf.append(getIntersectFraction());
 		buf.append(getDelimiter());
-		buf.append(peak.id());
+		buf.append(peak!=null?peak.id():"NA");
 		buf.append(getDelimiter());
 		buf.append("OVERLAP");
 		return buf.toString();
