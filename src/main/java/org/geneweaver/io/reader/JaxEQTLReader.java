@@ -104,7 +104,8 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		return (N)bean;
 	}
 	
-	private DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+	private DateFormat format1 = new SimpleDateFormat("MM/dd/yyyy");
+	private DateFormat format2 = new SimpleDateFormat("yyyy-MM-dd");
 	
 	@Override
 	protected Map<String,Object> parseHeaders() throws ReaderException {
@@ -149,9 +150,13 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 			if (name.equals("url")) name = "source";
 			if (name.equals("date")) {
 				try {
-					value = format.parse(value.toString());
+					value = format1.parse(value.toString());
 				} catch (ParseException e) {
-					throw new ReaderException("Cannot parse date: "+value);
+					try {
+						value = format2.parse(value.toString());
+					} catch (ParseException eOther) {
+						throw new ReaderException("Cannot parse date: "+value);
+					}
 				}
 				continue;// We do not repeat date
 			}

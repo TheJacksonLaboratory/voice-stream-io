@@ -62,7 +62,7 @@ public class ExportBuilder implements AutoCloseable {
 	 * simple save using the default connector.
 	 */
 	@JsonIgnore
-	private Export exporter = (builder, path) -> defaultExport(path, true);
+	private Export exporter = (builder, path) -> defaultExport(path, false);
 	
 	/**
 	 * The value of the -c command line
