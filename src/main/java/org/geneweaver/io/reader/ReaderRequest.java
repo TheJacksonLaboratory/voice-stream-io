@@ -32,7 +32,6 @@ import java.util.zip.GZIPInputStream;
 
 import javax.annotation.processing.Generated;
 
-import org.apache.logging.log4j.message.LoggerNameAwareMessage;
 import org.geneweaver.domain.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

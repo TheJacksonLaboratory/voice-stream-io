@@ -20,6 +20,7 @@ package org.geneweaver.io.reader;
 
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -49,6 +50,7 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	
 
 	private ChromosomeService cservice = ChromosomeService.getInstance();
+	private boolean isTrack;
 	
 	/**
 	 * Create the reader by setting its data
@@ -61,6 +63,7 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	public BedReader<N> init(ReaderRequest request) throws ReaderException {
 		super.setup(request);
 		setDelimiter("\\s+");
+		this.isTrack = false;
 		return this;
 	}
 
@@ -118,8 +121,9 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 			
 			parseName(d);
 			
-			String egen = peak.getEpigenome();
-			if (egen==null) return null;
+			String epi  = peak.getEpigenome();
+			String feat = peak.getFeatureType();
+			if (epi==null && feat!=null) return null;
 			createPeakId(peak);
 
 			ret = (N)peak;
@@ -137,7 +141,7 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		
 		int start = peak.getStart();
 		int end = peak.getEnd();
-		String peakId = createPeakId(peak.getEpigenome(), peak.getChr(), start, end, false);
+		String peakId = createPeakId(peak.getEpigenome(), peak.getChr(), start, end);
 		peak.setPeakId(peakId);
 		return peak;
 	}
@@ -154,7 +158,7 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	 * @param removeSpecialChars
 	 * @return the peak id as a string.
 	 */
-	public static String createPeakId(String epiGen, String chr, int start, int end, boolean removeSpecialChars) {
+	public static String createPeakId(String epiGen, String chr, int start, int end) {
 		
 		StringBuilder buf = new StringBuilder();
 		buf.append(epiGen);
@@ -200,7 +204,7 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	}
 	
 	Peak testParseName(String name) throws ReaderException {
-		Peak peak = new Peak(name, 0, 0);
+		Peak peak = new Peak(name);
 		parseName(new BeanMap(peak));
 		return peak;
 	}
@@ -249,6 +253,7 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	
 	Map<String,String> getEpigenomeDescriptions(String species) throws ReaderException {
 		
+		if (species==null) return Collections.emptyMap();
 		if (descriptions.get(species)!=null) return descriptions.get(species);
 		
 		String path ="/epigenome_description/"+species.replace(" ", "_")+".tsv";

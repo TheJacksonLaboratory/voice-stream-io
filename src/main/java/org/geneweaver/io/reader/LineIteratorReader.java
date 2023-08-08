@@ -607,6 +607,7 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	 * @return the species
 	 */
 	public String getSpecies() {
+		if (request==null) return null;
 		return request.getSource();
 	}
 
