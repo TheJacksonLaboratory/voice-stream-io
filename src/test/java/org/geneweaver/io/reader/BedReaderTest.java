@@ -66,17 +66,17 @@ public class BedReaderTest extends AbstractDataFileTest {
 	private void check04998(String fileName, List<NamedEntity> lines, String path) {
 		
 		// line 0: chr1 959245 959305 NOC2L_1 900 - 959245 959256
-		String peakId = BedReader.createPeakId(null, "1", null, path, 959245, 959305, true);
+		String peakId = BedReader.createPeakId(null, "1", 959245, 959305, true);
 		Peak r0 = new Peak(peakId, "Homo sapiens", "chr1", 959245, 959305, "NOC2L_1", 900, Strand.REVERSE, 959245, 959256);
 		assertEquals(r0, lines.get(0));
 
 		// line 49: chr1 1727706 1727766 SLC35E2B_3 900 - 1727706 1727717
-		peakId = BedReader.createPeakId(null, "1", null, path, 1727706, 1727766, true);
+		peakId = BedReader.createPeakId(null, "1", 1727706, 1727766, true);
 		Peak r49 = new Peak(peakId, "Homo sapiens", "1", 1727706, 1727766, "SLC35E2B_3", 900, Strand.REVERSE, 1727706, 1727717);
 		assertEquals(r49, lines.get(49));
 
 		// line 98: chr1 3752400 3752460 CCDC27_1 900 + 3752449 3752460
-		peakId = BedReader.createPeakId(null, "1", null, path, 3752400, 3752460, true);
+		peakId = BedReader.createPeakId(null, "1", 3752400, 3752460, true);
 		Peak r98 = new Peak(peakId, "Homo sapiens", "chr1", 3752400, 3752460, "CCDC27_1", 900, Strand.FORWARD, 3752449, 3752460);
 		assertEquals(r98, lines.get(98));
 	}
@@ -275,6 +275,14 @@ public class BedReaderTest extends AbstractDataFileTest {
 		// Make sure no duplicates
 		Set<String> unique = new HashSet<>(idsPass1);
 		assertEquals(idsPass1.size(), unique.size());
+	}
+	
+	@Test
+	public void testNameParse() throws Exception {
+		BedReader<?> reader = new BedReader<>();
+		Peak peak = reader.testParseName("H3K27me3_bipolar_neuron__Enriched_Site");
+		assertEquals("bipolar_neuron", peak.getEpigenome());
+		assertEquals("H3K27me3", peak.getFeatureType());
 	}
 
 }

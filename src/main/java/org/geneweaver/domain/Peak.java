@@ -200,6 +200,10 @@ public class Peak  extends NamedEntity implements Located {
 	public Peak() {
 		
 	}
+	
+	public Peak(String name) {
+		this.setName(name);
+	}
 
 	public Peak(String peakId, String species, String chr, int start, int end, String name, int score, Strand strand, int thickStart, int thickEnd) {
 		

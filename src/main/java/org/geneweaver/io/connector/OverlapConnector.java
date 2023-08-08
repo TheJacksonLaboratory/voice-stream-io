@@ -11,8 +11,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -51,6 +53,8 @@ import org.neo4j.ogm.session.Session;
  */
 public class OverlapConnector<N extends Entity, E extends Entity> extends AbstractOverlapConnector<N,E> {
 
+	private final static int cacheSize = Integer.getInteger("org.geneweaver.io.connector.MAX_DUPLICATE_CACHE", 1000000);
+	
 	public OverlapConnector() {
 		this("peaks");
 	}
@@ -151,6 +155,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 				lookup.setInt(4, vupper);
 	
 				Set<String> usedIds = new HashSet<>();
+				
 				try (ResultSet res = lookup.executeQuery()) {
 					while(res.next()) {
 						String peakId = res.getString(1);

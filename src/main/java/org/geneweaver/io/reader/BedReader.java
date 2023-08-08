@@ -19,7 +19,6 @@
 package org.geneweaver.io.reader;
 
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -48,8 +47,9 @@ import org.geneweaver.io.connector.ChromosomeService;
  */
 public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	
-	private ChromosomeService cservice = ChromosomeService.getInstance();
 
+	private ChromosomeService cservice = ChromosomeService.getInstance();
+	
 	/**
 	 * Create the reader by setting its data
 	 * 
@@ -117,7 +117,10 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 			if (rec.length>11) d.put("blockStarts", getIntArray(rec[11], 1));
 			
 			parseName(d);
-			createPeakId(peak, this.request.path());
+			
+			String egen = peak.getEpigenome();
+			if (egen==null) return null;
+			createPeakId(peak);
 
 			ret = (N)peak;
 		}
@@ -130,11 +133,11 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		return super.stream();
 	}
 	
-	private Peak createPeakId(Peak peak, String path) {
+	private Peak createPeakId(Peak peak) {
 		
 		int start = peak.getStart();
 		int end = peak.getEnd();
-		String peakId = createPeakId(peak.getFeatureType(), peak.getChr(), peak.getEpigenome(), path, start, end, false);
+		String peakId = createPeakId(peak.getEpigenome(), peak.getChr(), start, end, false);
 		peak.setPeakId(peakId);
 		return peak;
 	}
@@ -151,20 +154,10 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	 * @param removeSpecialChars
 	 * @return the peak id as a string.
 	 */
-	public static String createPeakId(String featureName, String chr, String egenome, String path, int start, int end, boolean removeSpecialChars) {
+	public static String createPeakId(String epiGen, String chr, int start, int end, boolean removeSpecialChars) {
 		
 		StringBuilder buf = new StringBuilder();
-		buf.append(featureName);
-		if (egenome!=null) {
-			egenome = egenome.replaceAll("[^a-zA-Z0-9]", "");
-			buf.append("-");
-			buf.append(egenome.hashCode());
-		}
-		if (path!=null) {
-			buf.append("-");
-			buf.append(path.hashCode());
-		}
-
+		buf.append(epiGen);
 		buf.append("@");
 		buf.append(chr);
 		buf.append("#");
@@ -205,7 +198,13 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 			}
 		}
 	}
-
+	
+	Peak testParseName(String name) throws ReaderException {
+		Peak peak = new Peak(name, 0, 0);
+		parseName(new BeanMap(peak));
+		return peak;
+	}
+ 
 	private int[] getIntArray(String string, int min) {
 		String[] col = string.split(",");
 		Collection<Integer> ret = new LinkedList<>();
