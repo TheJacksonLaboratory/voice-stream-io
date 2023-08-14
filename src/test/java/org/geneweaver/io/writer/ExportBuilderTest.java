@@ -252,6 +252,8 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		}
 		
 		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>()) {
+			conn.setAllowNulls(true);     // Just for testing
+			conn.setAllowNoTissue(true);  // Just for testing
 			conn.setFrequency(100);
 			conn.setLocation(dir);
 			conn.add(rpath);

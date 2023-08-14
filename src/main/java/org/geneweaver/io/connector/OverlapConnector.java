@@ -53,7 +53,8 @@ import org.neo4j.ogm.session.Session;
  */
 public class OverlapConnector<N extends Entity, E extends Entity> extends AbstractOverlapConnector<N,E> {
 
-	private final static int cacheSize = Integer.getInteger("org.geneweaver.io.connector.MAX_DUPLICATE_CACHE", 1000000);
+	private boolean allowNulls    = Boolean.getBoolean("org.geneweaver.io.connector.ALLOW_NULL_IN_PEAKID");
+	private boolean allowNoTissue = Boolean.getBoolean("org.geneweaver.io.connector.ALLOW_NOTISSUE_IN_PEAKID");
 	
 	public OverlapConnector() {
 		this("peaks");
@@ -159,9 +160,17 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 				try (ResultSet res = lookup.executeQuery()) {
 					while(res.next()) {
 						String peakId = res.getString(1);
+						if (peakId==null) continue;
 						if (usedIds.contains(peakId)) {
 							logger.info("Encountered duplicate peakID: "+peakId);
-							//if (log!=null) log.println("Encountered duplicate peakID: "+peakId);
+							continue;
+						}
+						if (!allowNulls && peakId.contains("null")) { // One of the properties making up the id is unset.
+							logger.info("Peak missing information: "+peakId);
+							continue;
+						}
+						if (!allowNoTissue && peakId.endsWith("-t")) { // No tissue identified
+							logger.info("Peak missing tissue information: "+peakId);
 							continue;
 						}
 						int rlow = res.getInt(2);
@@ -228,6 +237,34 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 	 */
 	public void setFrequency(int frequency) {
 		this.frequency = frequency;
+	}
+
+	/**
+	 * @return the allowNulls
+	 */
+	public boolean isAllowNulls() {
+		return allowNulls;
+	}
+
+	/**
+	 * @param allowNulls the allowNulls to set
+	 */
+	public void setAllowNulls(boolean allowNulls) {
+		this.allowNulls = allowNulls;
+	}
+
+	/**
+	 * @return the allowNoTissue
+	 */
+	public boolean isAllowNoTissue() {
+		return allowNoTissue;
+	}
+
+	/**
+	 * @param allowNoTissue the allowNoTissue to set
+	 */
+	public void setAllowNoTissue(boolean allowNoTissue) {
+		this.allowNoTissue = allowNoTissue;
 	}
 
 

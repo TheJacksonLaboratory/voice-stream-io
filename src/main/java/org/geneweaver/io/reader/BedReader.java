@@ -50,7 +50,6 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	
 
 	private ChromosomeService cservice = ChromosomeService.getInstance();
-	private boolean isTrack;
 	
 	/**
 	 * Create the reader by setting its data
@@ -63,7 +62,6 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	public BedReader<N> init(ReaderRequest request) throws ReaderException {
 		super.setup(request);
 		setDelimiter("\\s+");
-		this.isTrack = false;
 		return this;
 	}
 
@@ -141,7 +139,7 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		
 		int start = peak.getStart();
 		int end = peak.getEnd();
-		String peakId = createPeakId(peak.getEpigenome(), peak.getChr(), start, end);
+		String peakId = createPeakId(peak.getEpigenome(), peak.getChr(), start, end, peak.getTissueDescription());
 		peak.setPeakId(peakId);
 		return peak;
 	}
@@ -158,7 +156,7 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	 * @param removeSpecialChars
 	 * @return the peak id as a string.
 	 */
-	public static String createPeakId(String epiGen, String chr, int start, int end) {
+	public static String createPeakId(String epiGen, String chr, int start, int end, String tissue) {
 		
 		StringBuilder buf = new StringBuilder();
 		buf.append(epiGen);
@@ -168,6 +166,10 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		buf.append(start);
 		buf.append(":");
 		buf.append(end);
+		// Using this can find out from id if tissue
+		// was identified.
+		String tc = tissue!=null && !tissue.isBlank() ? "+t" : "-t";
+		buf.append(tc);
 		return buf.toString();
 	}
 

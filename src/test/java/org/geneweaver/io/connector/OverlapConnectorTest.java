@@ -150,6 +150,8 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		FileUtils.deleteQuietly(tdir.toFile());
 		
 		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>()) {
+			conn.setAllowNulls(true);     // Just for testing
+			conn.setAllowNoTissue(true);  // Just for testing
 			conn.setLocation(tdir);
 			conn.add(rpath);
 			conn.create();
