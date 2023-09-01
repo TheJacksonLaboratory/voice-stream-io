@@ -54,7 +54,7 @@ import org.neo4j.ogm.session.Session;
 public class OverlapConnector<N extends Entity, E extends Entity> extends AbstractOverlapConnector<N,E> {
 
 	private boolean allowNulls    = Boolean.getBoolean("org.geneweaver.io.connector.ALLOW_NULL_IN_PEAKID");
-	private boolean allowNoTissue = Boolean.getBoolean("org.geneweaver.io.connector.ALLOW_NOTISSUE_IN_PEAKID");
+	private boolean allowNoTissue = Boolean.parseBoolean(System.getProperty("org.geneweaver.io.connector.ALLOW_NOTISSUE_IN_PEAKID", "true"));
 	
 	public OverlapConnector() {
 		this("peaks");
