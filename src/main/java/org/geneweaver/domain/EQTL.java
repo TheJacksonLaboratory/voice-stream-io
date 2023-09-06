@@ -136,11 +136,10 @@ public class EQTL extends AbstractEntity {
 		buf.append(getDelimiter());
 		buf.append("strain");
 		buf.append(getDelimiter());
-		buf.append("lod");
+		buf.append("lod:double");
 		buf.append(getDelimiter());
-		buf.append("bp");
+		buf.append("bp:int");
 		buf.append(getDelimiter());
-		
 		buf.append(":END_ID(Gene-Id)");
 		buf.append(getDelimiter());
 		buf.append(":TYPE");
