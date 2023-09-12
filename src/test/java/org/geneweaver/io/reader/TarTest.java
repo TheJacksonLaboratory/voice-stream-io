@@ -97,7 +97,6 @@ public class TarTest extends AbstractDataFileTest {
 	        	
 	        	StreamReader<Entity> reader = ReaderFactory.getReader(new ReaderRequest(tarInput, entry.getName(), false));
 	        	long lines = reader.stream().count();
-	        	System.out.println("Lines in reader = "+lines);
 	        	total+=lines;
 	        }
 		}
@@ -126,7 +125,6 @@ public class TarTest extends AbstractDataFileTest {
 	        	
 	        	StreamReader<Entity> reader = ReaderFactory.getReader(new ReaderRequest(tarInput, entry.getName(), false));
 	        	long lines = reader.stream().count();
-	        	System.out.println("Lines in reader = "+lines);
 	        	total+=lines;
 	        }
 		}

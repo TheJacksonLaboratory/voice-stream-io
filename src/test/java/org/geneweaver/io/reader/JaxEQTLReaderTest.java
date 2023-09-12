@@ -16,7 +16,7 @@ public class JaxEQTLReaderTest extends AbstractDataFileTest {
 
 	
 	@Test
-	public void direct() throws Exception {
+	public void directAgingBone() throws Exception {
 		
 		JaxEQTLReader<EQTL> reader = new JaxEQTLReader<>();
 		reader.init(new ReaderRequest("Mus musculus", getFile("data/eQTL/mm/Aging_Bone_DO.csv")));
@@ -26,6 +26,19 @@ public class JaxEQTLReaderTest extends AbstractDataFileTest {
 		
 		check(eqtls);
 	}
+	
+	@Test
+	public void directAttieIslet() throws Exception {
+		
+		JaxEQTLReader<EQTL> reader = new JaxEQTLReader<>();
+		reader.init(new ReaderRequest("Mus musculus", getFile("prod/eQTL/Attie_Islet_DO.csv.gz")));
+		
+		List<EQTL> eqtls = reader.stream().collect(Collectors.toList());
+		assertEquals(42910, eqtls.size());
+		
+		check(eqtls);
+	}
+
 
 	@Test
 	public void factory() throws Exception {
@@ -62,6 +75,7 @@ public class JaxEQTLReaderTest extends AbstractDataFileTest {
 			assertNotNull(e.getGeneId());
 			assertNotNull(e.getStrain());
 			assertNotNull(e.getTissueName());
+			assertNotNull(e.getBp());
 		});		
 	}
 	

@@ -1,7 +1,5 @@
 package org.geneweaver.io.writer;
 
-import static org.geneweaver.io.DirectSave.save;
-
 import java.io.BufferedWriter;
 import java.io.PrintStream;
 import java.nio.file.Path;
@@ -18,7 +16,9 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.geneweaver.domain.Entity;
+import org.geneweaver.io.DirectSave;
 import org.geneweaver.io.Timer;
+import org.geneweaver.io.connector.Connector;
 import org.geneweaver.io.reader.ReaderException;
 import org.geneweaver.io.reader.ReaderFactory;
 import org.geneweaver.io.reader.ReaderRequest;
@@ -62,7 +62,7 @@ public class ExportBuilder implements AutoCloseable {
 	 * simple save using the default connector.
 	 */
 	@JsonIgnore
-	private Export exporter = (builder, path) -> defaultExport(path, true);
+	private Export exporter = (builder, path) -> defaultExport(path, false);
 	
 	/**
 	 * The value of the -c command line
@@ -94,11 +94,16 @@ public class ExportBuilder implements AutoCloseable {
 	@JsonIgnore
 	private PrintStream out = System.out;
 	
+	private boolean verbose = false;
+	
 	/**
 	 * Map of writers cached while we write all the files.
 	 */
 	@JsonIgnore
 	private Map<Class<? extends Entity>, Map<String,BufferedWriter>> writers = Collections.synchronizedMap(new HashMap<>());
+	
+	@JsonIgnore
+	private Map<Class<? extends Entity>, Map<String,Path>> paths = Collections.synchronizedMap(new HashMap<>());
 
 	private Collection<Throwable> errors = new LinkedList<>();
 	
@@ -181,8 +186,49 @@ public class ExportBuilder implements AutoCloseable {
 	 */
 	protected String defaultExport(Path input, boolean append) throws Exception {
 		
+		
+		if (isVerbose() && getOut()!=null) {
+			getOut().println("Input file: "+input);
+		}
+		
 	    StreamReader<Entity> reader = createReader(input);
+	    Collection<Function<Entity, Stream<Entity>>> conns = getConnnectors(reader);
 	    
+		if (isVerbose() && getOut()!=null) {
+			getOut().println("Input file: "+input);
+			getOut().println("There are "+conns.size()+" connectors");
+			for (Function<Entity, Stream<Entity>> c : conns) {
+				getOut().println("Connector type: "+c.getClass().getName());
+				boolean isConnector = (c instanceof Connector<Entity, Entity>);
+				getOut().println("Conector instance of 'Connector' class: "+isConnector);
+			}
+			getOut().println("Calling stack:");
+			new Exception("Stack trace").printStackTrace(getOut());
+		}
+
+		try (DirectSave saver = new DirectSave(getOut(), isVerbose())) {
+			
+			Timer timer = createTimer();
+			
+			Stream<Entity> stream = reader.stream();
+			for (Function<Entity, Stream<Entity>> c : conns) {
+				boolean isConnector = (c instanceof Connector<Entity, Entity>);
+				if (isVerbose() && isConnector) {
+					Connector<Entity, Entity> conn = (Connector<Entity, Entity>)c;
+					stream = stream.flatMap(g->conn.stream(g, null, getOut()));
+				} else {
+					stream = stream.flatMap(g->c.apply(g));
+				}
+			}
+			
+			long saved = stream.map(g->saver.save(g, paths, writers, dir, timer, append))
+							   .count();
+	
+			return "Wrote bulk file(s) for '"+input.getFileName()+"' in "+timer.getFormattedTime()+" parsed "+saved+" objects.";
+		}
+	}
+
+	private Collection<Function<Entity, Stream<Entity>>> getConnnectors(StreamReader<Entity> reader) {
 	    Collection<Function<Entity, Stream<Entity>>> conns = null;
 	    if (this.connectors==null || this.connectors.isEmpty()) {
 	    	Function<Entity, Stream<Entity>> def = reader.getDefaultConnector();
@@ -200,18 +246,7 @@ public class ExportBuilder implements AutoCloseable {
 		    	conns.add(cast);
 			}
 	    }
-		
-		Timer timer = createTimer();
-		
-		Stream<Entity> stream = reader.stream();
-		for (Function<Entity, Stream<Entity>> c : conns) {
-			stream = stream.flatMap(g->c.apply(g));
-		}
-		
-		long saved = stream.map(g->save(g, writers, dir, timer, append))
-						   .count();
-
-		return "Wrote bulk file(s) for '"+input.getFileName()+"' in "+timer.getFormattedTime()+" parsed "+saved+" objects.";
+	    return conns;
 	}
 
 	/**
@@ -310,6 +345,15 @@ public class ExportBuilder implements AutoCloseable {
 		return writers;
 	}
 
+
+	/**
+	 * @return the writers
+	 */
+	@JsonIgnore
+	public Map<Class<? extends Entity>, Map<String,Path>> getPaths() {
+		return paths;
+	}
+
 	/**
 	 * @return the exporter
 	 */
@@ -406,8 +450,9 @@ public class ExportBuilder implements AutoCloseable {
 	 * @param out the out to set
 	 */
 	@JsonIgnore
-	public void setOut(PrintStream out) {
+	public ExportBuilder setOut(PrintStream out) {
 		this.out = out;
+		return this;
 	}
 
 	/**
@@ -437,6 +482,21 @@ public class ExportBuilder implements AutoCloseable {
 	 */
 	public ExportBuilder setParallelFiles(boolean parallel) {
 		this.parallelFiles = parallel;
+		return this;
+	}
+
+	/**
+	 * @return the verbose
+	 */
+	public boolean isVerbose() {
+		return verbose;
+	}
+
+	/**
+	 * @param verbose the verbose to set
+	 */
+	public ExportBuilder setVerbose(boolean verbose) {
+		this.verbose = verbose;
 		return this;
 	}
 

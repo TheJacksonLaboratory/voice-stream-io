@@ -22,14 +22,13 @@ import java.util.Objects;
 
 import org.neo4j.ogm.annotation.Index;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class GeneticEntity.
  */
-public abstract class GeneticEntity extends AbstractEntity implements Species {
+public abstract class GeneticEntity extends AbstractEntity implements Species, Located {
 	
 	// May be unset for some implementors. Gene and 
 	/** The gene id. */
@@ -391,13 +390,4 @@ public abstract class GeneticEntity extends AbstractEntity implements Species {
 	public Long getBuild() {
 		return build;
 	}
-
-	/**
-	 * Get the value of the id field. 
-	 * Not all entities will have the same field name
-	 * for the id field but they all must have a value for it.
-	 * @return id
-	 */
-	@JsonIgnore
-	public abstract String id();
 }

@@ -20,6 +20,7 @@ package org.geneweaver.io.reader;
 
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -37,7 +38,6 @@ import org.geneweaver.domain.Peak.Strand;
 import org.geneweaver.domain.Track;
 import org.geneweaver.io.connector.BedConnector;
 import org.geneweaver.io.connector.ChromosomeService;
-import org.geneweaver.io.connector.OverlapService;
 
 /**
  * Bed file format @see https://m.ensembl.org/info/website/upload/bed.html
@@ -48,9 +48,9 @@ import org.geneweaver.io.connector.OverlapService;
  */
 public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	
-	private OverlapService oservice = new OverlapService();
-	private ChromosomeService cservice = ChromosomeService.getInstance();
 
+	private ChromosomeService cservice = ChromosomeService.getInstance();
+	
 	/**
 	 * Create the reader by setting its data
 	 * 
@@ -118,6 +118,10 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 			if (rec.length>11) d.put("blockStarts", getIntArray(rec[11], 1));
 			
 			parseName(d);
+			
+			String epi  = peak.getEpigenome();
+			String feat = peak.getFeatureType();
+			if (epi==null && feat!=null) return null;
 			createPeakId(peak);
 
 			ret = (N)peak;
@@ -126,7 +130,6 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		ret.setSpecies(getSpecies());
 		return ret;
 	}
-	
 
 	public Stream<N> stream() {
 		return super.stream();
@@ -136,27 +139,37 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		
 		int start = peak.getStart();
 		int end = peak.getEnd();
-		String peakId = createPeakId(peak.getFeatureType(), peak.getChr(), peak.getEpigenome(), start, end, false);
+		String peakId = createPeakId(peak.getEpigenome(), peak.getChr(), start, end, peak.getTissueDescription());
 		peak.setPeakId(peakId);
 		return peak;
 	}
 
-	public static String createPeakId(String featureName, String chr, String egenome, int start, int end, boolean removeSpecialChars) {
+	/**
+	 * Try to make a repeatable unique peakId from the properties
+	 * of the peak.
+	 * 
+	 * @param featureName
+	 * @param chr
+	 * @param path
+	 * @param start
+	 * @param end
+	 * @param removeSpecialChars
+	 * @return the peak id as a string.
+	 */
+	public static String createPeakId(String epiGen, String chr, int start, int end, String tissue) {
 		
-		// If the same peakId is generated twice, the graph will drop it. 
-		// This means that some features with multiple epigenetics will be lost
-		// We do this intentionally because it reduces peak count, however it is wrong.
-		
-		// TODO Should use egenome in the unique peakId.
-		//egenome = egenome!=null ? egenome.replaceAll("[^a-zA-Z0-9]", "") : null;
 		StringBuilder buf = new StringBuilder();
-		buf.append(featureName);
+		buf.append(epiGen);
 		buf.append("@");
 		buf.append(chr);
 		buf.append("#");
 		buf.append(start);
 		buf.append(":");
 		buf.append(end);
+		// Using this can find out from id if tissue
+		// was identified.
+		String tc = tissue!=null && !tissue.isBlank() ? "+t" : "-t";
+		buf.append(tc);
 		return buf.toString();
 	}
 
@@ -191,7 +204,13 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 			}
 		}
 	}
-
+	
+	Peak testParseName(String name) throws ReaderException {
+		Peak peak = new Peak(name);
+		parseName(new BeanMap(peak));
+		return peak;
+	}
+ 
 	private int[] getIntArray(String string, int min) {
 		String[] col = string.split(",");
 		Collection<Integer> ret = new LinkedList<>();
@@ -236,6 +255,7 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	
 	Map<String,String> getEpigenomeDescriptions(String species) throws ReaderException {
 		
+		if (species==null) return Collections.emptyMap();
 		if (descriptions.get(species)!=null) return descriptions.get(species);
 		
 		String path ="/epigenome_description/"+species.replace(" ", "_")+".tsv";

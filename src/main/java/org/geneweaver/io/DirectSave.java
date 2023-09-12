@@ -19,12 +19,15 @@
 package org.geneweaver.io;
 
 
+import static org.geneweaver.io.connector.ChromosomeService.na;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -33,7 +36,6 @@ import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 import org.geneweaver.domain.Entity;
-import static org.geneweaver.io.connector.ChromosomeService.na;
 
 /**
  * A simple function for importing static to find readers in a map 
@@ -42,8 +44,20 @@ import static org.geneweaver.io.connector.ChromosomeService.na;
  * @author gerrim
  *
  */
-public class DirectSave {
+public class DirectSave implements AutoCloseable {
 	
+	private PrintStream log;
+	private boolean verbose;
+	
+	public DirectSave() {
+		this(null, false);
+	}
+	
+	public DirectSave(PrintStream log, boolean verbose) {
+		this.log = log;
+		this.verbose = verbose;
+	}
+
 	/**
 	 * This function uses the map to passed in to cache writers.
 	 * @param e
@@ -52,8 +66,8 @@ public class DirectSave {
 	 * @param timer
 	 * @return
 	 */
-	public static Entity save(Entity e, Map<Class<? extends Entity>, Map<String,BufferedWriter>> writers, Path dir, Timer timer) {
-		return save(e, writers, dir, timer, false);
+	public Entity save(Entity e, Map<Class<? extends Entity>, Map<String,Path>> paths, Map<Class<? extends Entity>, Map<String,BufferedWriter>> writers, Path dir, Timer timer) {
+		return save(e, paths, writers, dir, timer, false);
 	}
 	
 	/**
@@ -67,12 +81,17 @@ public class DirectSave {
 	 * @param timer - may be null
 	 * @return
 	 */
-	public static Entity save(Entity e, Map<Class<? extends Entity>, Map<String,BufferedWriter>> writers, Path dir, Timer timer, boolean append) {
+	public Entity save(Entity e, Map<Class<? extends Entity>, Map<String,Path>> paths, Map<Class<? extends Entity>, Map<String,BufferedWriter>> writers, Path dir, Timer timer, boolean append) {
 		
 		synchronized(e.getClass()) {
 			try {
 				if (!writers.containsKey(e.getClass())) {
-					BufferedWriter header = Files.newBufferedWriter(dir.resolve(e.getClass().getSimpleName()+"-header.csv"));
+					
+					Path hpath = dir.resolve(e.getClass().getSimpleName()+"-header.csv");
+					if (verbose) {
+						if (log!=null) log.println("Creating header writer for "+hpath);
+					}
+					BufferedWriter header = Files.newBufferedWriter(hpath);
 					header.write(e.getHeader());
 					header.newLine();
 					header.close();
@@ -81,6 +100,12 @@ public class DirectSave {
 				}
 				
 				Map<String,BufferedWriter> brs = writers.get(e.getClass());
+				Map<String,Path> prs = paths.get(e.getClass());
+				if (prs == null) {
+					prs = Collections.synchronizedMap(new HashMap<>());
+					paths.put(e.getClass(), prs);
+				}
+
 				String chr = e.getChr();
 				if (chr==null) chr = na;
 				if (!brs.containsKey(chr)) {
@@ -90,15 +115,20 @@ public class DirectSave {
 					} else {
 						pbody = dir.resolve(e.getClass().getSimpleName()+"-chr"+chr+".csv.gz");
 					}
+					if (verbose) {
+						if (log!=null) log.println("Creating body writer for "+pbody);
+					}
 					BufferedWriter body = createWriter(pbody, append);
 					brs.put(chr, body);
+					prs.put(chr, pbody);
 				}
 				
 				BufferedWriter writer = writers.get(e.getClass()).get(chr);
 				writer.write(e.toCsv());
 				writer.newLine();
 				if (timer!=null) {
-					timer.time();
+					Path path = paths.get(e.getClass()).get(chr);
+					timer.time(path.toString(), verbose);
 				}
 			} catch (IOException ne) {
 				throw new RuntimeException(ne);
@@ -135,6 +165,11 @@ public class DirectSave {
 	public static BufferedWriter createWriter(Path pbody, boolean append) throws FileNotFoundException, IOException {
 		BufferedWriter body = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(pbody.toFile(), append))));
 		return body;
+	}
+
+	@Override
+	public void close() throws Exception {
+		// Nothing so far
 	}
 
 }

@@ -22,12 +22,14 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -185,7 +187,10 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	 */
 	protected Object transfer(String propName, Map<String,String> from, String attrName, Map<Object,Object> to) {
 		if (from.containsKey(propName)) {
-			return to.put(attrName, from.get(propName));
+			Set<Object> fields = to.keySet();
+			if (fields.contains(attrName)) {
+				return to.put(attrName, from.get(propName));
+			}
 		}
 		return null;
 	}
@@ -499,7 +504,10 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	 */
 	protected void populate(BeanMap d, String[] rec) {
         d.put("sequenceId", rec[0]);
-        d.put("chr", "chr"+rec[0]);
+        
+        String chr = rec[0];
+        if (!chr.startsWith("chr")) chr = "chr"+chr;
+        d.put("chr", chr);
         d.put("source", rec[1]);
         d.put("type", rec[2]);
         d.put("start", rec[3]);
@@ -599,6 +607,7 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	 * @return the species
 	 */
 	public String getSpecies() {
+		if (request==null) return null;
 		return request.getSource();
 	}
 
@@ -617,4 +626,17 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 		this.comment = comment;
 	}
 
+	protected Map<String, Object> parseHeaders() throws ReaderException {
+		if (header==null || header.isEmpty()) return Collections.emptyMap();
+		Map<String, Object> ret = new HashMap<>();
+		for (String line : header) {
+			line = line.trim();
+			if (line.startsWith("#")) line = line.substring(1);
+			String[] sa = null;
+			if (line.contains(":")) sa = line.split(":");
+			if (line.contains("=")) sa = line.split("=");
+			ret.put(sa[0].trim(), sa[1].trim());
+		}
+		return ret;
+	}
 }

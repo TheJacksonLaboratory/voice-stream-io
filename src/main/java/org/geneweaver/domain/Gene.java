@@ -22,7 +22,6 @@ import java.util.Objects;
 
 import javax.annotation.processing.Generated;
 
-import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 /**

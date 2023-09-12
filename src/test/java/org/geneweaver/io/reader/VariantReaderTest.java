@@ -23,12 +23,14 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.geneweaver.domain.Gene;
 import org.geneweaver.domain.GeneticEntity;
 import org.geneweaver.domain.Variant;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -259,5 +261,27 @@ public class VariantReaderTest extends AbstractDataFileTest {
 		assertEquals(1726211, reader.linesProcessed());
 	}
 	
+	@Ignore
+	@Test
+	public void read38() throws Exception {
+		
+		VariantReader<Variant> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("/Volumes/Work/JAX/data/mus_musculus_incl_consequences.gvf.gz")));
+		
+		try (PrintWriter out = new PrintWriter("/Volumes/Work/JAX/data/mus_musculus_GRCm38_mt.csv")) {
+			out.print("# rsId, chr, start, end");
+			reader.stream().forEach(v->{
+				if (v.getChr().toLowerCase().contains("m")) {
+					out.print(v.getRsId());
+					out.print(",");
+					out.print(v.getChr());
+					out.print(",");
+					out.print(v.getStart());
+					out.print(",");
+					out.println(v.getEnd());
+					out.flush();
+				}
+			});
+		}
+	}
 
 }

@@ -47,6 +47,8 @@ public class EQTL extends AbstractEntity {
 	
     private String marker;
     private String strain;
+    private Double lod;
+    private Integer bp;
 
 	@StartNode
 	private Variant variantFrom;
@@ -134,7 +136,10 @@ public class EQTL extends AbstractEntity {
 		buf.append(getDelimiter());
 		buf.append("strain");
 		buf.append(getDelimiter());
-		
+		buf.append("lod:double");
+		buf.append(getDelimiter());
+		buf.append("bp:int");
+		buf.append(getDelimiter());
 		buf.append(":END_ID(Gene-Id)");
 		buf.append(getDelimiter());
 		buf.append(":TYPE");
@@ -177,6 +182,10 @@ public class EQTL extends AbstractEntity {
 		buf.append(getMarker());
 		buf.append(getDelimiter());
 		buf.append(getStrain());
+		buf.append(getDelimiter());
+		buf.append(getLod()!=null?getLod():-1);
+		buf.append(getDelimiter());
+		buf.append(getBp()!=null?getBp():-1);
 		buf.append(getDelimiter());
 		
 		buf.append(getGeneId());
@@ -233,8 +242,9 @@ public class EQTL extends AbstractEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(altSeq, eqtlVariantId, fullGeneId, geneId, geneTo, marker, refSeq, rsId,
-				slope, source, strain, tissueFileName, tissueGroup, tissueName, uberon, variantFrom, version);
+		result = prime * result
+				+ Objects.hash(altSeq, bp, eqtlVariantId, fullGeneId, geneId, geneTo, lod, marker, refSeq, rsId, slope,
+						source, strain, tissueFileName, tissueGroup, tissueName, uberon, variantFrom, version);
 		return result;
 	}
 
@@ -247,9 +257,10 @@ public class EQTL extends AbstractEntity {
 		if (!(obj instanceof EQTL))
 			return false;
 		EQTL other = (EQTL) obj;
-		return Objects.equals(altSeq, other.altSeq) && Objects.equals(eqtlVariantId, other.eqtlVariantId)
-				&& Objects.equals(fullGeneId, other.fullGeneId) && Objects.equals(geneId, other.geneId)
-				&& Objects.equals(geneTo, other.geneTo) && Objects.equals(marker, other.marker)
+		return Objects.equals(altSeq, other.altSeq) && Objects.equals(bp, other.bp)
+				&& Objects.equals(eqtlVariantId, other.eqtlVariantId) && Objects.equals(fullGeneId, other.fullGeneId)
+				&& Objects.equals(geneId, other.geneId) && Objects.equals(geneTo, other.geneTo)
+				&& Objects.equals(lod, other.lod) && Objects.equals(marker, other.marker)
 				&& Objects.equals(refSeq, other.refSeq) && Objects.equals(rsId, other.rsId)
 				&& Double.doubleToLongBits(slope) == Double.doubleToLongBits(other.slope)
 				&& Objects.equals(source, other.source) && Objects.equals(strain, other.strain)
@@ -441,6 +452,34 @@ public class EQTL extends AbstractEntity {
 
 	public void setStrain(String strain) {
 		this.strain = strain;
+	}
+
+	/**
+	 * @return the lod
+	 */
+	public Double getLod() {
+		return lod;
+	}
+
+	/**
+	 * @param lod the lod to set
+	 */
+	public void setLod(Double lod) {
+		this.lod = lod;
+	}
+
+	/**
+	 * @return the bp
+	 */
+	public Integer getBp() {
+		return bp;
+	}
+
+	/**
+	 * @param bp the bp to set
+	 */
+	public void setBp(Integer bp) {
+		this.bp = bp;
 	}
 
 

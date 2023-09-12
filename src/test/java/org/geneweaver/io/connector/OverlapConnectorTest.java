@@ -93,17 +93,17 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		List<Entity> ret = testIntersections("testInterleaves", vpath, rpath);
 		
 		// In this data the first three variants all match the same peak
-		String peak1 = ((Overlap)ret.get(1)).getPeak().getPeakId();
-		assertEquals(peak1, ((Overlap)ret.get(3)).getPeak().getPeakId());
-		assertEquals(peak1, ((Overlap)ret.get(5)).getPeak().getPeakId());
+		String peak1 = ((Overlap)ret.get(1)).getPeak().id();
+		assertEquals(peak1, ((Overlap)ret.get(3)).getPeak().id());
+		assertEquals(peak1, ((Overlap)ret.get(5)).getPeak().id());
 		
 		// The 4th variant matches a different peak.
-		assertNotEquals(peak1, ((Overlap)ret.get(7)).getPeak().getPeakId());
-		String peak2 = ((Overlap)ret.get(7)).getPeak().getPeakId();
-		assertEquals(peak2, ((Overlap)ret.get(9)).getPeak().getPeakId());
-		assertEquals(peak2, ((Overlap)ret.get(11)).getPeak().getPeakId());
-		assertEquals(peak2, ((Overlap)ret.get(13)).getPeak().getPeakId());
-		assertEquals(peak2, ((Overlap)ret.get(15)).getPeak().getPeakId());
+		assertNotEquals(peak1, ((Overlap)ret.get(7)).getPeak().id());
+		String peak2 = ((Overlap)ret.get(7)).getPeak().id();
+		assertEquals(peak2, ((Overlap)ret.get(9)).getPeak().id());
+		assertEquals(peak2, ((Overlap)ret.get(11)).getPeak().id());
+		assertEquals(peak2, ((Overlap)ret.get(13)).getPeak().id());
+		assertEquals(peak2, ((Overlap)ret.get(15)).getPeak().id());
 	}
 
 	@Test
@@ -150,6 +150,8 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		FileUtils.deleteQuietly(tdir.toFile());
 		
 		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>()) {
+			conn.setAllowNulls(true);     // Just for testing
+			conn.setAllowNoTissue(true);  // Just for testing
 			conn.setLocation(tdir);
 			conn.add(rpath);
 			conn.create();

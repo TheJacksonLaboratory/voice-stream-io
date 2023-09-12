@@ -18,6 +18,7 @@
  */
 package org.geneweaver.io.connector;
 
+import java.io.PrintStream;
 import java.lang.ref.SoftReference;
 import java.util.Collection;
 import java.util.HashMap;
@@ -106,7 +107,7 @@ public class VariantConnector<N extends GeneticEntity, E extends Entity> impleme
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public Stream<E> stream(N ge, Session session) {
+	public Stream<E> stream(N ge, Session session, PrintStream log) {
 
 		if (!useSessions) {
 			return apply(ge);

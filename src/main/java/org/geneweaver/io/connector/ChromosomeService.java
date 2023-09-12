@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.geneweaver.domain.Peak;
+import org.geneweaver.domain.Located;
 
 /**
  * Standardizes chromosome e.g. removes chr etc.
@@ -85,8 +85,8 @@ public class ChromosomeService {
 	 * @param peak
 	 * @return
 	 */
-	public static boolean isValidChromosome(Peak peak) {
-		String chr = peak.getChr();
+	public static boolean isValidChromosome(Located entity) {
+		String chr = entity.getChr();
 		return chr!=null;
 	}
 

@@ -3,7 +3,6 @@ package org.geneweaver.io.reader;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 
 import org.geneweaver.domain.Ortholog;
 import org.junit.Test;
@@ -19,7 +18,7 @@ public class OrthologBaylorReaderTest extends AbstractDataFileTest {
 		assertTrue(size>40000);
 	}
 	
-	@Test(expected=ArrayIndexOutOfBoundsException.class)
+	@Test
 	public void parseWrongFormat() throws Exception {
 		File file = getFile("prod/eQTL/Aging_Bone_DO.csv.gz");
 		StreamReader<Ortholog> reader = new OrthologBaylorReader<Ortholog>();

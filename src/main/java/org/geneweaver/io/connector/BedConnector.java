@@ -18,6 +18,7 @@
  */
 package org.geneweaver.io.connector;
 
+import java.io.PrintStream;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -45,7 +46,7 @@ public class BedConnector<N extends NamedEntity, E extends Entity> implements Co
 	 * @param session, not required.
 	 */
 	@Override
-	public Stream<E> stream(N bean, Session session) {
+	public Stream<E> stream(N bean, Session session, PrintStream log) {
 		return apply(bean);
 	}
 

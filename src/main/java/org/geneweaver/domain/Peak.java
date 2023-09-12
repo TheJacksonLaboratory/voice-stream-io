@@ -89,7 +89,7 @@ blockStarts
  */
 @Generated("POJO")
 @NodeEntity(label="Peak")
-public class Peak  extends NamedEntity {
+public class Peak  extends NamedEntity implements Located {
 
 
 	@Index(unique=true)
@@ -130,13 +130,13 @@ public class Peak  extends NamedEntity {
 	 * Start position of the feature in standard chromosomal coordinates (i.e. first base is 0).
 	 */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private int start;
+	private Integer start;
 	
 	/**
 	 * End position of the feature in standard chromosomal coordinates.
 	 */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private int end;
+	private Integer end;
 	
 	/**
 	 * A score between 0 and 1000. See track lines, below, for ways to configure the display style of scored data.
@@ -199,6 +199,10 @@ public class Peak  extends NamedEntity {
 
 	public Peak() {
 		
+	}
+	
+	public Peak(String name) {
+		this.setName(name);
 	}
 
 	public Peak(String peakId, String species, String chr, int start, int end, String name, int score, Strand strand, int thickStart, int thickEnd) {
@@ -274,7 +278,7 @@ public class Peak  extends NamedEntity {
 	/**
 	 * @return the start
 	 */
-	public int getStart() {
+	public Integer getStart() {
 		return start;
 	}
 
@@ -282,7 +286,7 @@ public class Peak  extends NamedEntity {
 	/**
 	 * @param start the start to set
 	 */
-	public void setStart(int start) {
+	public void setStart(Integer start) {
 		this.start = start;
 	}
 
@@ -290,7 +294,7 @@ public class Peak  extends NamedEntity {
 	/**
 	 * @return the end
 	 */
-	public int getEnd() {
+	public Integer getEnd() {
 		return end;
 	}
 
@@ -298,7 +302,7 @@ public class Peak  extends NamedEntity {
 	/**
 	 * @param end the end to set
 	 */
-	public void setEnd(int end) {
+	public void setEnd(Integer end) {
 		this.end = end;
 	}
 
@@ -453,10 +457,10 @@ public class Peak  extends NamedEntity {
 			return false;
 		Peak other = (Peak) obj;
 		return blockCount == other.blockCount && Arrays.equals(blockSizes, other.blockSizes)
-				&& Arrays.equals(blockStarts, other.blockStarts) && end == other.end
+				&& Arrays.equals(blockStarts, other.blockStarts) && Objects.equals(end, other.end)
 				&& Objects.equals(epigenome, other.epigenome) && Objects.equals(featureType, other.featureType)
 				&& Objects.equals(filterType, other.filterType) && Arrays.equals(itemRgb, other.itemRgb)
-				&& Objects.equals(peakId, other.peakId) && score == other.score && start == other.start
+				&& Objects.equals(peakId, other.peakId) && score == other.score && Objects.equals(start, other.start)
 				&& strand == other.strand && thickEnd == other.thickEnd && thickStart == other.thickStart
 				&& Objects.equals(tissueDescription, other.tissueDescription);
 	}
@@ -529,6 +533,11 @@ public class Peak  extends NamedEntity {
 	 */
 	public void setFilterType(String filterType) {
 		this.filterType = filterType;
+	}
+
+	@Override
+	public String id() {
+		return getPeakId();
 	}
 
 }

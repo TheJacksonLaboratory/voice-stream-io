@@ -16,11 +16,11 @@ public class Overlap extends AbstractEntity {
 
 	/** The variant. */
 	@StartNode
-	private Variant variant;
+	private Located variant;
 	
 	/** The peak. */
 	@EndNode
-	private Peak peak;
+	private Located peak;
 
 	/**
 	 * A scalar which is the amount of overlap between the variant and the park.
@@ -69,13 +69,13 @@ public class Overlap extends AbstractEntity {
 	@Override
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
-		buf.append(variant.getRsId());
+		buf.append(variant!=null?variant.id():"NA");
 		buf.append(getDelimiter());
 		buf.append(getIntersectRange());
 		buf.append(getDelimiter());
 		buf.append(getIntersectFraction());
 		buf.append(getDelimiter());
-		buf.append(peak.getPeakId());
+		buf.append(peak!=null?peak.id():"NA");
 		buf.append(getDelimiter());
 		buf.append("OVERLAP");
 		return buf.toString();
@@ -84,28 +84,28 @@ public class Overlap extends AbstractEntity {
 	/**
 	 * @return the variant
 	 */
-	public Variant getVariant() {
+	public Located getVariant() {
 		return variant;
 	}
 
 	/**
 	 * @param variant the variant to set
 	 */
-	public void setVariant(Variant variant) {
+	public void setVariant(Located variant) {
 		this.variant = variant;
 	}
 
 	/**
 	 * @return the peak
 	 */
-	public Peak getPeak() {
+	public Located getPeak() {
 		return peak;
 	}
 
 	/**
 	 * @param peak the peak to set
 	 */
-	public void setPeak(Peak peak) {
+	public void setPeak(Located peak) {
 		this.peak = peak;
 	}
 
@@ -161,7 +161,7 @@ public class Overlap extends AbstractEntity {
 	@Override
 	public String toString() {
 		if (variant==null || peak==null) return super.toString();
-		return "(Variant{rsId:"+variant.getRsId()+"})-[OVERLAP]-(Peak{peakId:"+peak.getPeakId()+")";
+		return "(Variant{rsId:"+variant.id()+"})-[OVERLAP]-(Peak{peakId:"+peak.id()+")";
 	}
 
 

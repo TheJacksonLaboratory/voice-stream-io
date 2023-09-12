@@ -32,7 +32,6 @@ import java.util.zip.GZIPInputStream;
 
 import javax.annotation.processing.Generated;
 
-import org.apache.logging.log4j.message.LoggerNameAwareMessage;
 import org.geneweaver.domain.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -313,6 +312,12 @@ public class ReaderRequest {
 		if (file!=null) return file.getName();
 		if (name!=null) return name;
 		throw new IllegalArgumentException("A reader request must have a name for the resource!");
+	}
+	
+	@JsonIgnore
+	String path() {
+		if (file!=null) return file.getAbsolutePath();
+		return toString();
 	}
 
 	@JsonIgnore

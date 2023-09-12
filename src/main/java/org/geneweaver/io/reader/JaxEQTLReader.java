@@ -71,16 +71,29 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		for(int i=0;i<headerNames.size();i++) {
 			String name = headerNames.get(i);
 			
-			if (name.equals("bpmm10")) continue; // TODO
-
 			// BeanMap autoboxes which is probably slowish and
 			// could be speeded up.
+			Object value = values[i];
+			if (value==null) continue;
+			value = values[i].trim();
+			
+			Class<?> type = d.getType(name);
+			if ("NA".equals(value) && Number.class.isAssignableFrom(type)) {
+				value = "0";
+			}
+			if (Integer.class.equals(type)) {
+				value = Double.valueOf(value.toString()).intValue();
+			} else if (Double.class.equals(type)) {
+				value = Double.valueOf(value.toString());
+			}
 			try {
-				if (values[i].trim().length()<1) continue;
-				d.put(name, values[i]);
+				if (value.toString().length()<1) continue;
+				d.put(name, value);
 			} catch (NumberFormatException ne) {
 				logger.info("The property '"+name+"' cannot have value: "+values[i]);
 				continue;
+			} catch (IllegalArgumentException ie) {
+				throw new ReaderException("Field "+name+" has type "+type+" which has not been parsed from "+value);
 			}
 		}
 		
@@ -91,9 +104,11 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		return (N)bean;
 	}
 	
-	private DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+	private DateFormat format1 = new SimpleDateFormat("MM/dd/yyyy");
+	private DateFormat format2 = new SimpleDateFormat("yyyy-MM-dd");
 	
-	private void parseHeaders() throws ReaderException {
+	@Override
+	protected Map<String,Object> parseHeaders() throws ReaderException {
 		
 		if (header==null || header.isEmpty()) {
 			throw new ReaderException("JAX eQTL files must have a header!");
@@ -110,6 +125,8 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 			name = name.replace("_", "");
 			if (name.equals("rsid")) name = "rsId";
 			if (name.equals("geneid")) name = "geneId";
+			if (name.equals("bpmm10")) name = "bp";
+			// TODO lod
 			headerNames.add(name);
 		}
 		
@@ -133,14 +150,19 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 			if (name.equals("url")) name = "source";
 			if (name.equals("date")) {
 				try {
-					value = format.parse(value.toString());
+					value = format1.parse(value.toString());
 				} catch (ParseException e) {
-					throw new ReaderException("Cannot parse date: "+value);
+					try {
+						value = format2.parse(value.toString());
+					} catch (ParseException eOther) {
+						throw new ReaderException("Cannot parse date: "+value);
+					}
 				}
 				continue;// We do not repeat date
 			}
 			headerValues.put(name, value);
 		}
+		return headerValues;
 	}
 
 	protected void addHeader(String line) {
