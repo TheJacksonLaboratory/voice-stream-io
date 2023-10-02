@@ -62,8 +62,8 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		}
 		
 		EQTL bean = new EQTL();
-		bean.setTissueFileName(request.getName());
-		bean.setStudyId(createFudgedStudyId(request.getName()));
+		bean.setTissueFileName(request.name());
+		bean.setStudyId(createFudgedStudyId(request.name()));
 		BeanMap d = new BeanMap(bean);
 		
 		String[] values = line.split(getDelimiter());
@@ -123,10 +123,33 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		  "Liver.RDS",	"http://bhchurchilllab01.jax.org:18045/dl?fileName=Liver.RDS",
 		  "SkeletalMuscle.RDS",	"http://bhchurchilllab01.jax.org:18045/dl?fileName=SkeletalMuscle.RDS");
 	 */
+	
+	private static Map<String,String> studyIdMap = createStudyIdMap();
+	private static Map<String,String> createStudyIdMap() {
+		Map<String,String> ret = new HashMap<>();
+		ret.put("Aging_Bone_DO.csv.gz".toLowerCase(),"Project999901");
+		ret.put("Aging_Heart_DO.csv.gz".toLowerCase(),"Project999902");
+		ret.put("Aging_Kidney_DO.csv.gz".toLowerCase(),"Project999903");
+		ret.put("Chesler_Hippocampus_DO.csv.gz".toLowerCase(),"Chesler999901");
+		ret.put("Chesler_Striatum_DO.csv.gz".toLowerCase(),"Chesler999902");
+		ret.put("DO.Cube.Adipose.csv.gz".toLowerCase(),"Cube999901");
+		ret.put("DO.Cube.Heart.csv.gz".toLowerCase(),"Cube999902");
+		ret.put("DO.Cube.Islet.csv.gz".toLowerCase(),"Cube999903");
+		ret.put("DO.Cube.Liver.csv.gz".toLowerCase(),"Cube999904");
+		ret.put("DO.Cube.SkeletalMuscle.csv.gz".toLowerCase(),"Cube999905");
+		ret.put("Skelly_mESC_DO.csv.gz".toLowerCase(),"Skelly999901");
+		ret.put("Svenson_HFD_DO.csv.gz".toLowerCase(),"Svenson999901");
+		return ret;
+	}
+		
 	private String createFudgedStudyId(String name) throws ReaderException {
 		if (name == null) return null;
 		try {
-			return Base64.getEncoder().encodeToString(name.getBytes("UTF-8"));
+			// We generate a fake project StudyId.
+			// Project1234 would be a private id
+			// Chelser7 would be a public id
+			if (studyIdMap.containsKey(name.toLowerCase())) return studyIdMap.get(name.toLowerCase());
+			return "Project:"+Base64.getEncoder().encodeToString(name.getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e) {
 			throw new ReaderException(e);
 		}

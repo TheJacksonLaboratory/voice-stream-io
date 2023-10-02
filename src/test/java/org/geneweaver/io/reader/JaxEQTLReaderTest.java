@@ -35,6 +35,8 @@ public class JaxEQTLReaderTest extends AbstractDataFileTest {
 		assertEquals(46177, eqtls.size());
 		
 		check(eqtls);
+		
+		eqtls.stream().allMatch(e->e.getStudyId().equals("Project999901"));
 	}
 	
 
