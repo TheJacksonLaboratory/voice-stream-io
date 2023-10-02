@@ -69,6 +69,7 @@ public class EQTL extends AbstractEntity {
 	private String version;
 	private String uberon;
 	private String source; // e.g. GTEx
+	private String studyId;
 
 	@EndNode
 	private Gene geneTo;
@@ -140,6 +141,8 @@ public class EQTL extends AbstractEntity {
 		buf.append(getDelimiter());
 		buf.append("bp:int");
 		buf.append(getDelimiter());
+		buf.append("studyId");
+		buf.append(getDelimiter());
 		buf.append(":END_ID(Gene-Id)");
 		buf.append(getDelimiter());
 		buf.append(":TYPE");
@@ -186,6 +189,8 @@ public class EQTL extends AbstractEntity {
 		buf.append(getLod()!=null?getLod():-1);
 		buf.append(getDelimiter());
 		buf.append(getBp()!=null?getBp():-1);
+		buf.append(getDelimiter());
+		buf.append(getStudyId());
 		buf.append(getDelimiter());
 		
 		buf.append(getGeneId());
@@ -244,7 +249,7 @@ public class EQTL extends AbstractEntity {
 		int result = super.hashCode();
 		result = prime * result
 				+ Objects.hash(altSeq, bp, eqtlVariantId, fullGeneId, geneId, geneTo, lod, marker, refSeq, rsId, slope,
-						source, strain, tissueFileName, tissueGroup, tissueName, uberon, variantFrom, version);
+						source, strain, studyId, tissueFileName, tissueGroup, tissueName, uberon, variantFrom, version);
 		return result;
 	}
 
@@ -264,7 +269,7 @@ public class EQTL extends AbstractEntity {
 				&& Objects.equals(refSeq, other.refSeq) && Objects.equals(rsId, other.rsId)
 				&& Double.doubleToLongBits(slope) == Double.doubleToLongBits(other.slope)
 				&& Objects.equals(source, other.source) && Objects.equals(strain, other.strain)
-				&& Objects.equals(tissueFileName, other.tissueFileName)
+				&& Objects.equals(studyId, other.studyId) && Objects.equals(tissueFileName, other.tissueFileName)
 				&& Objects.equals(tissueGroup, other.tissueGroup) && Objects.equals(tissueName, other.tissueName)
 				&& Objects.equals(uberon, other.uberon) && Objects.equals(variantFrom, other.variantFrom)
 				&& Objects.equals(version, other.version);
@@ -480,6 +485,20 @@ public class EQTL extends AbstractEntity {
 	 */
 	public void setBp(Integer bp) {
 		this.bp = bp;
+	}
+
+	/**
+	 * @return the studyId
+	 */
+	public String getStudyId() {
+		return studyId;
+	}
+
+	/**
+	 * @param studyId the studyId to set
+	 */
+	public void setStudyId(String studyId) {
+		this.studyId = studyId;
 	}
 
 

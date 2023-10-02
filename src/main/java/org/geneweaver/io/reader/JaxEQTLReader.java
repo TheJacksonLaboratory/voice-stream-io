@@ -1,9 +1,11 @@
 package org.geneweaver.io.reader;
 
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +62,8 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		}
 		
 		EQTL bean = new EQTL();
+		bean.setTissueFileName(request.getName());
+		bean.setStudyId(createFudgedStudyId(request.getName()));
 		BeanMap d = new BeanMap(bean);
 		
 		String[] values = line.split(getDelimiter());
@@ -104,6 +108,30 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		return (N)bean;
 	}
 	
+	/*
+	      "Aging_Bone_DO.Rds",	"https://churchilllab.jax.org/qtlviewer/DO/bone/dl?fileName=dataset.mrna.DO_bone.v2.Rds",
+		  "Aging_Heart_DO.Rds", "https://churchilllab.jax.org/qtlviewer/JAC/DOHeart/dl?fileName=dataset.mrna.JAC_DO_heart.v10.Rds",
+		  "Aging_Kidney_DO.Rds", "https://churchilllab.jax.org/qtlviewer/JAC/DOKidney/dl?fileName=dataset.mrna.JAC_DO_kidney.v6.Rds",
+		  "Skelly_mESC_DO.Rds", "https://churchilllab.jax.org/qtlviewer/DO_mESC/dl?fileName=dataset.mrna.DO_mESC.v3.Rds",
+		  "Svenson_HFD_DO.Rds", "https://churchilllab.jax.org/qtlviewer/svenson/DOHFD/dl?fileName=dataset.mrna.Svenson_DO_HFD.v12.Rds",
+		  "Chesler_Striatum_DO.Rds",	"https://churchilllab.jax.org/qtlviewer/DO/DrugNaiveStriatum/dl?fileName=dataset.CSNA_DO_Striatum.v3.Rds",
+		  "Hippocampus_DO.Rds",	"https://churchilllab.jax.org/qtlviewer/DO/hippocampus/dl?fileName=dataset.DO_Hippocampus.v2.Rds",
+		  "AttieIsletSecretion_v13_DO.Rdata","http://bhchurchilllab01.jax.org:18005/dl?fileName=AttieIsletSecretion_v13.RData",
+		  "Adipose.RDS",	"http://bhchurchilllab01.jax.org:18045/dl?fileName=Adipose.RDS",
+		  "Heart.RDS",	"http://bhchurchilllab01.jax.org:18045/dl?fileName=Heart.RDS",
+		  "Islet.RDS",	"http://bhchurchilllab01.jax.org:18045/dl?fileName=Islet.RDS",
+		  "Liver.RDS",	"http://bhchurchilllab01.jax.org:18045/dl?fileName=Liver.RDS",
+		  "SkeletalMuscle.RDS",	"http://bhchurchilllab01.jax.org:18045/dl?fileName=SkeletalMuscle.RDS");
+	 */
+	private String createFudgedStudyId(String name) throws ReaderException {
+		if (name == null) return null;
+		try {
+			return Base64.getEncoder().encodeToString(name.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			throw new ReaderException(e);
+		}
+	}
+
 	private DateFormat format1 = new SimpleDateFormat("MM/dd/yyyy");
 	private DateFormat format2 = new SimpleDateFormat("yyyy-MM-dd");
 	

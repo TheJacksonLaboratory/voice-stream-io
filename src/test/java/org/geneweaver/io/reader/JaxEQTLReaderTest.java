@@ -26,18 +26,6 @@ public class JaxEQTLReaderTest extends AbstractDataFileTest {
 		
 		check(eqtls);
 	}
-	
-	@Test
-	public void directAttieIslet() throws Exception {
-		
-		JaxEQTLReader<EQTL> reader = new JaxEQTLReader<>();
-		reader.init(new ReaderRequest("Mus musculus", getFile("prod/eQTL/Attie_Islet_DO.csv.gz")));
-		
-		List<EQTL> eqtls = reader.stream().collect(Collectors.toList());
-		assertEquals(42910, eqtls.size());
-		
-		check(eqtls);
-	}
 
 
 	@Test

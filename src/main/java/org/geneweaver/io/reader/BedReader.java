@@ -18,7 +18,10 @@
  */
 package org.geneweaver.io.reader;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -260,7 +263,16 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		
 		String path ="/epigenome_description/"+species.replace(" ", "_")+".tsv";
 		InputStream in = getClass().getResourceAsStream(path);
-		if (in == null) return null;
+		if (in == null) {
+			try {
+				String local = "src/main/resources"+path;
+				in = Files.newInputStream(Paths.get(local));
+			} catch (IOException ignored) {
+				// Of the local path cannot be determined,
+				// we ignore that we cannot do tissue lookups.
+				return null;
+			}
+		}
 		
 		ReaderRequest req = new ReaderRequest(species, in, path);
 		req.setReaderHint("MapCSVReader");
