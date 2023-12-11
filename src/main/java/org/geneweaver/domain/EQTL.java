@@ -45,8 +45,13 @@ Also shortening the chain means less nodes/rels. A disadvantage is that it is a 
 @RelationshipEntity(type = "EQTL")
 public class EQTL extends AbstractEntity {
 	
+	public enum Type {
+		PEAK, INTERVAL;
+	}
+	
+	private Type type=Type.PEAK; // PEAK or INTERVAL
     private String marker;
-    private String strain;
+    private String population;
     private Double lod;
     private Integer bp;
 
@@ -63,6 +68,7 @@ public class EQTL extends AbstractEntity {
 	private String refSeq;
 	private String altSeq;
 	private double slope;
+	private Double pos;
 	private String tissueFileName;
 	private String tissueGroup;
 	private String tissueName;
@@ -111,7 +117,11 @@ public class EQTL extends AbstractEntity {
 		buf.append(":START_ID(Rs-Id)");
 		
 		buf.append(getDelimiter());
+		buf.append("type");
+		buf.append(getDelimiter());
 		buf.append("chr");
+		buf.append(getDelimiter());
+		buf.append("pos:double");
 		buf.append(getDelimiter());
 		buf.append("refSeq");
 		buf.append(getDelimiter());
@@ -135,7 +145,7 @@ public class EQTL extends AbstractEntity {
 		buf.append(getDelimiter());
 		buf.append("marker");
 		buf.append(getDelimiter());
-		buf.append("strain");
+		buf.append("population");
 		buf.append(getDelimiter());
 		buf.append("lod:double");
 		buf.append(getDelimiter());
@@ -160,7 +170,11 @@ public class EQTL extends AbstractEntity {
 		buf.append(getRsId());
 		
 		buf.append(getDelimiter());
+		buf.append(getType());
+		buf.append(getDelimiter());
 		buf.append(getChr());
+		buf.append(getDelimiter());
+		buf.append(getPos()!=null?getPos():-1);
 		buf.append(getDelimiter());
 		buf.append(getRefSeq());
 		buf.append(getDelimiter());
@@ -184,7 +198,7 @@ public class EQTL extends AbstractEntity {
 		buf.append(getDelimiter());
 		buf.append(getMarker());
 		buf.append(getDelimiter());
-		buf.append(getStrain());
+		buf.append(getPopulation());
 		buf.append(getDelimiter());
 		buf.append(getLod()!=null?getLod():-1);
 		buf.append(getDelimiter());
@@ -247,9 +261,9 @@ public class EQTL extends AbstractEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result
-				+ Objects.hash(altSeq, bp, eqtlVariantId, fullGeneId, geneId, geneTo, lod, marker, refSeq, rsId, slope,
-						source, strain, studyId, tissueFileName, tissueGroup, tissueName, uberon, variantFrom, version);
+		result = prime * result + Objects.hash(altSeq, bp, eqtlVariantId, fullGeneId, geneId, geneTo, lod, marker,
+				population, pos, refSeq, rsId, slope, source, studyId, tissueFileName, tissueGroup, tissueName, type,
+				uberon, variantFrom, version);
 		return result;
 	}
 
@@ -266,13 +280,15 @@ public class EQTL extends AbstractEntity {
 				&& Objects.equals(eqtlVariantId, other.eqtlVariantId) && Objects.equals(fullGeneId, other.fullGeneId)
 				&& Objects.equals(geneId, other.geneId) && Objects.equals(geneTo, other.geneTo)
 				&& Objects.equals(lod, other.lod) && Objects.equals(marker, other.marker)
+				&& Objects.equals(population, other.population)
+				&& Double.doubleToLongBits(pos) == Double.doubleToLongBits(other.pos)
 				&& Objects.equals(refSeq, other.refSeq) && Objects.equals(rsId, other.rsId)
 				&& Double.doubleToLongBits(slope) == Double.doubleToLongBits(other.slope)
-				&& Objects.equals(source, other.source) && Objects.equals(strain, other.strain)
-				&& Objects.equals(studyId, other.studyId) && Objects.equals(tissueFileName, other.tissueFileName)
+				&& Objects.equals(source, other.source) && Objects.equals(studyId, other.studyId)
+				&& Objects.equals(tissueFileName, other.tissueFileName)
 				&& Objects.equals(tissueGroup, other.tissueGroup) && Objects.equals(tissueName, other.tissueName)
-				&& Objects.equals(uberon, other.uberon) && Objects.equals(variantFrom, other.variantFrom)
-				&& Objects.equals(version, other.version);
+				&& type == other.type && Objects.equals(uberon, other.uberon)
+				&& Objects.equals(variantFrom, other.variantFrom) && Objects.equals(version, other.version);
 	}
 
 	/**
@@ -451,12 +467,12 @@ public class EQTL extends AbstractEntity {
 		this.marker = marker;
 	}
 
-	public String getStrain() {
-		return strain;
+	public String getPopulation() {
+		return population;
 	}
 
-	public void setStrain(String strain) {
-		this.strain = strain;
+	public void setPopulation(String population) {
+		this.population = population;
 	}
 
 	/**
@@ -499,6 +515,34 @@ public class EQTL extends AbstractEntity {
 	 */
 	public void setStudyId(String studyId) {
 		this.studyId = studyId;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public Type getType() {
+		return type;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(Type type) {
+		this.type = type;
+	}
+
+	/**
+	 * @return the pos
+	 */
+	public Double getPos() {
+		return pos;
+	}
+
+	/**
+	 * @param pos the pos to set
+	 */
+	public void setPos(Double pos) {
+		this.pos = pos;
 	}
 
 
