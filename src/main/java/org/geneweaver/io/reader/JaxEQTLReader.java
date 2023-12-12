@@ -177,6 +177,7 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 			if (name.equals("rsid")) name = "rsId";
 			if (name.equals("geneid")) name = "geneId";
 			if (name.equals("bpmm10")) name = "bp";
+			if (name.equals("strain")) name = "population";
 			// TODO lod
 			headerNames.add(name);
 		}
@@ -192,6 +193,7 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 			Object value = kvs[1].trim();
 			
 			// Make all eQTLs have same field names, even if from human data or mouse data.
+			if (name.equals("strain")) name = "population";
 			if (name.equals("ensembl.version")) name = "version";
 			if (name.equals("tissue")) {
 				name = "tissueName";

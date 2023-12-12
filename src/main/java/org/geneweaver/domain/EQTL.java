@@ -281,7 +281,7 @@ public class EQTL extends AbstractEntity {
 				&& Objects.equals(geneId, other.geneId) && Objects.equals(geneTo, other.geneTo)
 				&& Objects.equals(lod, other.lod) && Objects.equals(marker, other.marker)
 				&& Objects.equals(population, other.population)
-				&& Double.doubleToLongBits(pos) == Double.doubleToLongBits(other.pos)
+				&& Objects.equals(pos, other.pos)
 				&& Objects.equals(refSeq, other.refSeq) && Objects.equals(rsId, other.rsId)
 				&& Double.doubleToLongBits(slope) == Double.doubleToLongBits(other.slope)
 				&& Objects.equals(source, other.source) && Objects.equals(studyId, other.studyId)

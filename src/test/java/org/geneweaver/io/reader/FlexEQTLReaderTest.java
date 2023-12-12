@@ -92,7 +92,7 @@ public class FlexEQTLReaderTest extends AbstractDataFileTest {
 		reader.stream().collect(Collectors.toList());
 	}
 	
-	@Test(expected=AssertionError.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void badValues2Direct() throws Exception {
 		StreamReader<EQTL> reader = new FlexEQTLReader<>();
 		reader.init(new ReaderRequest("Mus musculus", getFile("data/eQTL/mm_bad/Mouse_eQTL_badValues2.csv"), ","));

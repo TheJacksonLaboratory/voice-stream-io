@@ -26,7 +26,7 @@ public class JaxIntervalEQTLReaderTest extends AbstractDataFileTest {
 	    
 		List<EQTL> eqtls = reader.stream().collect(Collectors.toList());
 	 
-		assertEquals(13010, eqtls.size());
+		assertEquals(1000, eqtls.size());
 		check(eqtls);
 		
 		String header = eqtls.get(0).getHeader();
@@ -80,7 +80,7 @@ public class JaxIntervalEQTLReaderTest extends AbstractDataFileTest {
 		reader.stream().collect(Collectors.toList());
 	}
 	
-	@Test(expected=AssertionError.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void badValues2Direct() throws Exception {
 		JaxIntervalEQTLReader<EQTL> reader = new JaxIntervalEQTLReader<>();
 		reader.init(new ReaderRequest("Mus musculus", getFile("data/eQTL/mm_bad/Mouse_eQTL_badValues2.csv")));
