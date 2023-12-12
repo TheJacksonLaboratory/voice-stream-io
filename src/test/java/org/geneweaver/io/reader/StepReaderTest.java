@@ -19,7 +19,7 @@ public class StepReaderTest extends AbstractDataFileTest {
 	@Test
 	public void simpleStepRead() throws Exception {
 		
-		StreamReader<Step> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("prod/ccsi/mm/4c-1.step.gz")));
+		StreamReader<Step> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("prod/steps/mm/4c-1.step.gz")));
 		List<Step> steps = reader.stream().collect(Collectors.toList());
 		assertNotNull(steps);
 		assertEquals(58, steps.size());
@@ -28,13 +28,13 @@ public class StepReaderTest extends AbstractDataFileTest {
 	@Test
 	public void readAllHuman() throws Exception {
 		
-		Path dir = getPath("prod/ccsi/hs/");
+		Path dir = getPath("prod/steps/hs/");
 		readAll("Homo sapiens", dir, 10);
 	}
 	
 	@Test
 	public void readAllMouse() throws Exception {
-		Path dir = getPath("prod/ccsi/mm/");
+		Path dir = getPath("prod/steps/mm/");
 		readAll("Mus musculus", dir, 10);
 	}
 	

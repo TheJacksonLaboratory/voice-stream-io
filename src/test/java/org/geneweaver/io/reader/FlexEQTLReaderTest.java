@@ -57,7 +57,7 @@ public class FlexEQTLReaderTest extends AbstractDataFileTest {
 	@Test
 	public void factoryGZ() throws Exception {
 		
-		Path path = getPath("prod/eQTL/BetaCells_independent_exon_eQTLs.txt.gz");
+		Path path = getPath("prod/eQTL/mm/BetaCells_independent_exon_eQTLs.txt.gz");
 		try {
 			StreamReader<EQTL> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", path));
 
