@@ -37,7 +37,7 @@ public class JaxIntervalEQTLReaderTest extends AbstractDataFileTest {
 	@Test
 	public void directUsingViveksFileZipped() throws Exception {
 		
-		Path path = getPath("prod/eQTL-interval/Chr8_1p5LODinterval_GenomeMuster_rqtl.csv.gz");
+		Path path = getPath("prod/eQTL-interval/mm/Chr8_1p5LODinterval_GenomeMuster_rqtl.csv.gz");
 		ReaderRequest req = new ReaderRequest("Mus musculus", path.toFile());
 		req.setReaderHint("JaxIntervalEQTLReader");
 	    StreamReader<EQTL> reader = ReaderFactory.getReader(req);
