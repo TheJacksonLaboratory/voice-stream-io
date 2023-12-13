@@ -1,6 +1,7 @@
 package org.geneweaver.io.reader;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -10,10 +11,11 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.BeanMap;
+import org.apache.commons.beanutils.BeanUtils;
 import org.geneweaver.domain.EQTL;
-import org.geneweaver.domain.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * @author gerrim
  *
  */
-class JaxIntervalEQTLReader<N extends Entity> extends LineIteratorReader<N> {
+class JaxIntervalEQTLReader extends LineIteratorReader<EQTL> {
 	
 	private static Logger logger = LoggerFactory.getLogger(JaxIntervalEQTLReader.class);
 
@@ -38,7 +40,7 @@ class JaxIntervalEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public JaxIntervalEQTLReader<N> init(ReaderRequest request) throws ReaderException {
+	public JaxIntervalEQTLReader init(ReaderRequest request) throws ReaderException {
 		super.setup(request);
 		setDelimiter(","); // Must be a , only
 		return this;
@@ -57,7 +59,7 @@ class JaxIntervalEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	protected N create(String line) throws ReaderException {
+	protected EQTL create(String line) throws ReaderException {
 
 		if (headerNames==null || headerValues==null) {
 			parseHeaders();
@@ -109,7 +111,7 @@ class JaxIntervalEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 			d.put(k,v);
 		});
 		
-		return (N)bean;
+		return bean;
 	}
 
 	private String createFudgedStudyId(String name, Map<String,Object> headerValues) throws ReaderException {
@@ -200,4 +202,36 @@ class JaxIntervalEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		super.addHeader(line);
 	}
 
+	/**
+	 * This stream must not be used in parallel stream programming.
+	 * Use forkJoinStream() instead.
+	 *
+	 * @return the stream
+	 */
+	public Stream<EQTL> stream() {
+		return super.stream()
+			 .flatMap(n->expand(n));
+	}
+
+	private Stream<EQTL> expand(EQTL n) {
+		if (!(n instanceof EQTL)) return Stream.of(n);
+		EQTL eqtl = (EQTL)n;
+		String rid = eqtl.getRsId();
+		if (rid.startsWith("rs") && rid.indexOf(' ')>-1) {
+			String[] rids = rid.split("\\s+");
+			return Stream.of(rids).map(r->clone(r, eqtl));
+		}
+		return Stream.of(n);
+	}
+
+	private EQTL clone(String rsId, EQTL eqtl) {
+		EQTL ret = new EQTL();
+		try {
+			BeanUtils.copyProperties(ret, eqtl);
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			throw new IllegalArgumentException("Cannot copy properties of EQTL for variant "+rsId);
+		}
+		ret.setRsId(rsId);
+		return ret;
+	}
 }
