@@ -57,7 +57,6 @@ class JaxIntervalEQTLReader extends LineIteratorReader<EQTL> {
 	 * @return the n
 	 * @throws ReaderException the reader exception
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	protected EQTL create(String line) throws ReaderException {
 
@@ -68,6 +67,7 @@ class JaxIntervalEQTLReader extends LineIteratorReader<EQTL> {
 		EQTL bean = new EQTL();
 		bean.setTissueFileName(request.name());
 		bean.setStudyId(createFudgedStudyId(request.name(), headerValues));
+		bean.setType(EQTL.Type.INTERVAL);
 		BeanMap d = new BeanMap(bean);
 		
 		String[] values = line.split(getDelimiter());

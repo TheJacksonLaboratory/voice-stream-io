@@ -72,6 +72,7 @@ public class JaxIntervalEQTLReaderTest extends AbstractDataFileTest {
 			assertNotNull(e.getLod());
 			assertNotNull(e.getStudyId());
 			assertNotNull(e.getBp());
+			assertEquals(EQTL.Type.INTERVAL, e.getType());
 		});		
 		
 		// Line 15: rs265569038 rs213947216
