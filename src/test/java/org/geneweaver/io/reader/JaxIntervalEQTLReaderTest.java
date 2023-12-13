@@ -73,8 +73,26 @@ public class JaxIntervalEQTLReaderTest extends AbstractDataFileTest {
 			assertNotNull(e.getStudyId());
 			assertNotNull(e.getBp());
 		});		
+		
+		// Line 15: rs265569038 rs213947216
+		checkPropertiesEqual(eqtls, "rs265569038", "rs213947216");
+		// Line 39: rs229925787 rs250584385
+		checkPropertiesEqual(eqtls, "rs229925787", "rs250584385");
+		// Line 84: rs49951440 rs238952826
+		checkPropertiesEqual(eqtls, "rs49951440", "rs238952826");
 	}
 	
+	private void checkPropertiesEqual(List<EQTL> eqtls, String r1, String r2) {
+		
+		EQTL e1 = eqtls.stream().filter(e->e.getRsId().equals(r1)).findFirst().orElse(null);
+		EQTL e2 = eqtls.stream().filter(e->e.getRsId().equals(r2)).findFirst().orElse(null);
+		
+		// They should have all same values apart from rsId
+		e1.setRsId("test");
+		e2.setRsId("test");
+		assertEquals(e1, e2);
+	}
+
 	@Test(expected=IllegalArgumentException.class)
 	public void badHeaderDirect() throws Exception {
 		JaxIntervalEQTLReader reader = new JaxIntervalEQTLReader();
