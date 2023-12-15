@@ -120,8 +120,8 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 * @throws ReaderException
 	 * @throws IOException
 	 */
-	public void create() throws SQLException, ReaderException, IOException {
-		create(null, System.out);
+	public long create() throws SQLException, ReaderException, IOException {
+		return create(null, System.out);
 	}
 
 	/**
@@ -132,10 +132,12 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 * @throws ReaderException
 	 * @throws IOException
 	 */
-	public void create(String prefix, PrintStream out) throws SQLException, ReaderException, IOException {
+	public long create(String prefix, PrintStream out) throws SQLException, ReaderException, IOException {
 
 		if (source==null || source.isEmpty()) throw new IllegalArgumentException();
 		int index = -1;
+		
+		long added = 0;
 		for (Path path : source) {
 
 			++index;
@@ -156,6 +158,9 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			}
 			
 			Stream<Located> stream = raw.map(e->coerce(e));
+			
+			stream = stream.filter(l->filter(l));
+			
 			stream =  stream.filter(ChromosomeService::isValidChromosome)
 						    .filter(l->isValidClass(l));
 			
@@ -163,8 +168,22 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 				stream = stream.limit(limit.longValue());
 			}
 			
-			stream.forEach(loc -> store(loc, prefix, out));
+			long stored = stream.map(loc -> store(loc, prefix, out))
+						        .filter(s->s!=null)
+							    .count();
+			added += stored;
+			
 		} 
+		return added;
+	}
+	
+	/**
+	 * Implement to provide custom filtering to the input stream.
+	 * @param loc
+	 * @return
+	 */
+	protected boolean filter(Located loc) {
+		return true;
 	}
 
 	/**
@@ -195,7 +214,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		return true;
 	}
 
-	protected <T extends Located> void store(T line, String prefix, PrintStream out) {
+	protected <T extends Located> T store(T line, String prefix, PrintStream out) {
 		
 		int lower = Math.min(line.getStart(), line.getEnd());
 		int upper = Math.max(line.getStart(), line.getEnd());
@@ -205,7 +224,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			String msg = "Could not find shard for "+line.getChr();
 			logger.warn(msg);
 			out.println(msg);
-			return; // No shard
+			return null; // No shard
 		}
 		storeBase(lshardName, line, prefix, out);
 		
@@ -214,9 +233,10 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			String msg = "Could not find shard for "+line.getChr();
 			logger.warn(msg);
 			out.println(msg);
-			return; // No shard
+			return null; // No shard
 		}
 		if (!ubshardName.equals(lshardName)) storeBase(ubshardName, line, prefix, out);
+		return line;
 	}
 
 

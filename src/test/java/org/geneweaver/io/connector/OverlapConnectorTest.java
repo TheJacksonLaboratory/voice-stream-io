@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Overlap;
+import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Variant;
 import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.geneweaver.io.reader.ReaderFactory;
@@ -147,6 +148,41 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		}
 	}
 
+	@Test
+	public void filterPeaksWrong() throws Exception {
+		
+		assertEquals(0, testOverlapPeakFeatureFilter("WRONG"));
+	}
+	
+	@Test
+	public void filterPeaksBCL3() throws Exception {
+		
+		assertEquals(10, testOverlapPeakFeatureFilter("BCL3"));
+	}
+
+	@Test
+	public void filterPeaksH3K4me3() throws Exception {
+		
+		assertEquals(5, testOverlapPeakFeatureFilter("H3K4me3"));
+	}
+
+	@Test
+	public void filterPeaksNone() throws Exception {
+		
+		assertEquals(15, testOverlapPeakFeatureFilter(null));
+	}
+
+	@Test
+	public void filterPeaksH3KStar() throws Exception {
+		
+		assertEquals(5, testOverlapPeakFeatureFilter("H3K.*"));
+	}
+
+	@Test
+	public void filterPeaksH3K33Star() throws Exception {
+		
+		assertEquals(0, testOverlapPeakFeatureFilter("H3K33.*"));
+	}
 
 	private List<Entity> testIntersections(String testName, Path vpath, Path rpath) throws Exception {
 		
@@ -167,6 +203,23 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 			
 			assertNotNull(varsAndIntersections);
 			return varsAndIntersections;
+		}
+	}
+	
+	public long testOverlapPeakFeatureFilter(String pff) throws Exception {
+		
+		Path dir = Paths.get("./tmp/testPeakFeatureFilter");
+		FileUtils.deleteQuietly(dir.toFile());
+		dir.toFile().mkdirs();
+
+		// Create a massive database
+		Path rpath = getPath("data/bed_peaks/some.bed");
+		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("peaks")) {
+			// 1. Create a database with things that match.
+			conn.setLocation(dir);
+			conn.add(rpath);
+			conn.setPeakFeatureFilter(pff);
+			return conn.create();
 		}
 	}
 	
@@ -194,13 +247,14 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 			// 1. Create a database with things that match.
 			conn.setLocation(dir);
 			conn.add(rpath);
-			conn.create();
+			long addedFirst = conn.create();
+			System.out.println("Added "+addedFirst+" real data rows");
 			
 			// 2. Add random rows to this database, increase size to check performance of 
 			// many rows. 10mill is a reasonable test when it comes to our peaks which are
 			// size 170059268 for all ensembl-107 data (but splittable my chromosome).
-			int added = conn.testAddRandomRows("chr1", 100000);
-			System.out.println("Added "+added+" rows");
+			int addedExtra = conn.testAddRandomRows("chr1", 100000);
+			System.out.println("Added "+addedExtra+" extra rows");
 		}
 		
 		long time = System.currentTimeMillis();

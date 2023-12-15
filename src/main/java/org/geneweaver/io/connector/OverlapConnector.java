@@ -11,10 +11,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -22,6 +20,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.geneweaver.domain.Entity;
+import org.geneweaver.domain.Located;
 import org.geneweaver.domain.Overlap;
 import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Variant;
@@ -55,6 +54,8 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 
 	private boolean allowNulls    = Boolean.getBoolean("org.geneweaver.io.connector.ALLOW_NULL_IN_PEAKID");
 	private boolean allowNoTissue = Boolean.parseBoolean(System.getProperty("org.geneweaver.io.connector.ALLOW_NOTISSUE_IN_PEAKID", "true"));
+	
+	private String peakFeatureFilter = null;
 	
 	public OverlapConnector() {
 		this("peaks");
@@ -202,6 +203,39 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 		return (Stream<E>) ret.stream();
 	}
 
+	
+	/**
+	 * Implement to provide custom filtering to the input stream.
+	 * @param loc
+	 * @return
+	 */
+	@Override
+	protected boolean filter(Located loc) {
+		if (loc instanceof Peak) {
+			Peak p = (Peak)loc;
+			return filter(p, peakFeatureFilter); 
+		}
+		return true;
+	}
+	
+	/**
+	 * Call to filter a peak by feature type, useful used in a stream.
+	 * @param p
+	 * @param peakFeatureFilter
+	 * @return
+	 */
+	public static boolean filter(Peak p, String peakFeatureFilter) {
+		if (peakFeatureFilter==null) return true;
+		if (p.getFeatureType()==null && peakFeatureFilter!=null) {
+			return false; // If they have no feature and we should filter the features, we do not want this one.
+		}
+		if (p.getFeatureType()!=null && peakFeatureFilter!=null) {
+			if (p.getFeatureType().equalsIgnoreCase(peakFeatureFilter)) return true;
+			return p.getFeatureType().matches(peakFeatureFilter); // Might be false
+		}
+		return true;
+	}
+
 	private long roughBPperChr = 200000000;
 	
 	/**
@@ -265,6 +299,20 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 	 */
 	public void setAllowNoTissue(boolean allowNoTissue) {
 		this.allowNoTissue = allowNoTissue;
+	}
+
+	/**
+	 * @return the peakFeatureFilter
+	 */
+	public String getPeakFeatureFilter() {
+		return peakFeatureFilter;
+	}
+
+	/**
+	 * @param peakFeatureFilter the peakFeatureFilter to set
+	 */
+	public void setPeakFeatureFilter(String peakFeatureFilter) {
+		this.peakFeatureFilter = peakFeatureFilter;
 	}
 
 
