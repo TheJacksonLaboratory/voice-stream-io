@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Overlap;
-import org.geneweaver.domain.Peak;
+import org.geneweaver.domain.Transcript;
 import org.geneweaver.domain.Variant;
 import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.geneweaver.io.reader.ReaderFactory;
@@ -328,6 +328,57 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 			// Should only take newer.
 			assertTrue(added.stream().allMatch(p->p.getFileName().toString().endsWith("20210107.bed.gz")));
 		}
+	}
+	
+	@Test
+	public void simpleTranscriptOverlapCreation() throws Exception {
+		
+		Path gdir = Paths.get("tmp/simpleTranscriptOverlapCreation/hs");
+		FileUtils.deleteQuietly(gdir.toFile());
+		Files.createDirectory(gdir);
+		
+		// Should use just the transcript locations.
+		Path input =  getPath("data/1000/hs_gtf/hg38_2.gtf");
+		
+		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("genes_and_transcripts")) {
+			conn.setLocation(gdir);
+			conn.add(input);
+		
+			long nall = conn.create(null, System.out); 
+			assertEquals(230, nall);
+		}
+
+		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("transcripts")) {
+			conn.setLocation(gdir);
+			conn.add(input);
+		
+		    long ntrans = conn.create(null, System.out, Transcript.class); 
+			assertEquals(171, ntrans);
+		}
+		
+		
+		gdir = Paths.get("tmp/simpleTranscriptOverlapCreation/mm");
+		FileUtils.deleteQuietly(gdir.toFile());
+		Files.createDirectory(gdir);
+
+		input =  getPath("data/gz/mm10_1.gtf.gz");
+		
+		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("genes_and_transcripts")) {
+			conn.setLocation(gdir);
+			conn.add(input);
+		
+			long nall = conn.create(null, System.out); 
+			assertEquals(95996, nall);
+		}
+
+		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("transcripts")) {
+			conn.setLocation(gdir);
+			conn.add(input);
+		
+		    long ntrans = conn.create(null, System.out, Transcript.class); 
+			assertEquals(68918, ntrans);
+		}
+
 	}
 
 }
