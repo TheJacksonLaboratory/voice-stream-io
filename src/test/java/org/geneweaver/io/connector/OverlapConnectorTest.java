@@ -335,7 +335,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		
 		Path gdir = Paths.get("tmp/simpleTranscriptOverlapCreation/hs");
 		FileUtils.deleteQuietly(gdir.toFile());
-		Files.createDirectory(gdir);
+		Files.createDirectories(gdir);
 		
 		// Should use just the transcript locations.
 		Path input =  getPath("data/1000/hs_gtf/hg38_2.gtf");
@@ -359,7 +359,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		
 		gdir = Paths.get("tmp/simpleTranscriptOverlapCreation/mm");
 		FileUtils.deleteQuietly(gdir.toFile());
-		Files.createDirectory(gdir);
+		Files.createDirectories(gdir);
 
 		input =  getPath("data/gz/mm10_1.gtf.gz");
 		
