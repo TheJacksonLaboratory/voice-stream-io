@@ -352,6 +352,19 @@
             </property>
         </activation>
         
+        <repositories>
+				    <repository>
+				      <id>artifact-registry</id>
+				      <url>artifactregistry://us-maven.pkg.dev/jax-cs-registry/${deploy.repo.name}</url>
+				      <releases>
+				        <enabled>true</enabled>
+				      </releases>
+				      <snapshots>
+				        <enabled>true</enabled>
+				      </snapshots>
+				    </repository>
+				</repositories>
+
 				<distributionManagement>
 		   	 	<snapshotRepository>
 		     	 <id>artifact-registry</id>
