@@ -15,6 +15,9 @@ pipelines:
          script:
             - cp settings.xml ~/.m2/
             - git clone git@bitbucket.org:jacksonlaboratory/gweaver-test-data.git
+						
+						# -DdeployJax=true is our own variable created to add different deployment
+						# other than maven central.
             - mvn -B deploy -DdeployJax=true # -B batch mode makes Maven less verbose
             
          services:
