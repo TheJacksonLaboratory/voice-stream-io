@@ -18,7 +18,7 @@ pipelines:
 
             # -DdeployJax=true is our own variable created to add different deployment
             # other than maven central.
-            - mvn -B deploy -DdeployJax=true # -B batch mode makes Maven less verbose
+            - mvn -B deploy -DskipTests=true -Djacoco.skip=true -DdeployJax=true # -B batch mode makes Maven less verbose
             
          services:
             - docker

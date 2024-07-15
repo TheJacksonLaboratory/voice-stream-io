@@ -15,6 +15,7 @@
 		<maven.compiler.target>17</maven.compiler.target>
 		<maven.compiler.source>17</maven.compiler.source>
 		<neo4j-ogm.version>3.2.37</neo4j-ogm.version>
+		<deploy.repo.name>maven</deploy.repo.name>
 	</properties>
 
 	<description>The IO bundle for Geneweaver.</description>
@@ -356,6 +357,8 @@
 				</distributionManagement>
 		
 				<build>
+					<plugins>
+					</plugins>
 					<extensions>
 			      <extension>
 			        <groupId>com.google.cloud.artifactregistry</groupId>
@@ -366,7 +369,6 @@
 				</build>
     </profile>
 
-	
 		<!-- Full Release: https://dzone.com/articles/publish-your-artifacts-to-maven-central 
 			http://tutorials.jenkov.com/maven/publish-to-central-maven-repository.html 
 			https://central.sonatype.org/pages/releasing-the-deployment.html -->
