@@ -16,6 +16,9 @@
 		<maven.compiler.source>17</maven.compiler.source>
 		<neo4j-ogm.version>3.2.37</neo4j-ogm.version>
 		<deploy.repo.name>maven</deploy.repo.name>
+		
+		<deployJax>true</deployJax>
+		<performRelease>false</performRelease>
 	</properties>
 
 	<description>The IO bundle for Geneweaver.</description>
