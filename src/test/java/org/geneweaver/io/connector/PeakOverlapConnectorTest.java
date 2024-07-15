@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.Entity;
-import org.geneweaver.domain.Overlap;
+import org.geneweaver.domain.PeakOverlap;
 import org.geneweaver.domain.Transcript;
 import org.geneweaver.domain.Variant;
 import org.geneweaver.io.reader.AbstractDataFileTest;
@@ -30,13 +30,13 @@ import org.junit.Test;
 
 import com.google.common.base.Stopwatch;
 
-public class OverlapConnectorTest extends AbstractDataFileTest{
+public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 
 	
 	@Test(expected=FileNotFoundException.class)
 	public void badRegionFile1() throws Exception {
 		Path hFile = getPath("data/NOTTHERE");
-		try (OverlapConnector<Variant, Entity> func = new OverlapConnector<>()) {
+		try (PeakOverlapConnector<Variant, Entity> func = new PeakOverlapConnector<>()) {
 			func.add(hFile);
 		}
 	}
@@ -45,7 +45,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 	public void badRegionFile2() throws Exception {
 		Path mFile = getPath("data/bed_peaks/homo_sapiens/CD14_monocyte_1/H3K4me1/homo_sapiens.GRCh38.CD14_monocyte_1.H3K4me1.ccat_histone.peaks.20210107.bed.gz");
 		Path hFile = getPath("data/NOTTHERE");
-		try (OverlapConnector<Variant, Entity> func = new OverlapConnector<>()) {
+		try (PeakOverlapConnector<Variant, Entity> func = new PeakOverlapConnector<>()) {
 			func.add(mFile);
 			func.add(hFile);
 		}
@@ -53,7 +53,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void noAdd() throws Exception {
-		try (OverlapConnector<Variant, Entity> func = new OverlapConnector<>()) {
+		try (PeakOverlapConnector<Variant, Entity> func = new PeakOverlapConnector<>()) {
 			func.create(); // Creates indexed database.
 		}
 	}
@@ -76,7 +76,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		Path tdir = Paths.get("./tmp/"+testName);
 		FileUtils.deleteQuietly(tdir.toFile());
 		
-		try (OverlapConnector<Variant, Entity> func = new OverlapConnector<>()) {
+		try (PeakOverlapConnector<Variant, Entity> func = new PeakOverlapConnector<>()) {
 			func.setLocation(tdir);
 			
 			// limit is used here just to avoid caching all the test files i.e. test goes quicker.
@@ -98,17 +98,17 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		List<Entity> ret = testIntersections("testInterleaves", vpath, rpath);
 		
 		// In this data the first three variants all match the same peak
-		String peak1 = ((Overlap)ret.get(1)).getPeak().id();
-		assertEquals(peak1, ((Overlap)ret.get(3)).getPeak().id());
-		assertEquals(peak1, ((Overlap)ret.get(5)).getPeak().id());
+		String peak1 = ((PeakOverlap)ret.get(1)).getPeak().id();
+		assertEquals(peak1, ((PeakOverlap)ret.get(3)).getPeak().id());
+		assertEquals(peak1, ((PeakOverlap)ret.get(5)).getPeak().id());
 		
 		// The 4th variant matches a different peak.
-		assertNotEquals(peak1, ((Overlap)ret.get(7)).getPeak().id());
-		String peak2 = ((Overlap)ret.get(7)).getPeak().id();
-		assertEquals(peak2, ((Overlap)ret.get(9)).getPeak().id());
-		assertEquals(peak2, ((Overlap)ret.get(11)).getPeak().id());
-		assertEquals(peak2, ((Overlap)ret.get(13)).getPeak().id());
-		assertEquals(peak2, ((Overlap)ret.get(15)).getPeak().id());
+		assertNotEquals(peak1, ((PeakOverlap)ret.get(7)).getPeak().id());
+		String peak2 = ((PeakOverlap)ret.get(7)).getPeak().id();
+		assertEquals(peak2, ((PeakOverlap)ret.get(9)).getPeak().id());
+		assertEquals(peak2, ((PeakOverlap)ret.get(11)).getPeak().id());
+		assertEquals(peak2, ((PeakOverlap)ret.get(13)).getPeak().id());
+		assertEquals(peak2, ((PeakOverlap)ret.get(15)).getPeak().id());
 	}
 
 	@Test
@@ -116,7 +116,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		Path vpath = getPath("data/bed_peaks/none.gvf");
 		Path rpath = getPath("data/bed_peaks/none.bed");
 		List<Entity> ret = testIntersections("testNoMatch", vpath, rpath);
-		assertTrue(ret.stream().allMatch(e->!(e instanceof Overlap)));
+		assertTrue(ret.stream().allMatch(e->!(e instanceof PeakOverlap)));
 	}
 	
 	@Test
@@ -126,7 +126,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		Path vpath = getPath("data/bed_peaks/some.gvf");
 		Path rpath = getPath("data/bed_peaks/some.bed");
 		List<Entity> ret  = testIntersections("testSomeMatch", vpath, rpath);
-		List<Entity> laps = ret.stream().filter(o->(o instanceof Overlap)).collect(Collectors.toList());
+		List<Entity> laps = ret.stream().filter(o->(o instanceof PeakOverlap)).collect(Collectors.toList());
 		assertEquals(30, laps.size());
 		
 		// The six non-matches should result in variants which have no Overlap
@@ -141,7 +141,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		boolean checkNotOverlap = false;
 		for (Entity e : ret) {
 			if (checkNotOverlap) {
-				assertFalse(e instanceof Overlap);
+				assertFalse(e instanceof PeakOverlap);
 				checkNotOverlap = false;
 			}
 			checkNotOverlap = (e instanceof Variant) && "n".equals(((Variant)e).getType());
@@ -189,7 +189,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		Path tdir = Paths.get("./tmp/"+testName);
 		FileUtils.deleteQuietly(tdir.toFile());
 		
-		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>()) {
+		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>()) {
 			conn.setAllowNulls(true);     // Just for testing
 			conn.setAllowNoTissue(true);  // Just for testing
 			conn.setLocation(tdir);
@@ -214,7 +214,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 
 		// Create a massive database
 		Path rpath = getPath("data/bed_peaks/some.bed");
-		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("peaks")) {
+		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("peaks")) {
 			// 1. Create a database with things that match.
 			conn.setLocation(dir);
 			conn.add(rpath);
@@ -243,7 +243,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 
 		// Create a massive database
 		Path rpath = getPath("data/bed_peaks/some.bed");
-		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("peaks")) {
+		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("peaks")) {
 			// 1. Create a database with things that match.
 			conn.setLocation(dir);
 			conn.add(rpath);
@@ -268,7 +268,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 			copies.add(tmp);
 		}
 
-		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("peaks")) {
+		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("peaks")) {
 			conn.setLocation(dir);
 
 			try (@SuppressWarnings("resource")
@@ -293,10 +293,10 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 		
 		System.out.println(String.format("This is %3.2f ms per variant.", interval/(double)size));
 		
-		ReaderRequest reader = new ReaderRequest("test", dir.resolve("Overlap-chr1.csv.gz"));
+		ReaderRequest reader = new ReaderRequest("test", dir.resolve("PeakOverlap-chr1.csv.gz"));
 		reader.setReaderHint("MapCSVReader");
 		assertTrue(ReaderFactory.getReader(reader).stream().count() >= 719); // There are 719 but some randoms might collide.
-		assertTrue(Files.exists(dir.resolve("Overlap-header.csv")));
+		assertTrue(Files.exists(dir.resolve("PeakOverlap-header.csv")));
 		assertTrue(Files.size(dir.resolve("Variant-chr1.csv.gz"))>100);
 		assertTrue(Files.exists(dir.resolve("Variant-header.csv")));
 		assertTrue(Files.exists(dir.resolve("VariantEffect-chr1.csv.gz")));
@@ -307,7 +307,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 	@Test
 	public void ignoreOlderBedFilesMouse() throws Exception {
 		Path dir = getPath("data/bed_peaks/mus_musculus");
-		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("peaks")) {
+		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("peaks")) {
 			Collection<Path> added = conn.addAll(dir);
 			
 			// e.g. ...peaks.20201021.bed.gz
@@ -320,7 +320,7 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 	@Test
 	public void ignoreOlderBedFilesHuman() throws Exception {
 		Path dir = getPath("data/bed_peaks/homo_sapiens");
-		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("peaks")) {
+		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("peaks")) {
 			Collection<Path> added = conn.addAll(dir);
 			
 			// e.g. ...peaks.20201021.bed.gz
@@ -328,57 +328,6 @@ public class OverlapConnectorTest extends AbstractDataFileTest{
 			// Should only take newer.
 			assertTrue(added.stream().allMatch(p->p.getFileName().toString().endsWith("20210107.bed.gz")));
 		}
-	}
-	
-	@Test
-	public void simpleTranscriptOverlapCreation() throws Exception {
-		
-		Path gdir = Paths.get("tmp/simpleTranscriptOverlapCreation/hs");
-		FileUtils.deleteQuietly(gdir.toFile());
-		Files.createDirectories(gdir);
-		
-		// Should use just the transcript locations.
-		Path input =  getPath("data/1000/hs_gtf/hg38_2.gtf");
-		
-		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("genes_and_transcripts")) {
-			conn.setLocation(gdir);
-			conn.add(input);
-		
-			long nall = conn.create(null, System.out); 
-			assertEquals(230, nall);
-		}
-
-		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("transcripts")) {
-			conn.setLocation(gdir);
-			conn.add(input);
-		
-		    long ntrans = conn.create(null, System.out, Transcript.class); 
-			assertEquals(171, ntrans);
-		}
-		
-		
-		gdir = Paths.get("tmp/simpleTranscriptOverlapCreation/mm");
-		FileUtils.deleteQuietly(gdir.toFile());
-		Files.createDirectories(gdir);
-
-		input =  getPath("data/gz/mm10_1.gtf.gz");
-		
-		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("genes_and_transcripts")) {
-			conn.setLocation(gdir);
-			conn.add(input);
-		
-			long nall = conn.create(null, System.out); 
-			assertEquals(95996, nall);
-		}
-
-		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>("transcripts")) {
-			conn.setLocation(gdir);
-			conn.add(input);
-		
-		    long ntrans = conn.create(null, System.out, Transcript.class); 
-			assertEquals(68918, ntrans);
-		}
-
 	}
 
 }

@@ -18,7 +18,8 @@ import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Variant;
 import org.geneweaver.io.DirectSave;
 import org.geneweaver.io.Timer;
-import org.geneweaver.io.connector.OverlapConnector;
+import org.geneweaver.io.connector.PeakOverlapConnector;
+import org.geneweaver.io.connector.TranscriptOverlapConnector;
 import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.geneweaver.io.reader.ReaderException;
 import org.geneweaver.io.reader.ReaderFactory;
@@ -225,6 +226,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 	public void testBedExportWithOverlaps() throws Exception {
 		
 		Path rpath = getPath("data/bed_peaks/some.bed");
+		Path tpath = getPath("data/1000/hs_gtf/hg38_2.gtf");
 
 		Path dir = Paths.get("./tmp/testBedExportWithOverlaps");
 		FileUtils.deleteQuietly(dir.toFile());
@@ -251,19 +253,27 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 			copies.add(tmp);
 		}
 		
-		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>()) {
-			conn.setAllowNulls(true);     // Just for testing
-			conn.setAllowNoTissue(true);  // Just for testing
-			conn.setFrequency(100);
-			conn.setLocation(dir);
-			conn.add(rpath);
-			conn.create();
+		try (PeakOverlapConnector<Variant, Entity> pconn = new PeakOverlapConnector<>();
+			 TranscriptOverlapConnector<Variant, Entity> tconn = new TranscriptOverlapConnector<>()) {
+			pconn.setAllowNulls(true);     // Just for testing
+			pconn.setAllowNoTissue(true);  // Just for testing
+			pconn.setFrequency(100);
+			pconn.setLocation(dir);
+			pconn.add(rpath);
+			pconn.create();
+			
+			tconn.setFrequency(100);
+			tconn.setLocation(dir);
+			tconn.add(tpath);
+			tconn.create();
+
 			
 			try (@SuppressWarnings("resource")
 				ExportBuilder builder = new ExportBuilder().setSpecies("Homo sapiens")
 					   .setChunkProperty("1000")
 					   .setAlwaysUseDefaultConnector(true)
-					   .addConnector(conn)
+					   .addConnector(pconn)
+					   .addConnector(tconn)
 					   .setVerbose(true)
 					   .setOut(System.out)
 					   .setDir(dir)
@@ -276,9 +286,11 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		}
 		
 		assertNumber(dir, "Variant-chr1.csv.gz", 815);
-		assertNumber(dir, "Overlap-chr1.csv.gz", 719); 
+		assertNumber(dir, "PeakOverlap-chr1.csv.gz", 719); 
+		assertNumber(dir, "TranscriptOverlap-chr1.csv.gz", 2375); 
 
-		assertTrue(Files.exists(dir.resolve("Overlap-header.csv")));
+		assertTrue(Files.exists(dir.resolve("PeakOverlap-header.csv")));
+		assertTrue(Files.exists(dir.resolve("TranscriptOverlap-header.csv")));
 		assertTrue(Files.exists(dir.resolve("Peak-chr1.csv.gz")));
 		assertTrue(Files.size(dir.resolve("Peak-chr1.csv.gz"))>100);
 		assertTrue(Files.exists(dir.resolve("Peak-header.csv")));
@@ -305,7 +317,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		FileUtils.deleteQuietly(dir.toFile());
 		dir.toFile().mkdirs();
 
-		try (OverlapConnector<Variant, Entity> conn = new OverlapConnector<>()) {
+		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>()) {
 			conn.setLocation(dir);
 			conn.addAll(hdir);
 			conn.create();

@@ -111,15 +111,6 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		return source;
 	}
 	
-	/**
-	 * Call this method to create a cache of the files which we have added.
-	 * This cache is then used when the connector is streamed to look up locations.
-	 * 
-	 * @throws SQLException
-	 * @throws ReaderException
-	 * @throws IOException
-	 */
-	@SuppressWarnings("unchecked")
 	public long create() throws SQLException, ReaderException, IOException {
 		return create(null, System.out);
 	}
@@ -132,8 +123,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 * @throws ReaderException
 	 * @throws IOException
 	 */
-	@SafeVarargs
-	public final <T extends Located> long create(String prefix, PrintStream out, Class<T>... clazzes) throws SQLException, ReaderException, IOException {
+	public final <T extends Located> long create(String prefix, PrintStream out) throws SQLException, ReaderException, IOException {
 
 		if (source==null || source.isEmpty()) throw new IllegalArgumentException();
 		int index = -1;
@@ -149,11 +139,6 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			
 			StreamReader<?> reader = ReaderFactory.getReader(request);
 			Stream<?> raw = reader.stream();
-			
-			if (clazzes != null && clazzes.length>0) {
-				List<Class<T>> allowedTypes = Arrays.asList(clazzes);
-				raw = raw.filter(o->allowedTypes.contains(o.getClass()));
-			}
 			
 			// The skip is not that accurate because
 			// we use it on the raw which might have other objects in.

@@ -15,7 +15,7 @@ pipelines:
          script:
             - cp settings.xml ~/.m2/
             - git clone git@bitbucket.org:jacksonlaboratory/gweaver-test-data.git
-            - mvn -B deploy # -B batch mode makes Maven less verbose
+            - mvn -B deploy -DdeployJax=true # -B batch mode makes Maven less verbose
             
          services:
             - docker

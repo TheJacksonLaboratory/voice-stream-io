@@ -19,9 +19,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import org.geneweaver.domain.AbstractEntity;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Located;
-import org.geneweaver.domain.Overlap;
 import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Variant;
 import org.neo4j.ogm.session.Session;
@@ -50,14 +50,14 @@ import org.neo4j.ogm.session.Session;
  * @author gerrim
  *
  */
-public class OverlapConnector<N extends Entity, E extends Entity> extends AbstractOverlapConnector<N,E> {
+public class PeakOverlapConnector<N extends Entity, E extends Entity> extends AbstractOverlapConnector<N,E> {
 
 	private boolean allowNulls    = Boolean.getBoolean("org.geneweaver.io.connector.ALLOW_NULL_IN_PEAKID");
 	private boolean allowNoTissue = Boolean.parseBoolean(System.getProperty("org.geneweaver.io.connector.ALLOW_NOTISSUE_IN_PEAKID", "true"));
 	
 	private String peakFeatureFilter = null;
 	
-	public OverlapConnector() {
+	public PeakOverlapConnector() {
 		this("peaks");
 	}
 
@@ -66,7 +66,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 	 * The database is sharded by file so this
 	 * @param databaseFileName
 	 */
-	public OverlapConnector(String databaseFileName) {
+	public PeakOverlapConnector(String databaseFileName) {
 		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
 		setFileName(databaseFileName);
 		setFileFilters(".bed.gz", ".bed");
@@ -181,7 +181,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 							log.println("Example of peakId found: "+peakId);
 						}
 
-						Overlap o = oservice.intersection(variant, new Peak(peakId, rlow, rup));
+						AbstractEntity o = oservice.intersection(variant, new Peak(peakId, rlow, rup));
 						if (o!=null) {
 							o.setChr(variant.getChr());
 							ret.add(o);

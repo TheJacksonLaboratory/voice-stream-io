@@ -7,7 +7,7 @@
 	<groupId>org.geneweaver</groupId>
 	<artifactId>gweaver-stream-io</artifactId>
 	<packaging>jar</packaging>
-	<version>2.6.0-SNAPSHOT</version>
+	<version>2.7.0-SNAPSHOT</version>
 	<name>Geneweaver Stream IO</name>
 
 	<properties>
@@ -332,18 +332,41 @@
 		</plugins>
 	</build>
 
-	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
 
 	<profiles>
+	
+    <profile>
+        <id>jax-repository</id>
+        <activation>
+            <property>
+                <name>deployJax</name>
+                <value>true</value>
+            </property>
+        </activation>
+        
+				<distributionManagement>
+		   	 	<snapshotRepository>
+		     	 <id>artifact-registry</id>
+		    	  <url>artifactregistry://us-maven.pkg.dev/jax-cs-registry/${deploy.repo.name}</url>
+		   	 	</snapshotRepository>
+		    	<repository>
+		     	 <id>artifact-registry</id>
+		     	 <url>artifactregistry://us-maven.pkg.dev/jax-cs-registry/${deploy.repo.name}</url>
+		    	</repository>
+				</distributionManagement>
+		
+				<build>
+					<extensions>
+			      <extension>
+			        <groupId>com.google.cloud.artifactregistry</groupId>
+			        <artifactId>artifactregistry-maven-wagon</artifactId>
+			        <version>2.2.0</version>
+			      </extension>
+		    	</extensions>
+				</build>
+    </profile>
+
+	
 		<!-- Full Release: https://dzone.com/articles/publish-your-artifacts-to-maven-central 
 			http://tutorials.jenkov.com/maven/publish-to-central-maven-repository.html 
 			https://central.sonatype.org/pages/releasing-the-deployment.html -->
@@ -366,6 +389,18 @@
 					<value>true</value>
 				</property>
 			</activation>
+			
+			<distributionManagement>
+				<snapshotRepository>
+					<id>ossrh</id>
+					<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+				</snapshotRepository>
+				<repository>
+					<id>ossrh</id>
+					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+				</repository>
+			</distributionManagement>
+			
 			<build>
 				<plugins>
 					<plugin>
