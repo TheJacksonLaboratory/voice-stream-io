@@ -121,7 +121,7 @@ public class Peak  extends NamedEntity implements Located {
 	private String filterType;
 
 	/**
-	 * The subdir of the new data sources e.g. H3K4me1
+	 * The subdir of the new data sources e.g. H3K4me1 or H3K4me3
 	 */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String featureType;

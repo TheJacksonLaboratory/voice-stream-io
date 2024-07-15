@@ -1,18 +1,21 @@
 package org.geneweaver.io.reader;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.BeanMap;
+import org.apache.commons.beanutils.BeanUtils;
 import org.geneweaver.domain.EQTL;
-import org.geneweaver.domain.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +28,9 @@ import org.slf4j.LoggerFactory;
  * @author gerrim
  *
  */
-class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
+class JaxIntervalEQTLReader extends LineIteratorReader<EQTL> {
 	
-	private static Logger logger = LoggerFactory.getLogger(JaxEQTLReader.class);
+	private static Logger logger = LoggerFactory.getLogger(JaxIntervalEQTLReader.class);
 
 	/**
 	 * Create the reader by setting its data
@@ -37,7 +40,7 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public JaxEQTLReader<N> init(ReaderRequest request) throws ReaderException {
+	public JaxIntervalEQTLReader init(ReaderRequest request) throws ReaderException {
 		super.setup(request);
 		setDelimiter(","); // Must be a , only
 		return this;
@@ -46,6 +49,7 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 	private List<String> headerNames;
 	private Map<String,Object> headerValues;
 
+	private List<String> ignoredColumns = Arrays.asList("1p5lod", "inpaper");
 	/**
 	 * Creates the.
 	 *
@@ -53,9 +57,8 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 	 * @return the n
 	 * @throws ReaderException the reader exception
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
-	protected N create(String line) throws ReaderException {
+	protected EQTL create(String line) throws ReaderException {
 
 		if (headerNames==null || headerValues==null) {
 			parseHeaders();
@@ -63,7 +66,8 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		
 		EQTL bean = new EQTL();
 		bean.setTissueFileName(request.name());
-		bean.setStudyId(createFudgedStudyId(request.name()));
+		bean.setStudyId(createFudgedStudyId(request.name(), headerValues));
+		bean.setType(EQTL.Type.INTERVAL);
 		BeanMap d = new BeanMap(bean);
 		
 		String[] values = line.split(getDelimiter());
@@ -74,7 +78,8 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		
 		for(int i=0;i<headerNames.size();i++) {
 			String name = headerNames.get(i);
-			
+			if (ignoredColumns.contains(name.toLowerCase())) continue;
+
 			// BeanMap autoboxes which is probably slowish and
 			// could be speeded up.
 			Object value = values[i];
@@ -90,6 +95,7 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 			} else if (Double.class.equals(type)) {
 				value = Double.valueOf(value.toString());
 			}
+			
 			try {
 				if (value.toString().length()<1) continue;
 				d.put(name, value);
@@ -105,50 +111,13 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 			d.put(k,v);
 		});
 		
-		return (N)bean;
+		return bean;
 	}
-	
-	/*
-	      "Aging_Bone_DO.Rds",	"https://churchilllab.jax.org/qtlviewer/DO/bone/dl?fileName=dataset.mrna.DO_bone.v2.Rds",
-		  "Aging_Heart_DO.Rds", "https://churchilllab.jax.org/qtlviewer/JAC/DOHeart/dl?fileName=dataset.mrna.JAC_DO_heart.v10.Rds",
-		  "Aging_Kidney_DO.Rds", "https://churchilllab.jax.org/qtlviewer/JAC/DOKidney/dl?fileName=dataset.mrna.JAC_DO_kidney.v6.Rds",
-		  "Skelly_mESC_DO.Rds", "https://churchilllab.jax.org/qtlviewer/DO_mESC/dl?fileName=dataset.mrna.DO_mESC.v3.Rds",
-		  "Svenson_HFD_DO.Rds", "https://churchilllab.jax.org/qtlviewer/svenson/DOHFD/dl?fileName=dataset.mrna.Svenson_DO_HFD.v12.Rds",
-		  "Chesler_Striatum_DO.Rds",	"https://churchilllab.jax.org/qtlviewer/DO/DrugNaiveStriatum/dl?fileName=dataset.CSNA_DO_Striatum.v3.Rds",
-		  "Hippocampus_DO.Rds",	"https://churchilllab.jax.org/qtlviewer/DO/hippocampus/dl?fileName=dataset.DO_Hippocampus.v2.Rds",
-		  "AttieIsletSecretion_v13_DO.Rdata","http://bhchurchilllab01.jax.org:18005/dl?fileName=AttieIsletSecretion_v13.RData",
-		  "Adipose.RDS",	"http://bhchurchilllab01.jax.org:18045/dl?fileName=Adipose.RDS",
-		  "Heart.RDS",	"http://bhchurchilllab01.jax.org:18045/dl?fileName=Heart.RDS",
-		  "Islet.RDS",	"http://bhchurchilllab01.jax.org:18045/dl?fileName=Islet.RDS",
-		  "Liver.RDS",	"http://bhchurchilllab01.jax.org:18045/dl?fileName=Liver.RDS",
-		  "SkeletalMuscle.RDS",	"http://bhchurchilllab01.jax.org:18045/dl?fileName=SkeletalMuscle.RDS");
-	 */
-	
-	private static Map<String,String> studyIdMap = createStudyIdMap();
-	private static Map<String,String> createStudyIdMap() {
-		Map<String,String> ret = new HashMap<>();
-		ret.put("Aging_Bone_DO.csv.gz".toLowerCase(),"Project999901");
-		ret.put("Aging_Heart_DO.csv.gz".toLowerCase(),"Project999902");
-		ret.put("Aging_Kidney_DO.csv.gz".toLowerCase(),"Project999903");
-		ret.put("Chesler_Hippocampus_DO.csv.gz".toLowerCase(),"Chesler999901");
-		ret.put("Chesler_Striatum_DO.csv.gz".toLowerCase(),"Chesler999902");
-		ret.put("DO.Cube.Adipose.csv.gz".toLowerCase(),"Cube999901");
-		ret.put("DO.Cube.Heart.csv.gz".toLowerCase(),"Cube999902");
-		ret.put("DO.Cube.Islet.csv.gz".toLowerCase(),"Cube999903");
-		ret.put("DO.Cube.Liver.csv.gz".toLowerCase(),"Cube999904");
-		ret.put("DO.Cube.SkeletalMuscle.csv.gz".toLowerCase(),"Cube999905");
-		ret.put("Skelly_mESC_DO.csv.gz".toLowerCase(),"Skelly999901");
-		ret.put("Svenson_HFD_DO.csv.gz".toLowerCase(),"Svenson999901");
-		return ret;
-	}
-		
-	private String createFudgedStudyId(String name) throws ReaderException {
+
+	private String createFudgedStudyId(String name, Map<String,Object> headerValues) throws ReaderException {
 		if (name == null) return null;
 		try {
-			// We generate a fake project StudyId.
-			// Project1234 would be a private id
-			// Chelser7 would be a public id
-			if (studyIdMap.containsKey(name.toLowerCase())) return studyIdMap.get(name.toLowerCase());
+			if (headerValues.containsKey("studyId")) return  headerValues.get("studyId").toString();
 			return "Project:"+Base64.getEncoder().encodeToString(name.getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e) {
 			throw new ReaderException(e);
@@ -174,31 +143,40 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		for (int i = 0; i < names.length; i++) {
 			String name = names[i];
 			name = name.replace("_", "");
-			if (name.equals("rsid")) name = "rsId";
-			if (name.equals("geneid")) name = "geneId";
-			if (name.equals("bpmm10")) name = "bp";
-			if (name.equals("strain")) name = "population";
+			name = name.replace(" ", "");
+			String lc = name.toLowerCase();
+			if (lc.equals("rsid"))   name = "rsId";
+			if (lc.equals("rid"))    name = "rsId";
+			if (lc.equals("geneid")) name = "geneId";
+			if (lc.equals("genename")) name = "geneName";
+			if (lc.equals("bpmm10")) name = "bp";
 			// TODO lod
 			headerNames.add(name);
 		}
 		
 		// Header values
 		headerValues = new HashMap<>();
-		// Something like: strain, tissue, ensembl.version, species, url, date
 		for (int i = 0; i < header.size()-1; i++) {
 			String hline = header.get(i).substring(1);
 			String[] kvs = hline.split(":");
 			
-			String name = kvs[0].toLowerCase();
+			String name = kvs[0].toLowerCase().trim();
+			name = name.replace("_", "");
+			name = name.replace(" ", "");
 			Object value = kvs[1].trim();
 			
 			// Make all eQTLs have same field names, even if from human data or mouse data.
-			if (name.equals("strain")) name = "population";
 			if (name.equals("ensembl.version")) name = "version";
 			if (name.equals("tissue")) {
 				name = "tissueName";
 				value = value.toString().toLowerCase();
 			}
+			if (name.equals("studyid"))name = "studyId";
+			if (name.equals("rsid"))   name = "rsId";
+			if (name.equals("rid"))    name = "rsId";
+			if (name.equals("geneid")) name = "geneId";
+			if (name.equals("genename")) name = "geneName";
+			if (name.equals("bpmm10")) name = "bp";
 			if (name.equals("species")) continue; // Repeated information
 			if (name.equals("url")) name = "source";
 			if (name.equals("date")) {
@@ -224,4 +202,36 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		super.addHeader(line);
 	}
 
+	/**
+	 * This stream must not be used in parallel stream programming.
+	 * Use forkJoinStream() instead.
+	 *
+	 * @return the stream
+	 */
+	public Stream<EQTL> stream() {
+		return super.stream()
+			 .flatMap(n->expand(n));
+	}
+
+	private Stream<EQTL> expand(EQTL n) {
+		if (!(n instanceof EQTL)) return Stream.of(n);
+		EQTL eqtl = (EQTL)n;
+		String rid = eqtl.getRsId();
+		if (rid.startsWith("rs") && rid.indexOf(' ')>-1) {
+			String[] rids = rid.split("\\s+");
+			return Stream.of(rids).map(r->clone(r, eqtl));
+		}
+		return Stream.of(n);
+	}
+
+	private EQTL clone(String rsId, EQTL eqtl) {
+		EQTL ret = new EQTL();
+		try {
+			BeanUtils.copyProperties(ret, eqtl);
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			throw new IllegalArgumentException("Cannot copy properties of EQTL for variant "+rsId);
+		}
+		ret.setRsId(rsId);
+		return ret;
+	}
 }

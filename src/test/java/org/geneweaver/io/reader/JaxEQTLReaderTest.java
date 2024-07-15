@@ -63,7 +63,7 @@ public class JaxEQTLReaderTest extends AbstractDataFileTest {
 		eqtls.forEach(e-> {
 			assertNotNull(e.getRsId()); // It might be "NA" though
 			assertNotNull(e.getGeneId());
-			assertNotNull(e.getStrain());
+			assertNotNull(e.getPopulation());
 			assertNotNull(e.getTissueName());
 			assertNotNull(e.getBp());
 		});		

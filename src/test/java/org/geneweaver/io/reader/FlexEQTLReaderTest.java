@@ -57,7 +57,7 @@ public class FlexEQTLReaderTest extends AbstractDataFileTest {
 	@Test
 	public void factoryGZ() throws Exception {
 		
-		Path path = getPath("prod/eQTL/BetaCells_independent_exon_eQTLs.txt.gz");
+		Path path = getPath("prod/eQTL/mm/BetaCells_independent_exon_eQTLs.txt.gz");
 		try {
 			StreamReader<EQTL> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", path));
 
@@ -92,7 +92,7 @@ public class FlexEQTLReaderTest extends AbstractDataFileTest {
 		reader.stream().collect(Collectors.toList());
 	}
 	
-	@Test(expected=AssertionError.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void badValues2Direct() throws Exception {
 		StreamReader<EQTL> reader = new FlexEQTLReader<>();
 		reader.init(new ReaderRequest("Mus musculus", getFile("data/eQTL/mm_bad/Mouse_eQTL_badValues2.csv"), ","));

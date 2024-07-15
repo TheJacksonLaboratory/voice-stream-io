@@ -95,12 +95,12 @@ public class StepConnectorTest extends AbstractDataFileTest {
 	 */
 	@Test
 	public void readAFewMouseCCSIVariants() throws Exception {
-		variants("prod/ccsi/mm/snp137.txt.gz");
+		variants("prod/steps/mm/snp137.txt.gz");
 	}
 	
 	@Test
 	public void readAFewHumanCCSIVariants() throws Exception {
-		variants("prod/ccsi/hs/snp141.txt.gz");
+		variants("prod/steps/hs/snp141.txt.gz");
 	}
 	
 	private void variants(String path) throws IOException, ReaderException {
@@ -132,7 +132,7 @@ public class StepConnectorTest extends AbstractDataFileTest {
 	 */
 	@Test
 	public void readHumanCCSIGenes() throws Exception {
-		Path file = getPath("prod/ccsi/hs/hg38.gtf.gz");
+		Path file = getPath("prod/steps/hs/hg38.gtf.gz");
 		ReaderRequest request = new ReaderRequest(file.getFileName().toString(), file);
 		StreamReader<Gene> reader = ReaderFactory.getReader(request);
 		assertEquals(60483, reader.stream().count());
@@ -149,7 +149,7 @@ public class StepConnectorTest extends AbstractDataFileTest {
 
 	@Test
 	public void readMouseCCSIGenes() throws Exception {
-		Path file = getPath("prod/ccsi/mm/mm10.gtf.gz");
+		Path file = getPath("prod/steps/mm/mm10.gtf.gz");
 		ReaderRequest request = new ReaderRequest(file.getFileName().toString(), file);
 		StreamReader<Gene> reader = ReaderFactory.getReader(request);
 		assertEquals(43346, reader.stream().count());
@@ -171,10 +171,10 @@ public class StepConnectorTest extends AbstractDataFileTest {
 		Path tdir = Paths.get("./tmp/"+testName);
 		FileUtils.deleteQuietly(tdir.toFile());
 
-		Path file = getPath("prod/ccsi/mm/mm10.gtf.gz");
+		Path file = getPath("prod/steps/mm/mm10.gtf.gz");
 		testRealParse(testName, file, Gene.class, "ENS", 0L, 100000L);
 		
-		file = getPath("prod/ccsi/mm/snp137.txt.gz");
+		file = getPath("prod/steps/mm/snp137.txt.gz");
 		testRealParse(testName, file, Variant.class, "rs", 10000L, 100000L);
 		
 		assertTrue(Files.exists(Paths.get("tmp/mouse/Variant_1.mv.db")));
@@ -189,10 +189,10 @@ public class StepConnectorTest extends AbstractDataFileTest {
 		Path tdir = Paths.get("./tmp/"+testName);
 		FileUtils.deleteQuietly(tdir.toFile());
 
-		Path file = getPath("prod/ccsi/hs/hg38.gtf.gz");
+		Path file = getPath("prod/steps/hs/hg38.gtf.gz");
 		testRealParse(testName, file, Gene.class, "ENS", 0L, 100000L);
 		
-		file = getPath("prod/ccsi/hs/snp141.txt.gz");
+		file = getPath("prod/steps/hs/snp141.txt.gz");
 		testRealParse(testName, file, Variant.class, "rs", 10000L, 100000L);
 		
 		assertTrue(Files.exists(Paths.get("tmp/human/Variant_1.mv.db")));

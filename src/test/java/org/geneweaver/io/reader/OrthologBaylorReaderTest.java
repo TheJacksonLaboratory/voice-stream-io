@@ -20,7 +20,7 @@ public class OrthologBaylorReaderTest extends AbstractDataFileTest {
 	
 	@Test
 	public void parseWrongFormat() throws Exception {
-		File file = getFile("prod/eQTL/Aging_Bone_DO.csv.gz");
+		File file = getFile("prod/eQTL/mm/Aging_Bone_DO.csv.gz");
 		StreamReader<Ortholog> reader = new OrthologBaylorReader<Ortholog>();
 		reader.init(new ReaderRequest(file));
 		long size = reader.stream().count();
