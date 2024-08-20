@@ -1,30 +1,21 @@
 package org.geneweaver.io.connector;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.file.Path;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Located;
-import org.geneweaver.domain.Overlap;
 import org.geneweaver.domain.Peak;
-import org.geneweaver.domain.Variant;
-import org.neo4j.ogm.session.Session;
 
 /**
  * This function reads all the regions from their separate files
@@ -50,14 +41,14 @@ import org.neo4j.ogm.session.Session;
  * @author gerrim
  *
  */
-public class OverlapConnector<N extends Entity, E extends Entity> extends AbstractOverlapConnector<N,E> {
+public class PeakOverlapConnector<N extends Entity, E extends Entity> extends AbstractOverlapConnector<N,E> {
 
 	private boolean allowNulls    = Boolean.getBoolean("org.geneweaver.io.connector.ALLOW_NULL_IN_PEAKID");
 	private boolean allowNoTissue = Boolean.parseBoolean(System.getProperty("org.geneweaver.io.connector.ALLOW_NOTISSUE_IN_PEAKID", "true"));
 	
 	private String peakFeatureFilter = null;
 	
-	public OverlapConnector() {
+	public PeakOverlapConnector() {
 		this("peaks");
 	}
 
@@ -66,10 +57,11 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 	 * The database is sharded by file so this
 	 * @param databaseFileName
 	 */
-	public OverlapConnector(String databaseFileName) {
+	public PeakOverlapConnector(String databaseFileName) {
 		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
 		setFileName(databaseFileName);
 		setFileFilters(".bed.gz", ".bed");
+		setNewestInDirectoryByName(true);
 	}
 	
 	/**
@@ -120,89 +112,23 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 		return rev;
 	}
 	
-	// Every so often we print that overlaps are found in verbose mode.
-	private volatile int count = 0;
-	private int frequency = 10000;
-
-	@SuppressWarnings("unchecked")
 	@Override
-	public Stream<E> stream(N ent, Session session, PrintStream log) {
-		
-		// Other streams may run through this connector, but
-		// if they send other objects, we return them.
-		if (!(ent instanceof Variant)) return (Stream<E>) Stream.of(ent);
-		Variant variant = (Variant)ent;
-		
-		String shardName = oservice.getShardName(variant.getChr(), variant.getStart());
-
-		Collection<Entity> ret = new LinkedList<>();
-		ret.add(variant);
-		
-		if (log!=null && count%frequency==0) {
-			log.println("Using shard: "+shardName);
-		}
-
-		if (shardName!=null) {
-	 		try {
-				PreparedStatement lookup = getSelectStatement(variant.getChr(), shardName, log);
-				if (lookup==null) { // Not all peaks have reasonable chromosomes.
-					return (Stream<E>) ret.stream();
-				}
-				
-				int vlower = Math.min(variant.getStart(), variant.getEnd());
-				lookup.setInt(1, vlower);
-				lookup.setInt(2, vlower);
-				int vupper = Math.max(variant.getStart(), variant.getEnd());
-				lookup.setInt(3, vupper);
-				lookup.setInt(4, vupper);
-	
-				Set<String> usedIds = new HashSet<>();
-				
-				try (ResultSet res = lookup.executeQuery()) {
-					while(res.next()) {
-						String peakId = res.getString(1);
-						if (peakId==null) continue;
-						if (usedIds.contains(peakId)) {
-							logger.info("Encountered duplicate peakID: "+peakId);
-							continue;
-						}
-						if (!allowNulls && peakId.contains("null")) { // One of the properties making up the id is unset.
-							logger.info("Peak missing information: "+peakId);
-							continue;
-						}
-						if (!allowNoTissue && peakId.endsWith("-t")) { // No tissue identified
-							logger.info("Peak missing tissue information: "+peakId);
-							continue;
-						}
-						int rlow = res.getInt(2);
-						int rup  = res.getInt(3);
-						
-						if (log!=null && count%frequency==0) {
-							log.println("Example of peakId found: "+peakId);
-						}
-
-						Overlap o = oservice.intersection(variant, new Peak(peakId, rlow, rup));
-						if (o!=null) {
-							o.setChr(variant.getChr());
-							ret.add(o);
-							usedIds.add(peakId);
-							
-							if (log!=null && count%frequency==0) {
-								log.println("Example of overlap found: "+o.toCsv());
-							}
-						}
-					}
-				}
-				
-			} catch (Exception ne) {
-				logger.warn("Cannot map "+variant, ne);
-			}
-		}
-		count++;
-		
-		return (Stream<E>) ret.stream();
+	protected Located createIntersectionObject(String id, int start, int end) {
+		return new Peak(id, start, end);
 	}
 
+	@Override
+	protected boolean testId(String peakId) {
+		if (!allowNulls && peakId.contains("null")) { // One of the properties making up the id is unset.
+			logger.info("Peak missing information: "+peakId);
+			return false;
+		}
+		if (!allowNoTissue && peakId.endsWith("-t")) { // No tissue identified
+			logger.info("Peak missing tissue information: "+peakId);
+			return false;
+		}
+		return true;
+	}
 	
 	/**
 	 * Implement to provide custom filtering to the input stream.
@@ -258,21 +184,7 @@ public class OverlapConnector<N extends Entity, E extends Entity> extends Abstra
 		} 
 		return nrows;
 	}
-
-	/**
-	 * @return the frequency
-	 */
-	public int getFrequency() {
-		return frequency;
-	}
-
-	/**
-	 * @param frequency the frequency to set
-	 */
-	public void setFrequency(int frequency) {
-		this.frequency = frequency;
-	}
-
+	
 	/**
 	 * @return the allowNulls
 	 */

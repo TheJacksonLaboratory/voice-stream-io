@@ -1,7 +1,14 @@
 package org.geneweaver.io.connector;
 
+import org.geneweaver.domain.AbstractEntity;
 import org.geneweaver.domain.Located;
-import org.geneweaver.domain.Overlap;
+import org.geneweaver.domain.Peak;
+import org.geneweaver.domain.PeakOverlap;
+import org.geneweaver.domain.RegulatoryFeature;
+import org.geneweaver.domain.RegulatoryFeatureOverlap;
+import org.geneweaver.domain.Transcript;
+import org.geneweaver.domain.TranscriptOverlap;
+import org.geneweaver.domain.Variant;
 import org.geneweaver.io.CLI;
 
 /**
@@ -37,17 +44,18 @@ public class OverlapService {
 	 * bisectRange = v.e-v.s-a-b
 
 	 * @param variant
-	 * @param peak
+	 * @param loc
 	 * @return
 	 * @throws OverlapException
 	 */
-	public Overlap intersection(Located variant, Located peak) {
+	@SuppressWarnings("unchecked")
+	public <T extends AbstractEntity> T intersection(Variant variant, Located loc) {
 		
 		int vs = Math.min(variant.getStart(), variant.getEnd());
 		int ve = Math.max(variant.getStart(), variant.getEnd());
 		
-		int ps = Math.min(peak.getStart(), peak.getEnd());
-		int pe = Math.max(peak.getStart(), peak.getEnd());
+		int ps = Math.min(loc.getStart(), loc.getEnd());
+		int pe = Math.max(loc.getStart(), loc.getEnd());
 		
 		// We rule out peaks of size 1
 		// This is in an effort to reduce the number of hits.
@@ -72,13 +80,33 @@ public class OverlapService {
 				                ? (float)intersectRange/(float)(ve-vs)
 				                : 0f;
 
-		Overlap ret = new Overlap();
-		ret.setPeak(peak);
-		ret.setVariant(variant);
-		ret.setIntersectRange(intersectRange);
-		ret.setIntersectFraction(intersectFaction);
-		
-		return ret;
+		if (loc instanceof Peak) {
+			PeakOverlap ret = new PeakOverlap();
+			ret.setPeak(loc);
+			ret.setVariant(variant);
+			ret.setIntersectRange(intersectRange);
+			ret.setIntersectFraction(intersectFaction);
+			
+			return (T) ret;
+			
+		} else if (loc instanceof Transcript) {
+			TranscriptOverlap ret = new TranscriptOverlap();
+			ret.setTranscript(loc);
+			ret.setVariant(variant);
+			ret.setIntersectRange(intersectRange);
+			ret.setIntersectFraction(intersectFaction);
+			return (T) ret;
+			
+		} else if (loc instanceof RegulatoryFeature) {
+			RegulatoryFeatureOverlap ret = new RegulatoryFeatureOverlap();
+			ret.setRegFeature(loc);
+			ret.setVariant(variant);
+			ret.setIntersectRange(intersectRange);
+			ret.setIntersectFraction(intersectFaction);
+			return (T) ret;
+		} else {
+			throw new IllegalArgumentException("Unrecognised to location: "+loc);
+		}
 	}
 	
 	/**

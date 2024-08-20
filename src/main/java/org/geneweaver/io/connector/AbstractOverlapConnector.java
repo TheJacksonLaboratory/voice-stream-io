@@ -18,15 +18,19 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.geneweaver.domain.AbstractEntity;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Located;
+import org.geneweaver.domain.Variant;
 import org.geneweaver.io.reader.ReaderException;
 import org.geneweaver.io.reader.ReaderFactory;
 import org.geneweaver.io.reader.ReaderRequest;
@@ -58,6 +62,17 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 
 	protected List<String> fileFilters = new LinkedList<>();
 	
+		
+	// Every so often we print that overlaps are found in verbose mode.
+	protected volatile int count = 0;
+	protected int frequency = 10000;
+
+	/**
+	 * Mouse peaks and reg features have two matching files with repeats in them, 
+	 * take only the newer file by name if this boolean is set.
+	 */
+	protected boolean newestInDirectoryByName = false;
+
 	/**
 	 * For testing we can limit the numbers of genes or variants processed
 	 * into the database. This allows things to parse more quickly when create() is
@@ -88,6 +103,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 * @throws IOException 
 	 */
 	Collection<Path> addAll(Path dir, int limit) throws IOException {
+		
 		Files.walk(dir).forEach(path->{
 			if (!Files.isRegularFile(path)) {
 				logger.debug(path+" is not a regular file and will not be used!");
@@ -105,6 +121,20 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			
 			if (limit>0 && source.size()>limit) return; // Do not add things after limit reached.
 			
+			if (isNewestInDirectoryByName()) {
+				
+				try {
+					List<Path> peers = new ArrayList<>(Files.list(path.getParent()).toList());
+					Collections.sort(peers);
+					Path last = peers.get(peers.size()-1);
+					if (!Files.isSameFile(path, last)) {
+						return; // Do not add older files.
+					}
+				} catch (IOException ne) {
+					logger.error("Cannot check for older ignored files in dir {}", path.getParent());
+				}
+			}
+			
 			// The paths can have duplicates, especially for mouse. 
 			// We must take the newer one.
 			source.add(path);
@@ -112,14 +142,6 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		return source;
 	}
 	
-	/**
-	 * Call this method to create a cache of the files which we have added.
-	 * This cache is then used when the connector is streamed to look up locations.
-	 * 
-	 * @throws SQLException
-	 * @throws ReaderException
-	 * @throws IOException
-	 */
 	public long create() throws SQLException, ReaderException, IOException {
 		return create(null, System.out);
 	}
@@ -132,7 +154,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 * @throws ReaderException
 	 * @throws IOException
 	 */
-	public long create(String prefix, PrintStream out) throws SQLException, ReaderException, IOException {
+	public final <T extends Located> long create(String prefix, PrintStream out) throws SQLException, ReaderException, IOException {
 
 		if (source==null || source.isEmpty()) throw new IllegalArgumentException();
 		int index = -1;
@@ -177,6 +199,99 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		return added;
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Stream<E> stream(N ent, Session session, PrintStream log) {
+		
+		// Other streams may run through this connector, but
+		// if they send other objects, we return them.
+		if (!(ent instanceof Variant)) return (Stream<E>) Stream.of(ent);
+		Variant variant = (Variant)ent;
+		
+		String shardName = oservice.getShardName(variant.getChr(), variant.getStart());
+
+		Collection<Entity> ret = new LinkedList<>();
+		ret.add(variant);
+		
+		if (log!=null && count%frequency==0) {
+			log.println("Using shard: "+shardName);
+		}
+		
+		if (shardName!=null) {
+	 		try {
+				PreparedStatement lookup = getSelectStatement(variant.getChr(), shardName, log);
+				if (lookup==null) { // Not all peaks have reasonable chromosomes.
+					return (Stream<E>) ret.stream();
+				}
+				
+				int vlower = Math.min(variant.getStart(), variant.getEnd());
+				lookup.setInt(1, vlower);
+				lookup.setInt(2, vlower);
+				int vupper = Math.max(variant.getStart(), variant.getEnd());
+				lookup.setInt(3, vupper);
+				lookup.setInt(4, vupper);
+	
+				Set<String> usedIds = new HashSet<>();
+				
+				try (ResultSet res = lookup.executeQuery()) {
+
+					while(res.next()) {
+						String id = res.getString(1);
+						if (id==null) continue;
+						if (usedIds.contains(id)) {
+							logger.info("Encountered duplicate id ("+getClass().getSimpleName()+"): "+id);
+							continue;
+						}
+						
+						if (!testId(id)) continue;
+						
+						int rlow = res.getInt(2);
+						int rup  = res.getInt(3);
+						
+						if (log!=null && count%frequency==0) {
+							log.println("Example of id ("+getClass().getSimpleName()+") found: "+id);
+						}
+
+						AbstractEntity o = oservice.intersection(variant, createIntersectionObject(id, rlow, rup));
+						if (o!=null) {
+							o.setChr(variant.getChr());
+							ret.add(o);
+							usedIds.add(id);
+							
+							if (log!=null && count%frequency==0) {
+								log.println("Example of overlap found: "+o.toCsv());
+							}
+						}
+
+					}
+					
+				}
+				
+	 		} catch (Exception ne) {
+				logger.warn("Cannot map "+variant, ne);
+			}
+	 		
+		}
+		count++;
+		
+		return (Stream<E>) ret.stream();
+	
+	}
+	
+	/**
+	 * Create an intersection object which we will compare with intersection,
+	 * fill in parameters and return as the overlap object.
+	 * @param id - unique id
+	 * @param start - bp start
+	 * @param end - bp end
+	 * @return intersection object which we will compare with intersection
+	 */
+	protected abstract Located createIntersectionObject(String id, int start, int end);
+		
+	protected boolean testId(String id) {
+		return true;
+	}
+
 	/**
 	 * Implement to provide custom filtering to the input stream.
 	 * @param loc
@@ -486,6 +601,34 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 */
 	protected void setTableName(String tableName) {
 		this.tableName = tableName;
+	}
+
+	/**
+	 * @return the frequency
+	 */
+	public int getFrequency() {
+		return frequency;
+	}
+
+	/**
+	 * @param frequency the frequency to set
+	 */
+	public void setFrequency(int frequency) {
+		this.frequency = frequency;
+	}
+
+	/**
+	 * @return the newestInDirectoryByName
+	 */
+	public boolean isNewestInDirectoryByName() {
+		return newestInDirectoryByName;
+	}
+
+	/**
+	 * @param newestInDirectoryByName the newestInDirectoryByName to set
+	 */
+	public void setNewestInDirectoryByName(boolean newestInDirectoryByName) {
+		this.newestInDirectoryByName = newestInDirectoryByName;
 	}
 
 }

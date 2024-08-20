@@ -202,8 +202,6 @@ public class ExportBuilder implements AutoCloseable {
 				boolean isConnector = (c instanceof Connector<Entity, Entity>);
 				getOut().println("Conector instance of 'Connector' class: "+isConnector);
 			}
-			getOut().println("Calling stack:");
-			new Exception("Stack trace").printStackTrace(getOut());
 		}
 
 		try (DirectSave saver = new DirectSave(getOut(), isVerbose())) {

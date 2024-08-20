@@ -1,0 +1,83 @@
+package org.geneweaver.io.connector;
+
+import static org.junit.Assert.assertEquals;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.apache.commons.io.FileUtils;
+import org.geneweaver.domain.Entity;
+import org.geneweaver.domain.Variant;
+import org.geneweaver.io.reader.AbstractDataFileTest;
+import org.junit.Test;
+
+public class RegulatoryFeatureOverlapConnectorTest extends AbstractDataFileTest {
+	
+	@Test
+	public void simpleRegulatoryFeatureOverlapCreation() throws Exception {
+		
+		Path gdir = Paths.get("tmp/simpleRegulatoryFeatureOverlapCreation/hs");
+		FileUtils.deleteQuietly(gdir.toFile());
+		Files.createDirectories(gdir);
+		
+		// Should use just the transcript locations.
+		Path dir =  getPath("data/gff_peaks/homo_sapiens");
+		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("regfeats")) {
+			conn.setLocation(gdir);
+			conn.addAll(dir);
+		
+		    long nFeats = conn.create(null, System.out); 
+			assertEquals(4695, nFeats);
+		}
+		
+		gdir = Paths.get("tmp/simpleRegulatoryFeatureOverlapCreation/mm");
+		FileUtils.deleteQuietly(gdir.toFile());
+		Files.createDirectories(gdir);
+
+		dir =  getPath("data/gff_peaks/mus_musculus");
+		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("regfeats")) {
+			conn.setLocation(gdir);
+			conn.addAll(dir);
+		
+		    long nFeats = conn.create(null, System.out); 
+		    
+		    // Do we want both feats from the mouse dir?
+		    // That's a lot of features.
+			assertEquals(1457352/2, nFeats);
+		}
+
+	}
+
+	@Test
+	public void newestByNameWorking() throws Exception {
+
+		Path gdir1 = Paths.get("tmp/newestByNameWorking/mm1");
+		Path dir =  getPath("data/gff_peaks/mus_musculus");
+		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("regfeats")) {
+			conn.setLocation(gdir1);
+			conn.setNewestInDirectoryByName(false);
+			conn.addAll(dir);
+		
+		    long nFeats = conn.create(null, System.out); 
+		    
+		    // Do we want both feats from the mouse dir?
+		    // That's a lot of features and they seem to be repeated.
+			assertEquals(1457352, nFeats);
+		}
+		
+		Path gdir2 = Paths.get("tmp/newestByNameWorking/mm2");
+		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("regfeats")) {
+			conn.setLocation(gdir2);
+			conn.addAll(dir);
+		
+		    long nFeats = conn.create(null, System.out); 
+			conn.setNewestInDirectoryByName(true); // Normally we ignore newest by name.
+		    
+		    // Do we want both feats from the mouse dir?
+		    // That's a lot of features and they seem to be repeated.
+			assertEquals(1457352/2, nFeats);
+		}
+
+	}
+}

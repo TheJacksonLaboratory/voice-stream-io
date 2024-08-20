@@ -11,8 +11,8 @@ import org.neo4j.ogm.annotation.StartNode;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Generated("POJO")
-@RelationshipEntity(type = "OVERLAP")
-public class Overlap extends AbstractEntity {
+@RelationshipEntity(type = "PEAK_OVERLAP")
+public class PeakOverlap extends AbstractEntity {
 
 	/** The variant. */
 	@StartNode
@@ -77,7 +77,7 @@ public class Overlap extends AbstractEntity {
 		buf.append(getDelimiter());
 		buf.append(peak!=null?peak.id():"NA");
 		buf.append(getDelimiter());
-		buf.append("OVERLAP");
+		buf.append("PEAK_OVERLAP");
 		return buf.toString();
 	}
 
@@ -151,9 +151,9 @@ public class Overlap extends AbstractEntity {
 			return true;
 		if (!super.equals(obj))
 			return false;
-		if (!(obj instanceof Overlap))
+		if (!(obj instanceof PeakOverlap))
 			return false;
-		Overlap other = (Overlap) obj;
+		PeakOverlap other = (PeakOverlap) obj;
 		return intersectFraction == other.intersectFraction && intersectRange == other.intersectRange
 				&& Objects.equals(peak, other.peak) && Objects.equals(variant, other.variant);
 	}
@@ -161,7 +161,7 @@ public class Overlap extends AbstractEntity {
 	@Override
 	public String toString() {
 		if (variant==null || peak==null) return super.toString();
-		return "(Variant{rsId:"+variant.id()+"})-[OVERLAP]-(Peak{peakId:"+peak.id()+")";
+		return "(Variant{rsId:"+variant.id()+"})-[PEAK_OVERLAP]-(Peak{peakId:"+peak.id()+")";
 	}
 
 

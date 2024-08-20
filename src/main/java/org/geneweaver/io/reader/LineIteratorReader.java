@@ -167,13 +167,19 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	 */
 	protected abstract T create(String line) throws ReaderException;
 		 
+	private String assignmentChar = " ";
 	/**
 	 * The variants are encoded with delimiter space(' ') or '#'.
 	 *
 	 * @return the assignment char
 	 */
 	protected String getAssignmentChar() {
-		return " ";
+		return assignmentChar;
+	}
+	protected String setAssignmentChar(String ac) {
+		String curChar = assignmentChar;
+		assignmentChar = ac;
+		return curChar;
 	}
 
 	/**
@@ -497,14 +503,14 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	}
 
 	/**
-	 * Populate.
+	 * Populate just the first five columns:
+	 * // chr, source, type, start, end
 	 *
 	 * @param d the d
 	 * @param rec the rec
 	 */
-	protected void populate(BeanMap d, String[] rec) {
-        d.put("sequenceId", rec[0]);
-        
+	protected void populateStandardColumns(BeanMap d, String[] rec) {
+         
         String chr = rec[0];
         if (!chr.startsWith("chr")) chr = "chr"+chr;
         d.put("chr", chr);
@@ -512,6 +518,18 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
         d.put("type", rec[2]);
         d.put("start", rec[3]);
         d.put("end", rec[4]);
+	}
+	
+	/**
+	 * Populate.
+	 *
+	 * @param d the d
+	 * @param rec the rec
+	 */
+	protected void populate(BeanMap d, String[] rec) {
+	    d.put("sequenceId", rec[0]);
+       
+	    populateStandardColumns(d, rec);
         d.put("score", rec[5]);
         d.put("strand", rec[6]);
         if (rec[6].length() > 8) {

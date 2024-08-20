@@ -3,7 +3,7 @@ package org.geneweaver.io.connector;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import org.geneweaver.domain.Overlap;
+import org.geneweaver.domain.AbstractEntity;
 import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Variant;
 import org.geneweaver.io.reader.AbstractDataFileTest;
@@ -14,18 +14,15 @@ import org.junit.Test;
 public class OverlapServiceTest extends AbstractDataFileTest  {
 	
 	private OverlapService iservice;
-	private ChromosomeService cservice;
 
 	@Before
 	public void create() {
 		this.iservice = new OverlapService();
-		cservice = ChromosomeService.getInstance();
 		ChromosomeService.clearCache();
 	}
 	
 	@After
 	public void dispose() {
-		cservice = ChromosomeService.getInstance();
 		ChromosomeService.clearCache();
 	}
 
@@ -124,7 +121,7 @@ public class OverlapServiceTest extends AbstractDataFileTest  {
 		assertNotNull(intersection(10, 20, 20, 22));
 	}
 
-	private Overlap intersection(int vs, int ve, int ps, int pe) {
+	private AbstractEntity intersection(int vs, int ve, int ps, int pe) {
 		Variant v = new Variant();
 		v.setStart(vs);
 		v.setEnd(ve);

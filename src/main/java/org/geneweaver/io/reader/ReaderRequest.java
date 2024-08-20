@@ -171,12 +171,14 @@ public class ReaderRequest {
 			this.file = null; // It's not a file.
 		} else {
 			this.file = path.toFile();
+			this.name = file.getName();
 		}
 	}
 
 	public ReaderRequest(String source, File file, boolean includeAll) {
 		this.source = source;
 		this.file = file;
+		this.name = file.getName();
 		this.includeAll = includeAll;
 	}
 	

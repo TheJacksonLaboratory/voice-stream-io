@@ -52,7 +52,16 @@ public class Transcript extends GeneticEntity {
     /** The transcript biotype. */
     private String transcriptBiotype;
 
-	
+	public Transcript() {
+		// Empty
+	}
+
+	public Transcript(String transcriptId, int start, int end) {
+		this.transcriptId = transcriptId;
+		setStart(start);
+		setEnd(end);
+	}
+
 	/**
 	 * Gets the header.
 	 *
