@@ -11,12 +11,12 @@ import org.neo4j.ogm.annotation.StartNode;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Generated("POJO")
-@RelationshipEntity(type = "TRANSCRIPT_OVERLAP")
-public class TranscriptOverlap extends AbstractEntity {
+@RelationshipEntity(type = "REGULATORY_FEATURE_OVERLAP")
+public class RegulatoryFeatureOverlap extends AbstractEntity {
 
 	/** The variant. */
 	@StartNode
-	private Located transcript;
+	private Located regFeature;
 	
 	/** The peak. */
 	@EndNode
@@ -49,7 +49,7 @@ public class TranscriptOverlap extends AbstractEntity {
 	@Override
 	public String getHeader() {
 		StringBuilder buf = new StringBuilder();
-		buf.append(":START_ID(Transcript-Id)");
+		buf.append(":START_ID(Feature-Id)");
 		buf.append(getDelimiter());
 		buf.append("intersectRange:int");
 		buf.append(getDelimiter());
@@ -69,7 +69,7 @@ public class TranscriptOverlap extends AbstractEntity {
 	@Override
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
-		buf.append(transcript!=null?transcript.id():"NA");
+		buf.append(regFeature!=null?regFeature.id():"NA");
 		buf.append(getDelimiter());
 		buf.append(getIntersectRange());
 		buf.append(getDelimiter());
@@ -77,22 +77,22 @@ public class TranscriptOverlap extends AbstractEntity {
 		buf.append(getDelimiter());
 		buf.append(variant!=null?variant.id():"NA");
 		buf.append(getDelimiter());
-		buf.append("TRANSCRIPT_OVERLAP");
+		buf.append("REGULATORY_FEATURE_OVERLAP");
 		return buf.toString();
 	}
 
 	/**
 	 * @return the variant
 	 */
-	public Located getTranscript() {
-		return transcript;
+	public Located getRegFeature() {
+		return regFeature;
 	}
 
 	/**
 	 * @param variant the variant to set
 	 */
-	public void setTranscript(Located transcript) {
-		this.transcript = transcript;
+	public void setRegFeature(Located rfeature) {
+		this.regFeature = rfeature;
 	}
 
 	/**
@@ -105,8 +105,8 @@ public class TranscriptOverlap extends AbstractEntity {
 	/**
 	 * @param peak the peak to set
 	 */
-	public void setVariant(Located variant) {
-		this.variant = variant;
+	public void setVariant(Located peak) {
+		this.variant = peak;
 	}
 
 	/**
@@ -141,7 +141,7 @@ public class TranscriptOverlap extends AbstractEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(intersectFraction, intersectRange, variant, transcript);
+		result = prime * result + Objects.hash(intersectFraction, intersectRange, variant, regFeature);
 		return result;
 	}
 
@@ -151,17 +151,17 @@ public class TranscriptOverlap extends AbstractEntity {
 			return true;
 		if (!super.equals(obj))
 			return false;
-		if (!(obj instanceof TranscriptOverlap))
+		if (!(obj instanceof RegulatoryFeatureOverlap))
 			return false;
-		TranscriptOverlap other = (TranscriptOverlap) obj;
+		RegulatoryFeatureOverlap other = (RegulatoryFeatureOverlap) obj;
 		return intersectFraction == other.intersectFraction && intersectRange == other.intersectRange
-				&& Objects.equals(variant, other.variant) && Objects.equals(transcript, other.transcript);
+				&& Objects.equals(variant, other.variant) && Objects.equals(regFeature, other.regFeature);
 	}
 
 	@Override
 	public String toString() {
-		if (transcript==null || variant==null) return super.toString();
-		return "(Variant{rsId:"+variant.id()+"})-[TRANSCRIPT_OVERLAP]-(Transcript{transcriptId:"+transcript.id()+")";
+		if (regFeature==null || variant==null) return super.toString();
+		return "(Variant{rsId:"+variant.id()+"})-[REGULATORY_FEATURE_OVERLAP]-(RegulatoryFeature{featureId:"+regFeature.id()+")";
 	}
 
 

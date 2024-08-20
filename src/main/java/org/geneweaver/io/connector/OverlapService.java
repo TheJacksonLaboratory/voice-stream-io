@@ -4,6 +4,8 @@ import org.geneweaver.domain.AbstractEntity;
 import org.geneweaver.domain.Located;
 import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.PeakOverlap;
+import org.geneweaver.domain.RegulatoryFeature;
+import org.geneweaver.domain.RegulatoryFeatureOverlap;
 import org.geneweaver.domain.Transcript;
 import org.geneweaver.domain.TranscriptOverlap;
 import org.geneweaver.domain.Variant;
@@ -90,6 +92,14 @@ public class OverlapService {
 		} else if (loc instanceof Transcript) {
 			TranscriptOverlap ret = new TranscriptOverlap();
 			ret.setTranscript(loc);
+			ret.setVariant(variant);
+			ret.setIntersectRange(intersectRange);
+			ret.setIntersectFraction(intersectFaction);
+			return (T) ret;
+			
+		} else if (loc instanceof RegulatoryFeature) {
+			RegulatoryFeatureOverlap ret = new RegulatoryFeatureOverlap();
+			ret.setRegFeature(loc);
 			ret.setVariant(variant);
 			ret.setIntersectRange(intersectRange);
 			ret.setIntersectFraction(intersectFaction);

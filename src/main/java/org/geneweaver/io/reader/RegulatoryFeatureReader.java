@@ -19,10 +19,14 @@
 package org.geneweaver.io.reader;
 
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.BeanMap;
+import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.GeneticEntity;
 import org.geneweaver.domain.RegulatoryFeature;
+import org.geneweaver.io.connector.RegulatoryFeatureOverlapConnector;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -54,6 +58,13 @@ class RegulatoryFeatureReader<N extends GeneticEntity> extends LineIteratorReade
 		setChunkSize(1000); 
 		return this;
 	}
+	
+	@Override
+	public <U extends Entity> Function<N, Stream<U>> getDefaultConnector() {
+		Function<N, Stream<U>> func = new RegulatoryFeatureOverlapConnector<N, U>();
+		return func;
+	}
+
 
 	/**
 	 * Creates the.

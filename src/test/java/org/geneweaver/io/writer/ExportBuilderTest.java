@@ -19,6 +19,7 @@ import org.geneweaver.domain.Variant;
 import org.geneweaver.io.DirectSave;
 import org.geneweaver.io.Timer;
 import org.geneweaver.io.connector.PeakOverlapConnector;
+import org.geneweaver.io.connector.RegulatoryFeatureOverlapConnector;
 import org.geneweaver.io.connector.TranscriptOverlapConnector;
 import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.geneweaver.io.reader.ReaderException;
@@ -223,14 +224,26 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 	}
 	
 	@Test
-	public void testBedExportWithOverlaps() throws Exception {
+	public void testExportWithOverlaps() throws Exception {
 		
-		Path rpath = getPath("data/bed_peaks/some.bed");
+		Path ppath = getPath("data/bed_peaks/some.bed");
 		Path tpath = getPath("data/1000/hs_gtf/hg38_2.gtf");
+		Path rpath = getPath("data/bed_peaks/some.gff");
 
 		Path dir = Paths.get("./tmp/testBedExportWithOverlaps");
 		FileUtils.deleteQuietly(dir.toFile());
 		dir.toFile().mkdirs();
+
+		try(ExportBuilder builder = new ExportBuilder().setSpecies("Homo sapiens")
+				   .setChunkProperty("1000")
+				   .setDir(dir)
+				   .setInput(ppath)
+				   .setDefaultChunkSize(10000)) {
+			
+			builder.export();
+		}
+		assertTrue(Files.exists(dir.resolve("Peak-chr1.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("Peak-header.csv")));
 
 		try(ExportBuilder builder = new ExportBuilder().setSpecies("Homo sapiens")
 				   .setChunkProperty("1000")
@@ -240,9 +253,9 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 			
 			builder.export();
 		}
-		assertTrue(Files.exists(dir.resolve("Peak-chr1.csv.gz")));
-		assertTrue(Files.exists(dir.resolve("Peak-header.csv")));
-		
+		assertTrue(Files.exists(dir.resolve("RegulatoryFeature-chr1.csv.gz")));
+		assertTrue(Files.exists(dir.resolve("RegulatoryFeature-header.csv")));
+
 		// We make 23 copies of the input in order to test 
 		// in parallel mode.
 		Path vpath = getPath("data/bed_peaks/some.gvf");
@@ -252,28 +265,34 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 			Files.copy(vpath, tmp);
 			copies.add(tmp);
 		}
-		
+
 		try (PeakOverlapConnector<Variant, Entity> pconn = new PeakOverlapConnector<>();
-			 TranscriptOverlapConnector<Variant, Entity> tconn = new TranscriptOverlapConnector<>()) {
+			 TranscriptOverlapConnector<Variant, Entity> tconn = new TranscriptOverlapConnector<>();
+			 RegulatoryFeatureOverlapConnector<Variant, Entity> rconn = new RegulatoryFeatureOverlapConnector<>()) {
 			pconn.setAllowNulls(true);     // Just for testing
 			pconn.setAllowNoTissue(true);  // Just for testing
 			pconn.setFrequency(100);
 			pconn.setLocation(dir);
-			pconn.add(rpath);
+			pconn.add(ppath);
 			pconn.create();
 			
 			tconn.setFrequency(100);
 			tconn.setLocation(dir);
 			tconn.add(tpath);
 			tconn.create();
-
 			
+			rconn.setFrequency(100);
+			rconn.setLocation(dir);
+			rconn.add(rpath);
+			rconn.create();
+
 			try (@SuppressWarnings("resource")
 				ExportBuilder builder = new ExportBuilder().setSpecies("Homo sapiens")
 					   .setChunkProperty("1000")
 					   .setAlwaysUseDefaultConnector(true)
 					   .addConnector(pconn)
 					   .addConnector(tconn)
+					   .addConnector(rconn)
 					   .setVerbose(true)
 					   .setOut(System.out)
 					   .setDir(dir)
@@ -288,11 +307,15 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		assertNumber(dir, "Variant-chr1.csv.gz", 815);
 		assertNumber(dir, "PeakOverlap-chr1.csv.gz", 719); 
 		assertNumber(dir, "TranscriptOverlap-chr1.csv.gz", 2375); 
+		assertNumber(dir, "RegulatoryFeatureOverlap-chr1.csv.gz", 551); 
 
 		assertTrue(Files.exists(dir.resolve("PeakOverlap-header.csv")));
 		assertTrue(Files.exists(dir.resolve("TranscriptOverlap-header.csv")));
+		assertTrue(Files.exists(dir.resolve("RegulatoryFeatureOverlap-header.csv")));
 		assertTrue(Files.exists(dir.resolve("Peak-chr1.csv.gz")));
 		assertTrue(Files.size(dir.resolve("Peak-chr1.csv.gz"))>100);
+		assertTrue(Files.exists(dir.resolve("RegulatoryFeature-chr1.csv.gz")));
+		assertTrue(Files.size(dir.resolve("RegulatoryFeature-chr1.csv.gz"))>100);
 		assertTrue(Files.exists(dir.resolve("Peak-header.csv")));
 		assertTrue(Files.exists(dir.resolve("VariantEffect-chr1.csv.gz")));
 		assertTrue(Files.exists(dir.resolve("VariantEffect-header.csv")));
@@ -323,4 +346,21 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 			conn.create();
 		}
 	}
+	
+	@Ignore("This is the code for the full scale one")
+	@Test
+	public void testFullRegFeatureMapping() throws Exception {
+		
+		Path mdir = Paths.get("/Volumes/Work/JAX/repos/gweaver/gweaver-graph-build/build/ensembl-107/reg_features/mus_musculus/RegulatoryFeatureActivity");
+		Path dir = Paths.get("./tmp/testLARGEWholeMouseRegFeatures");
+		FileUtils.deleteQuietly(dir.toFile());
+		dir.toFile().mkdirs();
+
+		try (RegulatoryFeatureOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>()) {
+			conn.setLocation(dir);
+			conn.addAll(mdir);
+			conn.create();
+		}
+	}
+
 }

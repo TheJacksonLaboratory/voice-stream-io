@@ -69,7 +69,6 @@ public class RegulatoryFeatureOverlapConnectorTest extends AbstractDataFileTest 
 		Path gdir2 = Paths.get("tmp/newestByNameWorking/mm2");
 		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("regfeats")) {
 			conn.setLocation(gdir2);
-			conn.setNewestInDirectoryByName(true); // Normally we ignore newest by name.
 			conn.addAll(dir);
 		
 		    long nFeats = conn.create(null, System.out); 
