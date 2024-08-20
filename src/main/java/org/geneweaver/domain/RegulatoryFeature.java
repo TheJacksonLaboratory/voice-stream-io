@@ -94,6 +94,17 @@ public class RegulatoryFeature extends GeneticEntity {
 	private String resultsType;
 	private String date;
 	
+	public RegulatoryFeature() {
+		
+	}
+
+	public RegulatoryFeature(String id, int start, int end) {
+		this();
+		this.featureId = id;
+		this.setStart(start);
+		this.setEnd(end);
+	}
+
 	/**
 	 * Gets the header.
 	 *

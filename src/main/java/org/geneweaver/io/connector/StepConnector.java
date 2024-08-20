@@ -210,4 +210,10 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 	public void setParentDirectory(Path parentDirectory) {
 		this.parentDirectory = parentDirectory;
 	}
+
+	@Override
+	protected Located createIntersectionObject(String id, int start, int end) {
+		// Does nothing in this case because we override stream(...)
+		return null;
+	}
 }

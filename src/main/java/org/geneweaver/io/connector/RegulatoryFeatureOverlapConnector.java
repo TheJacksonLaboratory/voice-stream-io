@@ -2,7 +2,7 @@ package org.geneweaver.io.connector;
 
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Located;
-import org.geneweaver.domain.Transcript;
+import org.geneweaver.domain.RegulatoryFeature;
 
 /**
  * This function reads all the regions from their separate files
@@ -28,10 +28,10 @@ import org.geneweaver.domain.Transcript;
  * @author gerrim
  *
  */
-public class TranscriptOverlapConnector<N extends Entity, E extends Entity> extends AbstractOverlapConnector<N,E> {
+public class RegulatoryFeatureOverlapConnector<N extends Entity, E extends Entity> extends AbstractOverlapConnector<N,E> {
 
-	public TranscriptOverlapConnector() {
-		this("transcripts");
+	public RegulatoryFeatureOverlapConnector() {
+		this("regfeats");
 	}
 
 	/**
@@ -39,15 +39,17 @@ public class TranscriptOverlapConnector<N extends Entity, E extends Entity> exte
 	 * The database is sharded by file so this
 	 * @param databaseFileName
 	 */
-	public TranscriptOverlapConnector(String databaseFileName) {
+	public RegulatoryFeatureOverlapConnector(String databaseFileName) {
 		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
 		setFileName(databaseFileName);
-		setFileFilters(".gtf.gz", ".gtf");
+		setFileFilters(".gff.gz", ".gff");
+		setNewestInDirectoryByName(true);
 	}
-		
+	
+	
 	@Override
 	protected Located createIntersectionObject(String id, int start, int end) {
-		return new Transcript(id, start, end);
+		return new RegulatoryFeature(id, start, end);
 	}
 
 	/**
@@ -57,9 +59,10 @@ public class TranscriptOverlapConnector<N extends Entity, E extends Entity> exte
 	 */
 	@Override
 	protected boolean filter(Located loc) {
-		if (loc instanceof Transcript) {
+		if (loc instanceof RegulatoryFeature) {
 			return true;
 		}
 		return false;
 	}
+
 }

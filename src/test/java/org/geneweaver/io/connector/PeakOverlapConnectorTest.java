@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.PeakOverlap;
-import org.geneweaver.domain.Transcript;
 import org.geneweaver.domain.Variant;
 import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.geneweaver.io.reader.ReaderFactory;

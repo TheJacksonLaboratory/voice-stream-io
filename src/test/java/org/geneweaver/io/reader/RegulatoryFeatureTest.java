@@ -73,7 +73,7 @@ public class RegulatoryFeatureTest extends AbstractDataFileTest {
 
 	@Test
 	public void simpleGeneReadByReader2() throws Exception {
-		RegulatoryFeatureReader<RegulatoryFeature> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/gff_peaks/homo_sapiens/sigmoid_colon/homo_sapiens.GRCh38.sigmoid_colon.Regulatory_Build.regulatory_activity.20220526.gff")));
+		RegulatoryFeatureReader<RegulatoryFeature> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/gff_peaks/homo_sapiens/sigmoid_colon/homo_sapiens.GRCh38.sigmoid_colon.Regulatory_Build.regulatory_activity.20220526.gff.gz")));
 		List<RegulatoryFeature> found = reader.stream()
 				.limit(1000)// There are a lot of them and it would take a while otherwise.
 				.collect(Collectors.toList());
