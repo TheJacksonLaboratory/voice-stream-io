@@ -2,11 +2,15 @@ package org.geneweaver.io.reader;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.geneweaver.domain.EQTL;
@@ -22,17 +26,66 @@ public class JaxEQTLReaderTest extends AbstractDataFileTest {
 		reader.init(new ReaderRequest("Mus musculus", getFile("data/eQTL/mm/Aging_Bone_DO.csv")));
 		
 		List<EQTL> eqtls = reader.stream().collect(Collectors.toList());
-		assertEquals(46177, eqtls.size());
+		assertEquals(151514, eqtls.size());
 		
 		check(eqtls);
 	}
 
+	@Test
+	public void directAgingBoneAsMapReader() throws Exception {
+		
+		ReaderRequest request = new ReaderRequest("Mus musculus", getFile("data/eQTL/mm/Aging_Bone_DO.csv"));
+		request.setReaderHint("MapCSVReader");
+		StreamReader<Map<String,String>> reader = ReaderFactory.getReader(request);
+		assertTrue(reader instanceof MapCSVReader);
+		Map<String,String> firstWrong = reader.stream().findAny().orElse(null);
+		// It gets the wrong headers.
+		assertTrue(firstWrong.get("17_9239543")!=null);
+	}
+
+	@Test
+	public void directAgingBoneSetHeaderOverride() throws Exception {
+		
+		ReaderRequest request = new ReaderRequest("Mus musculus", getFile("data/eQTL/mm/Aging_Bone_DO_pr69k.csv"));
+		request.setReaderHint("MapCSVReader");
+		AbstractCSVReader<Map<String,String>> reader = ReaderFactory.getReader(request);
+		reader.setHeaderOverride(Arrays.asList("marker","chr","bp_mm10","gene_id","rs_id","lod"));
+		assertTrue(reader instanceof MapCSVReader);
+		Map<String,String> firstWrong = reader.stream().findAny().orElse(null);
+		// It gets the right headers because we override them.
+		assertEquals("9_29539511", firstWrong.get("marker"));
+		assertEquals("29539511", firstWrong.get("bp_mm10"));
+	}
+
+	@Test
+	public void directAgingBoneHeadersFromLastCommentLine() throws Exception {
+		
+		ReaderRequest request = new ReaderRequest("Mus musculus", getFile("data/eQTL/mm/Aging_Bone_DO_pr69k.csv"));
+		request.setReaderHint("MapCSVReader");
+		AbstractCSVReader<Map<String,String>> reader = ReaderFactory.getReader(request);
+		reader.readHeadersFromLastCommentLine(); // This will close the stream so cannot be used in streaming mode.
+		assertTrue(reader instanceof MapCSVReader);
+		Map<String,String> firstWrong = reader.stream().findAny().orElse(null);
+		// It gets the right headers because we override them.
+		assertEquals("9_29539511", firstWrong.get("marker"));
+		assertEquals("29539511", firstWrong.get("bp_mm10"));
+	}
+
+	@Test(expected = ReaderException.class)
+	public void directAgingBoneHeadersFromLastCommentLineStream() throws Exception {
+		
+		InputStream in = Files.newInputStream(getPath("data/eQTL/mm/Aging_Bone_DO_pr69k.csv"));
+		ReaderRequest request = new ReaderRequest(in, "Mus musculus");
+		request.setReaderHint("MapCSVReader");
+		AbstractCSVReader<Map<String,String>> reader = ReaderFactory.getReader(request);
+		reader.readHeadersFromLastCommentLine(); // This will close the stream so cannot be used in streaming mode.
+	}
 
 	@Test
 	public void factory() throws Exception {
 		StreamReader<EQTL> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("data/eQTL/mm/Aging_Bone_DO.csv")));
 		List<EQTL> eqtls = reader.stream().collect(Collectors.toList());
-		assertEquals(46177, eqtls.size());
+		assertEquals(151514, eqtls.size());
 		
 		check(eqtls);
 		

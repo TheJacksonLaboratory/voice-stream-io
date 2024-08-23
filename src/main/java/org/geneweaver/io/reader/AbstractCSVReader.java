@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -31,6 +32,7 @@ import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVFormat.Builder;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
 import org.geneweaver.domain.Entity;
@@ -38,9 +40,10 @@ import org.geneweaver.domain.Entity;
 public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 
 	private ReaderRequest request;
-	private static final CSVFormat format = CSVFormat.DEFAULT;
 	private int lines;
 	
+	private List<String> headerOverride;
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public AbstractCSVReader<T> init(ReaderRequest request) {
@@ -64,7 +67,7 @@ public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 		
 		try {
 			Reader in = createReader(request);
-	
+			
 			char delim = request.getDelimiter().charAt(0);
 			Iterable<CSVRecord> records =  getFormat(delim).parse(in);
 			
@@ -99,6 +102,7 @@ public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 	
 	public List<String> headers() throws ReaderException {
 
+		if (headerOverride!=null) return headerOverride;
 		try {
 			Reader in = createReader(request);
 			
@@ -112,18 +116,27 @@ public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 
 	}
 	
-	@SuppressWarnings("deprecation")
 	private CSVFormat getFormat(char delim) {
-		CSVFormat ret = format.withCommentMarker('#')
-				  .withFirstRecordAsHeader()
-				  .withDelimiter(delim)
-				  .withTrim(true)
-				  .withIgnoreEmptyLines()
-				  .withTrailingDelimiter();
-		if (!request.isIncludeAll()) {
-			ret = ret.withAllowMissingColumnNames();
+
+		Builder builder = CSVFormat.DEFAULT.builder()
+				.setCommentMarker('#');
+		
+		if (headerOverride!=null) {
+			builder.setHeader(headerOverride.toArray(new String[headerOverride.size()]));
+		} else {
+			builder.setHeader();
 		}
-		return ret;
+				
+		builder	= builder.setSkipHeaderRecord(true)	
+				.setDelimiter(delim)
+				.setTrim(true)
+				.setIgnoreEmptyLines(true)
+				.setTrailingDelimiter(true);
+		
+		if (!request.isIncludeAll()) {
+			builder = builder.setAllowMissingColumnNames(true);
+		}
+		return builder.build();
 	}
 
 	private Reader createReader(ReaderRequest req) throws IOException {
@@ -191,4 +204,49 @@ public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 	public List<T> wind() throws ReaderException {
 		throw new ReaderException("Wind is not supported by "+getClass().getSimpleName());
 	}
+
+	/**
+	 * @return the headerOverride
+	 */
+	public List<String> getHeaderOverride() {
+		return headerOverride;
+	}
+
+	/**
+	 * @param headerOverride the headerOverride to set
+	 */
+	public void setHeaderOverride(List<String> headerOverride) {
+		this.headerOverride = headerOverride;
+	}
+
+	/**
+	 * This reads the headers from the last comment line as a csv.
+	 * It cannot be used for InputStream readers and will throw an
+	 * exception in this case.
+	 * @throws IOException 
+	 * @throws ReaderException 
+	 */
+	public void readHeadersFromLastCommentLine() throws IOException, ReaderException {
+		
+		if (!request.isFileRequest()) throw new ReaderException("Reading headers from last comment line is only supported in file mode!");
+		
+		try(BufferedReader reader = Files.newBufferedReader(request.getFile().toPath())) {
+			String line = null;
+			String previousline = null;
+			while((line = reader.readLine()) != null) {
+				line = line.trim();
+				if (!line.startsWith("#")) {
+					previousline = previousline.substring(1);
+					String delim = request.getDelimiter().substring(0, 1);
+					String[] headers = previousline.split(delim);
+					setHeaderOverride(Arrays.asList(headers));
+					return;
+				}
+					
+				previousline = line;
+			}
+			throw new ReaderException("Last line of headers not found!");
+		}
+	}
+
 }
