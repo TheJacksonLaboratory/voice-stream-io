@@ -65,10 +65,10 @@ public class JaxEQTLReaderTest extends AbstractDataFileTest {
 		AbstractCSVReader<Map<String,String>> reader = ReaderFactory.getReader(request);
 		reader.readHeadersFromLastCommentLine(); // This will close the stream so cannot be used in streaming mode.
 		assertTrue(reader instanceof MapCSVReader);
-		Map<String,String> firstWrong = reader.stream().findAny().orElse(null);
+		Map<String,String> first = reader.stream().findAny().orElse(null);
 		// It gets the right headers because we override them.
-		assertEquals("9_29539511", firstWrong.get("marker"));
-		assertEquals("29539511", firstWrong.get("bp_mm10"));
+		assertEquals("3_107201964", first.get("marker"));
+		assertEquals("107201964", first.get("bp_mm10"));
 	}
 
 	@Test(expected = ReaderException.class)

@@ -122,13 +122,14 @@ public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 				.setCommentMarker('#');
 		
 		if (headerOverride!=null) {
-			builder.setHeader(headerOverride.toArray(new String[headerOverride.size()]));
+			builder = builder.setHeader(headerOverride.toArray(new String[headerOverride.size()]))
+					.setSkipHeaderRecord(false); // It's not a header
 		} else {
-			builder.setHeader();
+			builder = builder.setHeader()
+			.setSkipHeaderRecord(true); // It's  a header
 		}
 				
-		builder	= builder.setSkipHeaderRecord(true)	
-				.setDelimiter(delim)
+		builder	= builder.setDelimiter(delim)
 				.setTrim(true)
 				.setIgnoreEmptyLines(true)
 				.setTrailingDelimiter(true);
