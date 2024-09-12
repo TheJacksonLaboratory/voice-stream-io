@@ -140,7 +140,7 @@ public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 		return builder.build();
 	}
 
-	private Reader createReader(ReaderRequest req) throws IOException {
+	private BufferedReader createReader(ReaderRequest req) throws IOException {
 		
 		InputStream in;
 		boolean gz = false;
@@ -231,7 +231,7 @@ public abstract class AbstractCSVReader<T> implements StreamReader<T> {
 		
 		if (!request.isFileRequest()) throw new ReaderException("Reading headers from last comment line is only supported in file mode!");
 		
-		try(BufferedReader reader = Files.newBufferedReader(request.getFile().toPath())) {
+		try(BufferedReader reader = createReader(request)) {
 			String line = null;
 			String previousline = null;
 			while((line = reader.readLine()) != null) {

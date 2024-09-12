@@ -51,10 +51,10 @@ public class JaxEQTLReaderTest extends AbstractDataFileTest {
 		AbstractCSVReader<Map<String,String>> reader = ReaderFactory.getReader(request);
 		reader.setHeaderOverride(Arrays.asList("marker","chr","bp_mm10","gene_id","rs_id","lod"));
 		assertTrue(reader instanceof MapCSVReader);
-		Map<String,String> firstWrong = reader.stream().findAny().orElse(null);
+		Map<String,String> first = reader.stream().findAny().orElse(null);
 		// It gets the right headers because we override them.
-		assertEquals("9_29539511", firstWrong.get("marker"));
-		assertEquals("29539511", firstWrong.get("bp_mm10"));
+		assertEquals("3_107201964", first.get("marker"));
+		assertEquals("107201964", first.get("bp_mm10"));
 	}
 
 	@Test
