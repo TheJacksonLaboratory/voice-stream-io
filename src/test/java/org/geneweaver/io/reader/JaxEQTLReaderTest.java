@@ -20,6 +20,30 @@ public class JaxEQTLReaderTest extends AbstractDataFileTest {
 
 	
 	@Test
+	public void liftOverAgingBone() throws Exception {
+		
+		JaxEQTLReader<EQTL> reader = new JaxEQTLReader<>();
+		reader.init(new ReaderRequest("Mus musculus", getFile("data/eQTL/mm/lo/Aging_Bone_DO_lo.csv")));
+		
+		List<EQTL> eqtls = reader.stream().collect(Collectors.toList());
+		assertEquals(46177, eqtls.size());
+		
+		check(eqtls);
+	}
+	
+	@Test
+	public void liftOverWithErrors() throws Exception {
+		
+		JaxEQTLReader<EQTL> reader = new JaxEQTLReader<>();
+		reader.init(new ReaderRequest("Mus musculus", getFile("data/eQTL/mm/lo/Aging_Bone_withErrors_lo.csv")));
+		
+		List<EQTL> eqtls = reader.stream().collect(Collectors.toList());
+		assertEquals(10, eqtls.size());
+		
+		check(eqtls);
+	}
+
+	@Test
 	public void directAgingBone() throws Exception {
 		
 		JaxEQTLReader<EQTL> reader = new JaxEQTLReader<>();

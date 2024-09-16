@@ -76,7 +76,10 @@ public class EQTL extends AbstractEntity {
 	private String uberon;
 	private String source; // e.g. GTEx
 	private String studyId;
-
+	
+	private String chrGRCm39;
+	private int	   bpGRCm39;
+	
 	@EndNode
 	private Gene geneTo;
 	private String geneId;
@@ -261,9 +264,9 @@ public class EQTL extends AbstractEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(altSeq, bp, eqtlVariantId, fullGeneId, geneId, geneTo, lod, marker,
-				population, pos, refSeq, rsId, slope, source, studyId, tissueFileName, tissueGroup, tissueName, type,
-				uberon, variantFrom, version);
+		result = prime * result + Objects.hash(altSeq, bp, bpGRCm39, chrGRCm39, eqtlVariantId, fullGeneId, geneId,
+				geneTo, lod, marker, population, pos, refSeq, rsId, slope, source, studyId, tissueFileName, tissueGroup,
+				tissueName, type, uberon, variantFrom, version);
 		return result;
 	}
 
@@ -276,13 +279,13 @@ public class EQTL extends AbstractEntity {
 		if (!(obj instanceof EQTL))
 			return false;
 		EQTL other = (EQTL) obj;
-		return Objects.equals(altSeq, other.altSeq) && Objects.equals(bp, other.bp)
-				&& Objects.equals(eqtlVariantId, other.eqtlVariantId) && Objects.equals(fullGeneId, other.fullGeneId)
-				&& Objects.equals(geneId, other.geneId) && Objects.equals(geneTo, other.geneTo)
-				&& Objects.equals(lod, other.lod) && Objects.equals(marker, other.marker)
-				&& Objects.equals(population, other.population)
-				&& Objects.equals(pos, other.pos)
-				&& Objects.equals(refSeq, other.refSeq) && Objects.equals(rsId, other.rsId)
+		return Objects.equals(altSeq, other.altSeq) && Objects.equals(bp, other.bp) && bpGRCm39 == other.bpGRCm39
+				&& Objects.equals(chrGRCm39, other.chrGRCm39) && Objects.equals(eqtlVariantId, other.eqtlVariantId)
+				&& Objects.equals(fullGeneId, other.fullGeneId) && Objects.equals(geneId, other.geneId)
+				&& Objects.equals(geneTo, other.geneTo) && Objects.equals(lod, other.lod)
+				&& Objects.equals(marker, other.marker) && Objects.equals(population, other.population)
+				&& Objects.equals(pos, other.pos) && Objects.equals(refSeq, other.refSeq)
+				&& Objects.equals(rsId, other.rsId)
 				&& Double.doubleToLongBits(slope) == Double.doubleToLongBits(other.slope)
 				&& Objects.equals(source, other.source) && Objects.equals(studyId, other.studyId)
 				&& Objects.equals(tissueFileName, other.tissueFileName)
@@ -543,6 +546,34 @@ public class EQTL extends AbstractEntity {
 	 */
 	public void setPos(Double pos) {
 		this.pos = pos;
+	}
+
+	/**
+	 * @return the chrGRCm39
+	 */
+	public String getChrGRCm39() {
+		return chrGRCm39;
+	}
+
+	/**
+	 * @param chrGRCm39 the chrGRCm39 to set
+	 */
+	public void setChrGRCm39(String chrGRCm39) {
+		this.chrGRCm39 = chrGRCm39;
+	}
+
+	/**
+	 * @return the bpGRCm39
+	 */
+	public int getBpGRCm39() {
+		return bpGRCm39;
+	}
+
+	/**
+	 * @param bpGRCm39 the bpGRCm39 to set
+	 */
+	public void setBpGRCm39(int bpGRCm39) {
+		this.bpGRCm39 = bpGRCm39;
 	}
 
 
