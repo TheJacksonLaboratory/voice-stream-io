@@ -39,7 +39,7 @@ import org.neo4j.ogm.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractOverlapConnector<N extends Entity, E extends Entity> implements Connector<N, E>, AutoCloseable {
+public abstract class AbstractOverlapConnector<N extends Entity, E extends Entity> implements Connector<N, E>, AutoCloseable, IntersectionCreator {
 
 	
 	protected static Logger logger = LoggerFactory.getLogger(AbstractOverlapConnector.class);
@@ -170,7 +170,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			
 			StreamReader<?> reader = ReaderFactory.getReader(request);
 			Stream<?> raw = reader.stream();
-			
+
 			// The skip is not that accurate because
 			// we use it on the raw which might have other objects in.
 			// However they are used in testing and will be slow if we
@@ -252,7 +252,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 							log.println("Example of id ("+getClass().getSimpleName()+") found: "+id);
 						}
 
-						AbstractEntity o = oservice.intersection(variant, createIntersectionObject(id, rlow, rup));
+						AbstractEntity o = oservice.intersection(variant, createIntersectionObject(id, rlow, rup, meta), this);
 						if (o!=null) {
 							o.setChr(variant.getChr());
 							ret.add(o);

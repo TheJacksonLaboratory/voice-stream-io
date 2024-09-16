@@ -1,29 +1,14 @@
 package org.geneweaver.io.connector;
 
+import org.geneweaver.domain.AbstractEntity;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Located;
 import org.geneweaver.domain.Transcript;
+import org.geneweaver.domain.TranscriptOverlap;
+import org.geneweaver.domain.Variant;
 
 /**
- * This function reads all the regions from their separate files
- * and caches them in a large table. This table can then be used to map
- * Variants to Regions using Intersection connections.
- * 
- * This connector should be used with Variants and return a stream of the
- * variant and all the Intersections of that variant with Regions form the bed files.
- * 
- * The databases holding the peaks are sharded because these tables need to be smaller
- * than 200mill and closer to 100k rows to be fast. In order to do this, we record the peak
- * in two tables if they straddle a shard boundary, once for its lower location and once 
- * for its upper (unless they are the same).
- * Then when seeing if there is a connection to a Variant we take the base of its lower value
- * and look up the peaks in that table (shard). 
- * 
- * In addition we use separate files for each chromosome with a separate connection. This
- * makes the connection somewhat faster because there can be 200mill base pairs in a chromosome
- * therefore if the base pair shards are 10000, there can be 20000 tables.
- * 
- * There are roughly 29 billion overlaps in the human variant to peak space on Ensembl.
+ * Used for the overlaps between Variant and Transcript
  * 
  * @author gerrim
  *
@@ -61,5 +46,20 @@ public class TranscriptOverlapConnector<N extends Entity, E extends Entity> exte
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public <T extends AbstractEntity> T create(Located loc, Variant variant, int intersectRange,
+			float intersectFaction) {
+		
+		if (loc instanceof Transcript) {
+			TranscriptOverlap ret = new TranscriptOverlap();
+			ret.setTranscript(loc);
+			ret.setVariant(variant);
+			ret.setIntersectRange(intersectRange);
+			ret.setIntersectFraction(intersectFaction);
+			return (T) ret;
+		}
+		throw new IllegalArgumentException("Cannot intersect with "+loc);
 	}
 }

@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.geneweaver.domain.AbstractEntity;
 import org.geneweaver.domain.Contact;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Gene;
@@ -213,6 +214,13 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 
 	@Override
 	protected Located createIntersectionObject(String id, int start, int end) {
+		// Does nothing in this case because we override stream(...)
+		return null;
+	}
+
+	@Override
+	public <T extends AbstractEntity> T create(Located loc, Variant variant, int intersectRange,
+			float intersectFaction) {
 		// Does nothing in this case because we override stream(...)
 		return null;
 	}

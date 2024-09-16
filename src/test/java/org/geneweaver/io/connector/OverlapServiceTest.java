@@ -129,6 +129,6 @@ public class OverlapServiceTest extends AbstractDataFileTest  {
 		Peak p = new Peak();
 		p.setStart(ps);
 		p.setEnd(pe);
-		return iservice.intersection(v, p);
+		return iservice.intersection(v, p, new PeakOverlapConnector<>());
 	}
 }

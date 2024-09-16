@@ -1,5 +1,6 @@
 package org.geneweaver.domain;
 
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -26,6 +27,18 @@ public interface Located extends IdGenerator {
 	 * @return
 	 */
 	String getChr();
+	
+	/**
+	 * This method returns any additional metadata
+	 * which we should set on the child object which we
+	 * create with this location. It is stored as an optional 
+	 * fourth column in the database as json. Using it can
+	 * build up the database and it should not always be set.
+	 * @return map of metadata values e.g. extra properties to set on EQTLOverlap.
+	 */
+	default Map<String,Object> getMeta() {
+		return null;
+	}
 
 	static Located at(String chr, Integer start, Integer end) {
 		final UUID rand = UUID.randomUUID();

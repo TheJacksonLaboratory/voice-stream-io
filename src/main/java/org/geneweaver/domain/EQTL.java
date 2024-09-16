@@ -43,7 +43,7 @@ Also shortening the chain means less nodes/rels. A disadvantage is that it is a 
  */
 @Generated("POJO")
 @RelationshipEntity(type = "EQTL")
-public class EQTL extends AbstractEntity {
+public class EQTL extends AbstractEntity implements Located {
 	
 	public enum Type {
 		PEAK, INTERVAL;
@@ -574,6 +574,21 @@ public class EQTL extends AbstractEntity {
 	 */
 	public void setBpGRCm39(int bpGRCm39) {
 		this.bpGRCm39 = bpGRCm39;
+	}
+
+	@Override
+	public String id() {
+		return geneId;
+	}
+
+	@Override
+	public Integer getStart() {
+		return getBpGRCm39();
+	}
+
+	@Override
+	public Integer getEnd() {
+		return getBpGRCm39();
 	}
 
 

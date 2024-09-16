@@ -1,8 +1,11 @@
 package org.geneweaver.io.connector;
 
+import org.geneweaver.domain.AbstractEntity;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Located;
 import org.geneweaver.domain.RegulatoryFeature;
+import org.geneweaver.domain.RegulatoryFeatureOverlap;
+import org.geneweaver.domain.Variant;
 
 /**
  * This function reads all the regions from their separate files
@@ -63,6 +66,21 @@ public class RegulatoryFeatureOverlapConnector<N extends Entity, E extends Entit
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public <T extends AbstractEntity> T create(Located loc, Variant variant, int intersectRange,
+			float intersectFaction) {
+		
+		if (loc instanceof RegulatoryFeature) {
+			RegulatoryFeatureOverlap ret = new RegulatoryFeatureOverlap();
+			ret.setRegFeature(loc);
+			ret.setVariant(variant);
+			ret.setIntersectRange(intersectRange);
+			ret.setIntersectFraction(intersectFaction);
+			return (T) ret;
+		}
+		throw new IllegalArgumentException("Cannot intersect with "+loc);
 	}
 
 }
