@@ -43,7 +43,7 @@ Also shortening the chain means less nodes/rels. A disadvantage is that it is a 
  */
 @Generated("POJO")
 @RelationshipEntity(type = "EQTL")
-public class EQTL extends AbstractEntity implements Located {
+public class EQTL extends EQTLBase {
 	
 	public enum Type {
 		PEAK, INTERVAL;
@@ -52,8 +52,6 @@ public class EQTL extends AbstractEntity implements Located {
 	private Type type=Type.PEAK; // PEAK or INTERVAL
     private String marker;
     private String population;
-    private Double lod;
-    private Integer bp;
 
 	@StartNode
 	private Variant variantFrom;
@@ -69,16 +67,11 @@ public class EQTL extends AbstractEntity implements Located {
 	private String altSeq;
 	private double slope;
 	private Double pos;
-	private String tissueFileName;
-	private String tissueGroup;
-	private String tissueName;
 	private String version;
-	private String uberon;
 	private String source; // e.g. GTEx
-	private String studyId;
 	
-	private String chrGRCm39;
-	private int	   bpGRCm39;
+	private String  chrGRCm39;
+	private Integer bpGRCm39;
 	
 	@EndNode
 	private Gene geneTo;
@@ -116,50 +109,23 @@ public class EQTL extends AbstractEntity implements Located {
 	 */
 	@Override
 	public String getHeader() {
-		StringBuilder buf = new StringBuilder();
-		buf.append(":START_ID(Rs-Id)");
 		
-		buf.append(getDelimiter());
-		buf.append("type");
-		buf.append(getDelimiter());
-		buf.append("chr");
-		buf.append(getDelimiter());
-		buf.append("pos:double");
-		buf.append(getDelimiter());
-		buf.append("refSeq");
-		buf.append(getDelimiter());
-		buf.append("altSeq");
-		buf.append(getDelimiter());
-		buf.append("slope:double");
-		buf.append(getDelimiter());
-		buf.append("tissueFileName");
-		buf.append(getDelimiter());
-		buf.append("tissueGroup");
-		buf.append(getDelimiter());
-		buf.append("tissueName");
-		buf.append(getDelimiter());
-		buf.append("version");
-		buf.append(getDelimiter());
-		buf.append("uberon");
-		buf.append(getDelimiter());
-		buf.append("source");
-		buf.append(getDelimiter());
-		buf.append("fullGeneId");
-		buf.append(getDelimiter());
-		buf.append("marker");
-		buf.append(getDelimiter());
-		buf.append("population");
-		buf.append(getDelimiter());
-		buf.append("lod:double");
-		buf.append(getDelimiter());
-		buf.append("bp:int");
-		buf.append(getDelimiter());
-		buf.append("studyId");
-		buf.append(getDelimiter());
-		buf.append(":END_ID(Gene-Id)");
-		buf.append(getDelimiter());
-		buf.append(":TYPE");
-		return buf.toString();
+		return delimify(":START_ID(Rs-Id)",
+				"type",
+				"chr",
+				"slope:double",
+				"tissueFileName",
+				"tissueGroup",
+				"tissueName",
+				"version",
+				"uberon",
+				"source",
+				"marker",
+				"lod:double",
+				"bp:int",
+				"studyId",
+				":END_ID(Gene-Id)",
+				":TYPE");
 	}
 	
 	/**
@@ -169,51 +135,23 @@ public class EQTL extends AbstractEntity implements Located {
 	 */
 	@Override
 	public String toCsv() {
-		StringBuilder buf = new StringBuilder();
-		buf.append(getRsId());
 		
-		buf.append(getDelimiter());
-		buf.append(getType());
-		buf.append(getDelimiter());
-		buf.append(getChr());
-		buf.append(getDelimiter());
-		buf.append(getPos()!=null?getPos():-1);
-		buf.append(getDelimiter());
-		buf.append(getRefSeq());
-		buf.append(getDelimiter());
-		buf.append(getAltSeq());
-		buf.append(getDelimiter());
-		buf.append(getSlope());
-		buf.append(getDelimiter());
-		buf.append(getTissueFileName());
-		buf.append(getDelimiter());
-		buf.append(getTissueGroup());
-		buf.append(getDelimiter());
-		buf.append(getTissueName());
-		buf.append(getDelimiter());
-		buf.append(getVersion());
-		buf.append(getDelimiter());
-		buf.append(getUberon());
-		buf.append(getDelimiter());
-		buf.append(getSource());
-		buf.append(getDelimiter());
-		buf.append(getFullGeneId());
-		buf.append(getDelimiter());
-		buf.append(getMarker());
-		buf.append(getDelimiter());
-		buf.append(getPopulation());
-		buf.append(getDelimiter());
-		buf.append(getLod()!=null?getLod():-1);
-		buf.append(getDelimiter());
-		buf.append(getBp()!=null?getBp():-1);
-		buf.append(getDelimiter());
-		buf.append(getStudyId());
-		buf.append(getDelimiter());
-		
-		buf.append(getGeneId());
-		buf.append(getDelimiter());
-		buf.append(getClass().getSimpleName().toUpperCase());
-		return buf.toString();
+		return delimify(getRsId(),
+				getType(),
+				getChrGRCm39()!=null?getChrGRCm39():getChr(),
+				getSlope(),
+				getTissueFileName(),
+				getTissueGroup(),
+				getTissueName(),
+				getVersion(),
+				getUberon(),
+				getSource(),
+				getMarker(),
+				getLod()!=null?getLod():-1,
+				getBpGRCm39()!=null?getBpGRCm39():-1,
+				getStudyId(),
+				getGeneId(),
+				getClass().getSimpleName().toUpperCase());
 	}
 
 	/**
@@ -264,9 +202,8 @@ public class EQTL extends AbstractEntity implements Located {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(altSeq, bp, bpGRCm39, chrGRCm39, eqtlVariantId, fullGeneId, geneId,
-				geneTo, lod, marker, population, pos, refSeq, rsId, slope, source, studyId, tissueFileName, tissueGroup,
-				tissueName, type, uberon, variantFrom, version);
+		result = prime * result + Objects.hash(altSeq, bpGRCm39, chrGRCm39, eqtlVariantId, fullGeneId, geneId, geneTo,
+				marker, population, pos, refSeq, rsId, slope, source, type, variantFrom, version);
 		return result;
 	}
 
@@ -279,18 +216,14 @@ public class EQTL extends AbstractEntity implements Located {
 		if (!(obj instanceof EQTL))
 			return false;
 		EQTL other = (EQTL) obj;
-		return Objects.equals(altSeq, other.altSeq) && Objects.equals(bp, other.bp) && bpGRCm39 == other.bpGRCm39
+		return Objects.equals(altSeq, other.altSeq) && Objects.equals(bpGRCm39, other.bpGRCm39)
 				&& Objects.equals(chrGRCm39, other.chrGRCm39) && Objects.equals(eqtlVariantId, other.eqtlVariantId)
 				&& Objects.equals(fullGeneId, other.fullGeneId) && Objects.equals(geneId, other.geneId)
-				&& Objects.equals(geneTo, other.geneTo) && Objects.equals(lod, other.lod)
-				&& Objects.equals(marker, other.marker) && Objects.equals(population, other.population)
-				&& Objects.equals(pos, other.pos) && Objects.equals(refSeq, other.refSeq)
-				&& Objects.equals(rsId, other.rsId)
+				&& Objects.equals(geneTo, other.geneTo) && Objects.equals(marker, other.marker)
+				&& Objects.equals(population, other.population) && Objects.equals(pos, other.pos)
+				&& Objects.equals(refSeq, other.refSeq) && Objects.equals(rsId, other.rsId)
 				&& Double.doubleToLongBits(slope) == Double.doubleToLongBits(other.slope)
-				&& Objects.equals(source, other.source) && Objects.equals(studyId, other.studyId)
-				&& Objects.equals(tissueFileName, other.tissueFileName)
-				&& Objects.equals(tissueGroup, other.tissueGroup) && Objects.equals(tissueName, other.tissueName)
-				&& type == other.type && Objects.equals(uberon, other.uberon)
+				&& Objects.equals(source, other.source) && type == other.type
 				&& Objects.equals(variantFrom, other.variantFrom) && Objects.equals(version, other.version);
 	}
 
@@ -364,33 +297,6 @@ public class EQTL extends AbstractEntity implements Located {
 		this.slope = slope;
 	}
 
-	/**
-	 * @return the tissueFileName
-	 */
-	public String getTissueFileName() {
-		return tissueFileName;
-	}
-
-	/**
-	 * @param tissueFileName the tissueFileName to set
-	 */
-	public void setTissueFileName(String tissue) {
-		this.tissueFileName = tissue;
-	}
-
-	/**
-	 * @return the uberon
-	 */
-	public String getUberon() {
-		return uberon;
-	}
-
-	/**
-	 * @param uberon the uberon to set
-	 */
-	public void setUberon(String uberon) {
-		this.uberon = uberon;
-	}
 
 	/**
 	 * @return the source
@@ -434,33 +340,6 @@ public class EQTL extends AbstractEntity implements Located {
 		this.fullGeneId = fullGeneId;
 	}
 
-	/**
-	 * @return the tissueGroup
-	 */
-	public String getTissueGroup() {
-		return tissueGroup;
-	}
-
-	/**
-	 * @param tissueGroup the tissueGroup to set
-	 */
-	public void setTissueGroup(String tissueGroup) {
-		this.tissueGroup = tissueGroup;
-	}
-
-	/**
-	 * @return the tissueName
-	 */
-	public String getTissueName() {
-		return tissueName;
-	}
-
-	/**
-	 * @param tissueName the tissueName to set
-	 */
-	public void setTissueName(String tissueSecondaryGroup) {
-		this.tissueName = tissueSecondaryGroup;
-	}
 
 	public String getMarker() {
 		return marker;
@@ -476,48 +355,6 @@ public class EQTL extends AbstractEntity implements Located {
 
 	public void setPopulation(String population) {
 		this.population = population;
-	}
-
-	/**
-	 * @return the lod
-	 */
-	public Double getLod() {
-		return lod;
-	}
-
-	/**
-	 * @param lod the lod to set
-	 */
-	public void setLod(Double lod) {
-		this.lod = lod;
-	}
-
-	/**
-	 * @return the bp
-	 */
-	public Integer getBp() {
-		return bp;
-	}
-
-	/**
-	 * @param bp the bp to set
-	 */
-	public void setBp(Integer bp) {
-		this.bp = bp;
-	}
-
-	/**
-	 * @return the studyId
-	 */
-	public String getStudyId() {
-		return studyId;
-	}
-
-	/**
-	 * @param studyId the studyId to set
-	 */
-	public void setStudyId(String studyId) {
-		this.studyId = studyId;
 	}
 
 	/**
@@ -565,20 +402,31 @@ public class EQTL extends AbstractEntity implements Located {
 	/**
 	 * @return the bpGRCm39
 	 */
-	public int getBpGRCm39() {
+	public Integer getBpGRCm39() {
 		return bpGRCm39;
 	}
 
 	/**
 	 * @param bpGRCm39 the bpGRCm39 to set
 	 */
-	public void setBpGRCm39(int bpGRCm39) {
+	public void setBpGRCm39(Integer bpGRCm39) {
 		this.bpGRCm39 = bpGRCm39;
 	}
 
 	@Override
 	public String id() {
 		return geneId;
+	}
+
+	@Override
+	public String getChr() {
+		String chr = getChrGRCm39();
+		if (chr!=null) {
+			if (chr.toLowerCase().startsWith("chr")) {
+				chr = chr.substring(3);
+			}
+		}
+		return chr;
 	}
 
 	@Override

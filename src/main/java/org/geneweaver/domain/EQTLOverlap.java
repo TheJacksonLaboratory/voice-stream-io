@@ -11,8 +11,8 @@ import org.neo4j.ogm.annotation.StartNode;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Generated("POJO")
-@RelationshipEntity(type = "TRANSCRIPT_OVERLAP")
-public class EQTLOverlap extends AbstractEntity {
+@RelationshipEntity(type = "EQTL_OVERLAP")
+public class EQTLOverlap extends EQTLBase {
 
 	/** The variant. */
 	@StartNode
@@ -23,42 +23,24 @@ public class EQTLOverlap extends AbstractEntity {
 	private Located variant;
 
 	/**
-	 * A scalar which is the amount of overlap between the variant and the park.
-	 * a = p.s - v.s;
-	 * a < 0 ? a = 0 : a=a;
-	 * b = v.e - p.e;
-	 * b < 0 ? b = 0 : b=b;
-	 * intersectRange = v.e-v.s-a-b
-	 */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private int intersectRange;
-
-	/**
-	 * The faction of the peak which overlaps the original variant location.
-	 * intersectFraction = intersectRange / (v.e-v.s)
-	 */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private float intersectFraction;
-
-	
-	/**
 	 * Gets the header.
 	 *
 	 * @return the header
 	 */
 	@Override
 	public String getHeader() {
-		StringBuilder buf = new StringBuilder();
-		buf.append(":START_ID(Gene-Id)");
-		buf.append(getDelimiter());
-		buf.append("intersectRange:int");
-		buf.append(getDelimiter());
-		buf.append("intersectFraction:float");
-		buf.append(getDelimiter());
-		buf.append(":END_ID(Rs-Id)");
-		buf.append(getDelimiter());
-		buf.append(":TYPE");
-		return buf.toString();
+		
+		return delimify(":START_ID(Rs-Id)",
+				"chr",
+				"tissueFileName",
+				"tissueGroup",
+				"tissueName",
+				"uberon",
+				"lod:double",
+				"bp:int",
+				"studyId",
+				":END_ID(Gene-Id)",
+				":TYPE");
 	}
 	
 	/**
@@ -68,17 +50,18 @@ public class EQTLOverlap extends AbstractEntity {
 	 */
 	@Override
 	public String toCsv() {
-		StringBuilder buf = new StringBuilder();
-		buf.append(gene!=null?gene.id():"NA");
-		buf.append(getDelimiter());
-		buf.append(getIntersectRange());
-		buf.append(getDelimiter());
-		buf.append(getIntersectFraction());
-		buf.append(getDelimiter());
-		buf.append(variant!=null?variant.id():"NA");
-		buf.append(getDelimiter());
-		buf.append("TRANSCRIPT_OVERLAP");
-		return buf.toString();
+		
+		return delimify(variant!=null?variant.id():null,
+						getChr(),
+						getTissueFileName(),
+						getTissueGroup(),
+						getTissueName(),
+						getUberon(),
+						getLod()!=null?getLod():-1,
+						getBp()!=null?getBp():-1,
+						getStudyId(),
+						gene!=null?gene.id():null,
+						"EQTL_OVERLAP");
 	}
 
 	/**
@@ -109,39 +92,11 @@ public class EQTLOverlap extends AbstractEntity {
 		this.variant = variant;
 	}
 
-	/**
-	 * @return the intersectRange
-	 */
-	public int getIntersectRange() {
-		return intersectRange;
-	}
-
-	/**
-	 * @param intersectRange the intersectRange to set
-	 */
-	public void setIntersectRange(int intersectRange) {
-		this.intersectRange = intersectRange;
-	}
-
-	/**
-	 * @return the intersectFraction
-	 */
-	public float getIntersectFraction() {
-		return intersectFraction;
-	}
-
-	/**
-	 * @param intersectFraction the intersectFraction to set
-	 */
-	public void setIntersectFraction(float intersectFraction) {
-		this.intersectFraction = intersectFraction;
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(intersectFraction, intersectRange, variant, gene);
+		result = prime * result + Objects.hash(gene, variant);
 		return result;
 	}
 
@@ -154,14 +109,27 @@ public class EQTLOverlap extends AbstractEntity {
 		if (!(obj instanceof EQTLOverlap))
 			return false;
 		EQTLOverlap other = (EQTLOverlap) obj;
-		return intersectFraction == other.intersectFraction && intersectRange == other.intersectRange
-				&& Objects.equals(variant, other.variant) && Objects.equals(gene, other.gene);
+		return Objects.equals(gene, other.gene) && Objects.equals(variant, other.variant);
 	}
 
 	@Override
 	public String toString() {
 		if (gene==null || variant==null) return super.toString();
 		return "(Variant{rsId:"+variant.id()+"})-[EQTL_OVERLAP]-(Gene{geneId:"+gene.id()+")";
+	}
+
+	public Integer getStart() {
+		return null;
+	}
+
+	@Override
+	public Integer getEnd() {
+		return null;
+	}
+
+	@Override
+	public String id() {
+		return gene.id();
 	}
 
 

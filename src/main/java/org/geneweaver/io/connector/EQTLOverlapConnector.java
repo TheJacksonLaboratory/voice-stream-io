@@ -1,5 +1,6 @@
 package org.geneweaver.io.connector;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.beanutils.BeanMap;
@@ -39,10 +40,25 @@ public class EQTLOverlapConnector<N extends Entity, E extends Entity> extends Ab
 	protected Located createIntersectionObject(String id, int start, int end) {
 		// We process the eQTLs for the location but use
 		// the geneId for the id.
-		Gene gene = new Gene(id, start, end);
-		// TODO
-		// gene.setMeta(...)
-		return gene;
+		return new Gene(id, start, end);
+	}
+	
+	/**
+	 * Specify the parameters on EQTL which we read from the original file
+	 * and then save on EQTLOverlap later using a bean map.
+	 */
+	protected <T extends Located> Map<String, Object> getMeta(T line) {
+		EQTL eqtl = (EQTL)line;
+		Map<String, Object> meta = new HashMap<>();
+		meta.put("chr",  eqtl.getChrGRCm39());
+		meta.put("bp",   eqtl.getBpGRCm39());
+		meta.put("lod",  eqtl.getLod());
+		meta.put("tissueFileName",eqtl.getTissueFileName());
+		meta.put("tissueGroup",eqtl.getTissueGroup());
+		meta.put("tissueName",eqtl.getTissueName());
+		meta.put("uberon",eqtl.getUberon());
+		meta.put("studyId",eqtl.getStudyId());
+		return meta;
 	}
 
 	/**
@@ -61,26 +77,12 @@ public class EQTLOverlapConnector<N extends Entity, E extends Entity> extends Ab
 	}
 
 	@Override
-	public <T extends AbstractEntity> T create(Located loc, Variant variant, int intersectRange,
-					float intersectFaction) {
+	public <T extends AbstractEntity> T create(Located loc, Variant variant) {
 		
 		if (loc instanceof Gene) {
 			EQTLOverlap ret = new EQTLOverlap();
 			ret.setGene(loc);
 			ret.setVariant(variant);
-			ret.setIntersectRange(intersectRange);
-			ret.setIntersectFraction(intersectFaction);
-			
-			// If the meta 
-			Map<String,Object> meta = loc.getMeta();
-			if (meta == null) {
-				throw new IllegalArgumentException("The metadata values for EQTLOverlap must be set!");
-			}
-			
-			// All the meta values must be fields in the EQTLOverlap bean.
-			BeanMap map = new BeanMap(ret);
-			map.putAll(map);
-			
 			return (T) ret;
 		}
 		throw new IllegalArgumentException("Cannot intersect with "+loc);

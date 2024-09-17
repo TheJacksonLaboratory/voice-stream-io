@@ -23,25 +23,6 @@ public class PeakOverlap extends AbstractEntity {
 	private Located peak;
 
 	/**
-	 * A scalar which is the amount of overlap between the variant and the park.
-	 * a = p.s - v.s;
-	 * a < 0 ? a = 0 : a=a;
-	 * b = v.e - p.e;
-	 * b < 0 ? b = 0 : b=b;
-	 * intersectRange = v.e-v.s-a-b
-	 */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private int intersectRange;
-
-	/**
-	 * The faction of the peak which overlaps the original variant location.
-	 * intersectFraction = intersectRange / (v.e-v.s)
-	 */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private float intersectFraction;
-
-	
-	/**
 	 * Gets the header.
 	 *
 	 * @return the header
@@ -50,10 +31,6 @@ public class PeakOverlap extends AbstractEntity {
 	public String getHeader() {
 		StringBuilder buf = new StringBuilder();
 		buf.append(":START_ID(Rs-Id)");
-		buf.append(getDelimiter());
-		buf.append("intersectRange:int");
-		buf.append(getDelimiter());
-		buf.append("intersectFraction:float");
 		buf.append(getDelimiter());
 		buf.append(":END_ID(Peak-Id)");
 		buf.append(getDelimiter());
@@ -70,10 +47,6 @@ public class PeakOverlap extends AbstractEntity {
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
 		buf.append(variant!=null?variant.id():"NA");
-		buf.append(getDelimiter());
-		buf.append(getIntersectRange());
-		buf.append(getDelimiter());
-		buf.append(getIntersectFraction());
 		buf.append(getDelimiter());
 		buf.append(peak!=null?peak.id():"NA");
 		buf.append(getDelimiter());
@@ -109,39 +82,11 @@ public class PeakOverlap extends AbstractEntity {
 		this.peak = peak;
 	}
 
-	/**
-	 * @return the intersectRange
-	 */
-	public int getIntersectRange() {
-		return intersectRange;
-	}
-
-	/**
-	 * @param intersectRange the intersectRange to set
-	 */
-	public void setIntersectRange(int intersectRange) {
-		this.intersectRange = intersectRange;
-	}
-
-	/**
-	 * @return the intersectFraction
-	 */
-	public float getIntersectFraction() {
-		return intersectFraction;
-	}
-
-	/**
-	 * @param intersectFraction the intersectFraction to set
-	 */
-	public void setIntersectFraction(float intersectFraction) {
-		this.intersectFraction = intersectFraction;
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(intersectFraction, intersectRange, peak, variant);
+		result = prime * result + Objects.hash(peak, variant);
 		return result;
 	}
 
@@ -154,8 +99,7 @@ public class PeakOverlap extends AbstractEntity {
 		if (!(obj instanceof PeakOverlap))
 			return false;
 		PeakOverlap other = (PeakOverlap) obj;
-		return intersectFraction == other.intersectFraction && intersectRange == other.intersectRange
-				&& Objects.equals(peak, other.peak) && Objects.equals(variant, other.variant);
+		return Objects.equals(peak, other.peak) && Objects.equals(variant, other.variant);
 	}
 
 	@Override

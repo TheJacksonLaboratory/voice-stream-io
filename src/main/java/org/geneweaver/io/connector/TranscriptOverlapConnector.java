@@ -49,15 +49,12 @@ public class TranscriptOverlapConnector<N extends Entity, E extends Entity> exte
 	}
 
 	@Override
-	public <T extends AbstractEntity> T create(Located loc, Variant variant, int intersectRange,
-			float intersectFaction) {
+	public <T extends AbstractEntity> T create(Located loc, Variant variant) {
 		
 		if (loc instanceof Transcript) {
 			TranscriptOverlap ret = new TranscriptOverlap();
 			ret.setTranscript(loc);
 			ret.setVariant(variant);
-			ret.setIntersectRange(intersectRange);
-			ret.setIntersectFraction(intersectFaction);
 			return (T) ret;
 		}
 		throw new IllegalArgumentException("Cannot intersect with "+loc);

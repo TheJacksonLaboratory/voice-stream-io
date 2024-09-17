@@ -232,17 +232,12 @@ public class PeakOverlapConnector<N extends Entity, E extends Entity> extends Ab
 
 	@Override
 	public <T extends AbstractEntity> T create(Located loc, 
-			Variant variant, 
-			int intersectRange,
-			float intersectFaction) {
+			Variant variant) {
 		
 		if (loc instanceof Peak) {
 			PeakOverlap ret = new PeakOverlap();
 			ret.setPeak(loc);
 			ret.setVariant(variant);
-			ret.setIntersectRange(intersectRange);
-			ret.setIntersectFraction(intersectFaction);
-			
 			return (T) ret;
 		} 
 		throw new IllegalArgumentException("Cannot intersect with "+loc);

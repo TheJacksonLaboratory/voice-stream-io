@@ -69,15 +69,12 @@ public class RegulatoryFeatureOverlapConnector<N extends Entity, E extends Entit
 	}
 
 	@Override
-	public <T extends AbstractEntity> T create(Located loc, Variant variant, int intersectRange,
-			float intersectFaction) {
+	public <T extends AbstractEntity> T create(Located loc, Variant variant) {
 		
 		if (loc instanceof RegulatoryFeature) {
 			RegulatoryFeatureOverlap ret = new RegulatoryFeatureOverlap();
 			ret.setRegFeature(loc);
 			ret.setVariant(variant);
-			ret.setIntersectRange(intersectRange);
-			ret.setIntersectFraction(intersectFaction);
 			return (T) ret;
 		}
 		throw new IllegalArgumentException("Cannot intersect with "+loc);

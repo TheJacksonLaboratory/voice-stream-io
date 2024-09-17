@@ -39,10 +39,14 @@ import org.neo4j.ogm.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public abstract class AbstractOverlapConnector<N extends Entity, E extends Entity> implements Connector<N, E>, AutoCloseable, IntersectionCreator {
 
 	
 	protected static Logger logger = LoggerFactory.getLogger(AbstractOverlapConnector.class);
+	private static ObjectMapper mapper = new ObjectMapper();
 
 	private String tableName;
 	private String fileName;
@@ -72,6 +76,11 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 * take only the newer file by name if this boolean is set.
 	 */
 	protected boolean newestInDirectoryByName = false;
+
+	/**
+	 * Type ref for map of <String,Object>
+	 */
+	protected TypeReference<HashMap<String,Object>> mapReference = new TypeReference<HashMap<String,Object>>() {};
 
 	/**
 	 * For testing we can limit the numbers of genes or variants processed
@@ -224,12 +233,10 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 					return (Stream<E>) ret.stream();
 				}
 				
-				int vlower = Math.min(variant.getStart(), variant.getEnd());
-				lookup.setInt(1, vlower);
-				lookup.setInt(2, vlower);
-				int vupper = Math.max(variant.getStart(), variant.getEnd());
-				lookup.setInt(3, vupper);
-				lookup.setInt(4, vupper);
+				int a = Math.min(variant.getStart(), variant.getEnd());
+				lookup.setInt(1, a);
+				int b = Math.max(variant.getStart(), variant.getEnd());
+				lookup.setInt(2, b);
 	
 				Set<String> usedIds = new HashSet<>();
 				
@@ -245,14 +252,16 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 						
 						if (!testId(id)) continue;
 						
-						int rlow = res.getInt(2);
-						int rup  = res.getInt(3);
+						int rlow 		= res.getInt(2);
+						int rup  		= res.getInt(3);
+						String smeta  	= res.getString(4);
 						
 						if (log!=null && count%frequency==0) {
 							log.println("Example of id ("+getClass().getSimpleName()+") found: "+id);
 						}
 
-						AbstractEntity o = oservice.intersection(variant, createIntersectionObject(id, rlow, rup, meta), this);
+						Map<String,Object> meta = mapper.readValue(smeta, mapReference);
+						AbstractEntity o = oservice.intersection(variant, createIntersectionObject(id, rlow, rup), this, meta);
 						if (o!=null) {
 							o.setChr(variant.getChr());
 							ret.add(o);
@@ -333,19 +342,19 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		
 		int lower = Math.min(line.getStart(), line.getEnd());
 		int upper = Math.max(line.getStart(), line.getEnd());
-		
-		String lshardName = oservice.getShardName(line.getChr(), lower);
+		String chr = line.getChr();
+		String lshardName = oservice.getShardName(chr, lower);
 		if (lshardName==null) {
-			String msg = "Could not find shard for "+line.getChr();
+			String msg = "Could not find shard for "+chr;
 			logger.warn(msg);
 			out.println(msg);
 			return null; // No shard
 		}
 		storeBase(lshardName, line, prefix, out);
 		
-		String ubshardName = oservice.getShardName(line.getChr(), upper);
+		String ubshardName = oservice.getShardName(chr, upper);
 		if (ubshardName==null) {
-			String msg = "Could not find shard for "+line.getChr();
+			String msg = "Could not find shard for "+chr;
 			logger.warn(msg);
 			out.println(msg);
 			return null; // No shard
@@ -375,6 +384,10 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			
 			int upper = Math.max(line.getStart(), line.getEnd());
 			stmt.setInt(3,upper);
+			
+			Map<String, Object> meta = getMeta(line);
+			String smeta = mapper.writeValueAsString(meta);
+			stmt.setString(4,smeta);
 			stmt.execute();
 			
 		} catch (Exception ne) {
@@ -382,6 +395,11 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			throw new RuntimeException(ne);
 		}
 	}
+	
+	protected <T extends Located> Map<String, Object> getMeta(T line) {
+		return Collections.emptyMap();
+	}
+	
 	
 	private PreparedStatement getInsertStatement(String chr, String shardName, PrintStream out) throws Exception {
 		Connection conn = getConnection(chr, false, out);
@@ -396,13 +414,14 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 						// that the later lookup will be fast.
 						" entityId VARCHAR(128) NOT NULL, " +  
 						" lower INTEGER," +
-						" upper INTEGER);"; 
+						" upper INTEGER," +
+						" meta CHARACTER(1024));"; 
 
 				create.executeUpdate(sql);
 				logger.info("Create table if not exists "+shardName+":"+tableName);
 			} 
 
-			stmt = conn.prepareStatement("INSERT INTO "+tableName+shardName+" (entityId, lower, upper) VALUES (?,?,?);");
+			stmt = conn.prepareStatement("INSERT INTO "+tableName+shardName+" (entityId, lower, upper, meta) VALUES (?,?,?,?);");
 			insertCache.put(shardName, stmt);
 		} 
 		return stmt;
@@ -418,7 +437,9 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		Connection conn = getConnection(chr, true, out);
 		if (conn==null) return null;
 		if (stmt==null) {
-			String sql = "SELECT entityId, lower, upper FROM "+tableName+shardName+" WHERE (?>=lower AND ?<=upper) OR (?>=lower AND ?<=upper);";
+			// Does (a,b) bisect (lower,upper)?
+			// (a <= upper) && (lower <= b);
+			String sql = "SELECT entityId, lower, upper, meta FROM "+tableName+shardName+" WHERE (?<=upper AND lower<=?);";
 			stmt = conn.prepareStatement(sql);
 			selectCache.put(cacheKey, stmt);
 		} 

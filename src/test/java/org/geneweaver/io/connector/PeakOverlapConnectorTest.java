@@ -56,11 +56,28 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 			func.create(); // Creates indexed database.
 		}
 	}
-	
 
 	@Test
 	public void addAllMouse() throws Exception {
-		testCreate("regionsAllMouse", getPath("data/bed_peaks/mus_musculus/"), 2);
+		Path tdir = testCreate("regionsAllMouse", getPath("data/bed_peaks/mus_musculus/"), 2);
+		
+		try (PeakOverlapConnector<Variant, Entity> func = new PeakOverlapConnector<>()) {
+			func.setLocation(tdir);
+
+			// Test some variants which we know intersect
+			// 1. chr11	50160059	50160298	CTCF_bone_marrow_adult_8_weeks__Enriched_Site	1000	+
+			Variant search = createVariant("test1", "11", 50160055, 50160200);
+			assertEquals(1, func.stream(search).filter(PeakOverlap.class::isInstance).count());
+		
+			// 2. chr2	25511072	25512090	CTCF_bone_marrow_adult_8_weeks__Enriched_Site	1000	+
+			search = createVariant("test2", "2", 25511070, 25512100);
+			assertEquals(2, func.stream(search).filter(PeakOverlap.class::isInstance).count());
+			
+			// 3. chr7	43967376	43967658	CTCF_bone_marrow_adult_8_weeks__Enriched_Site	1000	+
+			search = createVariant("test3", "7", 43967378, 43967657);
+			assertEquals(1, func.stream(search).filter(PeakOverlap.class::isInstance).count());
+
+		}
 	}
 	
 	// TODO This test fails on BitBucket pipelines but is needed. 
@@ -71,7 +88,7 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 		testCreate("regionsAllHuman", getPath("data/bed_peaks/homo_sapiens/"), -1);
 	}
 	
-	public void testCreate(String testName, Path ddir, int limit) throws Exception {
+	public Path testCreate(String testName, Path ddir, int limit) throws Exception {
 		Path tdir = Paths.get("./tmp/"+testName);
 		FileUtils.deleteQuietly(tdir.toFile());
 		
@@ -88,6 +105,7 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 			assertTrue(func.size()>10000);
 			assertTrue(done.elapsed().toMillis()<80000);
 		}
+		return tdir;
 	}
 	
 	@Test

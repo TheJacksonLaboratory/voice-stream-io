@@ -15,7 +15,7 @@ public interface IntersectionCreator {
 	 * @param intersectFaction - stat about closeness of relationship
 	 * @return the entiry or an exception if this intersection cannot be parsed.
 	 */
-	<T extends AbstractEntity> T create(Located loc, Variant variant, int intersectRange, float intersectFaction);
+	<T extends AbstractEntity> T create(Located loc, Variant variant);
 
 	
 }

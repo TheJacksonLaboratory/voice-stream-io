@@ -219,8 +219,7 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 	}
 
 	@Override
-	public <T extends AbstractEntity> T create(Located loc, Variant variant, int intersectRange,
-			float intersectFaction) {
+	public <T extends AbstractEntity> T create(Located loc, Variant variant) {
 		// Does nothing in this case because we override stream(...)
 		return null;
 	}
