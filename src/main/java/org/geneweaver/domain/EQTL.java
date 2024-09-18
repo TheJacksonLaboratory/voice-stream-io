@@ -26,6 +26,8 @@ import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * 
 I *think* EQTL is best as just a relationship. It could be either:
@@ -413,6 +415,7 @@ public class EQTL extends EQTLBase {
 		this.bpGRCm39 = bpGRCm39;
 	}
 
+	@JsonIgnore
 	@Override
 	public String id() {
 		return geneId;
@@ -426,14 +429,16 @@ public class EQTL extends EQTLBase {
 				chr = chr.substring(3);
 			}
 		}
-		return chr;
+		return super.getChr();
 	}
 
+	@JsonIgnore
 	@Override
 	public Integer getStart() {
 		return getBpGRCm39();
 	}
 
+	@JsonIgnore
 	@Override
 	public Integer getEnd() {
 		return getBpGRCm39();

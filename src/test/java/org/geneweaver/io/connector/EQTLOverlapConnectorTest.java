@@ -113,7 +113,7 @@ public class EQTLOverlapConnectorTest extends AbstractDataFileTest{
 			conn.add(input);
 		
 		    long neqtl = conn.create(null, System.out); 
-			assertEquals(9, neqtl);
+			assertEquals(10, neqtl);
 		}
 	}
 

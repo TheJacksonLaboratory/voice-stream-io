@@ -8,6 +8,7 @@ import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Generated("POJO")
@@ -118,18 +119,23 @@ public class EQTLOverlap extends EQTLBase {
 		return "(Variant{rsId:"+variant.id()+"})-[EQTL_OVERLAP]-(Gene{geneId:"+gene.id()+")";
 	}
 
-	public Integer getStart() {
-		return null;
-	}
-
-	@Override
-	public Integer getEnd() {
-		return null;
-	}
-
+	@JsonIgnore
 	@Override
 	public String id() {
 		return gene.id();
+	}
+
+
+	@JsonIgnore
+	@Override
+	public Integer getStart() {
+		return getBp();
+	}
+
+	@JsonIgnore
+	@Override
+	public Integer getEnd() {
+		return getBp();
 	}
 
 

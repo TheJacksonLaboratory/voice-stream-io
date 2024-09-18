@@ -122,6 +122,7 @@ public class JaxEQTLReaderTest extends AbstractDataFileTest {
 		
 		Path dir = getPath("data/eQTL/mm/");
 		Files.list(dir).forEach(path-> {
+			if (Files.isDirectory(path)) return;
 			try {
 				StreamReader<EQTL> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", path));
 				long start = System.currentTimeMillis();
