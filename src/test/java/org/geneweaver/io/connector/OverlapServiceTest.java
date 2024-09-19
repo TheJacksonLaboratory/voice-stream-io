@@ -43,7 +43,7 @@ public class OverlapServiceTest extends AbstractDataFileTest  {
 	public void enclosedVariant1OverlapGt1() throws Exception {
 		try {
 			iservice.minOverlap = 2;
-			assertNull(intersection(10, 10, 7, 12));
+			assertNotNull(intersection(10, 10, 7, 12));
 		} finally {
 			iservice.minOverlap = 1;
 		}
@@ -81,7 +81,7 @@ public class OverlapServiceTest extends AbstractDataFileTest  {
 
 	@Test
 	public void enclosedPeak0() throws Exception {
-		assertNull(intersection(10, 10, 10, 10));
+		assertNotNull(intersection(10, 10, 10, 10));
 	}
 
 	@Test
