@@ -24,11 +24,13 @@ import org.geneweaver.io.reader.ReaderFactory;
 import org.geneweaver.io.reader.ReaderRequest;
 import org.geneweaver.io.reader.StreamReader;
 import org.geneweaver.io.writer.ExportBuilder;
+import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.base.Stopwatch;
 
+@FixMethodOrder(org.junit.runners.MethodSorters.NAME_ASCENDING)
 public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 
 	
