@@ -7,7 +7,7 @@
 	<groupId>org.geneweaver</groupId>
 	<artifactId>gweaver-stream-io</artifactId>
 	<packaging>jar</packaging>
-	<version>2.7.7-SNAPSHOT</version>
+	<version>2.7.7</version>
 	<name>Geneweaver Stream IO</name>
 
 	<properties>
@@ -54,7 +54,7 @@
 	<scm>
 		<connection>scm:git:https://bitbucket.org/geneweaver/gweaver-stream-io/src/master/</connection>
 		<developerConnection>scm:git:ssh://git@bitbucket.org:geneweaver/gweaver-stream-io.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>gweaver-stream-io-2.7.7</tag>
 		<url>https://www.geneweaver.org</url>
 	</scm>
 	<ciManagement>
