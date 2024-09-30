@@ -12,10 +12,10 @@ pipelines:
          size: 2x
          caches:
             - maven
-            # see https://bitbucket.org/blog/cloning-another-bitbucket-repository-in-bitbucket-pipelines
          script:
             - cp settings.xml ~/.m2/
             - cp extensions.xml ~/.m2/
+            # see https://bitbucket.org/blog/cloning-another-bitbucket-repository-in-bitbucket-pipelines
             - git clone git@bitbucket.org:jacksonlaboratory/gweaver-test-data.git
 
             # -DdeployJax=true is our own variable created to add different deployment

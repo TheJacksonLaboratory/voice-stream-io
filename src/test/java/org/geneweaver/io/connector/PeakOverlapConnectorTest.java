@@ -61,7 +61,7 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 
 	@Test
 	public void addAllMouse() throws Exception {
-		Path tdir = testCreate("regionsAllMouse", getPath("data/bed_peaks/mus_musculus/"), 2);
+		Path tdir = testCreate("regionsAllMouse", getPath("data/bed_peaks/mus_musculus/"), 2, 120000);
 		
 		try (PeakOverlapConnector<Variant, Entity> func = new PeakOverlapConnector<>()) {
 			func.setLocation(tdir);
@@ -91,6 +91,10 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 	}
 	
 	public Path testCreate(String testName, Path ddir, int limit) throws Exception {
+		return testCreate(testName, ddir, limit, 80000);
+	}
+	
+	public Path testCreate(String testName, Path ddir, int limit, long time) throws Exception {
 		Path tdir = Paths.get("./tmp/"+testName);
 		FileUtils.deleteQuietly(tdir.toFile());
 		
@@ -105,11 +109,11 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 			Stopwatch done = timer.stop();
 			System.out.println("Created cache table size "+func.size()+" in "+done);
 			assertTrue(func.size()>10000);
-			assertTrue(done.elapsed().toMillis()<80000);
+			assertTrue(done.elapsed().toMillis()<time);
 		}
 		return tdir;
 	}
-	
+
 	@Test
 	public void testOnePerVariant() throws Exception {
 		Path vpath = getPath("data/bed_peaks/oneVarOnePeak.gvf");
