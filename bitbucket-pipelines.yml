@@ -9,6 +9,7 @@ image: maven:3.8-openjdk-18
 pipelines:
    default:
       - step:
+         size: 2x
          caches:
             - maven
             # see https://bitbucket.org/blog/cloning-another-bitbucket-repository-in-bitbucket-pipelines
