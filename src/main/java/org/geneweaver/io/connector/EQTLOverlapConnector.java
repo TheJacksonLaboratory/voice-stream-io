@@ -3,7 +3,6 @@ package org.geneweaver.io.connector;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.beanutils.BeanMap;
 import org.geneweaver.domain.AbstractEntity;
 import org.geneweaver.domain.EQTL;
 import org.geneweaver.domain.EQTLOverlap;
@@ -76,6 +75,7 @@ public class EQTLOverlapConnector<N extends Entity, E extends Entity> extends Ab
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends AbstractEntity> T create(Located loc, Variant variant) {
 		

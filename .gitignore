@@ -57,3 +57,5 @@ Thumbs.db
 # Maven release stuff
 release.properties
 pom.xml.releaseBackup
+/.project
+/org.eclipse.*
