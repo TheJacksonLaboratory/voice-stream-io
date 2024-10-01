@@ -426,7 +426,7 @@ public class EQTL extends EQTLBase {
 		String chr = getChrGRCm39();
 		if (chr!=null) {
 			if (chr.toLowerCase().startsWith("chr")) {
-				chr = chr.substring(3);
+				return chr.substring(3);
 			}
 		}
 		return super.getChr();
