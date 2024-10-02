@@ -152,12 +152,10 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 					return null;
 				}
 				
-				int vlower = Math.min(loc.getStart(), loc.getEnd());
-				lookup.setInt(1, vlower);
-				lookup.setInt(2, vlower);
-				int vupper = Math.max(loc.getStart(), loc.getEnd());
-				lookup.setInt(3, vupper);
-				lookup.setInt(4, vupper);
+				int a = Math.min(loc.getStart(), loc.getEnd());
+				lookup.setInt(1, a);
+				int b = Math.max(loc.getStart(), loc.getEnd());
+				lookup.setInt(2, b);
 
 				Set<String> usedIds = new LinkedHashSet<>();
 				try (ResultSet res = lookup.executeQuery()) {
