@@ -204,32 +204,32 @@ public class StepConnectorTest extends AbstractDataFileTest {
 	// on cache.
 	
 	// Slow
-	//@Test
+	// @Test
 	public void mouseFullVariantParse() throws Exception {
 		
 		String testName = "mouseFull";
 		Path tdir = Paths.get("./tmp/"+testName);
 		FileUtils.deleteQuietly(tdir.toFile());
 
-		Path file = getPath("prod/ccsi/mm/mm10.gtf.gz");
+		Path file = getPath("prod/steps/mm/mm10.gtf.gz");
 		testRealParse(testName, file, Gene.class,  "ENS", null, null);
 
-		file = getPath("prod/ccsi/mm/snp137.txt.gz");
+		file = getPath("prod/steps/mm/snp137.txt.gz");
 		testRealParse(testName, file, Variant.class, "rs", null, null);
 	}
 
 	// Slow
-	//@Test
+	// @Test
 	public void humanFullVariantParse() throws Exception {
 		
 		String testName = "humanFull";
 		Path tdir = Paths.get("./tmp/"+testName);
 		FileUtils.deleteQuietly(tdir.toFile());
 
-		Path file = getPath("prod/ccsi/hs/hg38.gtf.gz");
+		Path file = getPath("prod/steps/hs/hg38.gtf.gz");
 		testRealParse(testName, file, Gene.class, "ENS", null, null);
 
-		file = getPath("prod/ccsi/hs/snp141.txt.gz");
+		file = getPath("prod/steps/hs/snp141.txt.gz");
 		testRealParse(testName, file, Variant.class, "rs", null, null);
 	}
 	
@@ -240,7 +240,7 @@ public class StepConnectorTest extends AbstractDataFileTest {
 		// Use the previously created dir.
 		Path tdir = Paths.get("./tmp/mouseFull");
 
-		StreamReader<Step> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("prod/ccsi/mm/chia-16.step.gz")));
+		StreamReader<Step> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("prod/steps/mm/chia-16.step.gz")));
 		try (StepConnector conn = new StepConnector()) {
 
 			conn.setParentDirectory(tdir);
@@ -249,15 +249,16 @@ public class StepConnectorTest extends AbstractDataFileTest {
 										 .flatMap(step->conn.stream(step))
 										 .collect(Collectors.toList());
 				  
-			assertEquals(162, stream.size()); 
+			assertEquals(1236, stream.size()); 
 			
 		}
 	}
 	
-	//@Test
+	// Slow
+	// @Test
 	public void mouseBulkFileWrite() throws Exception {
 		
-		Path stepDir = getPath("prod/ccsi/mm/");
+		Path stepDir = getPath("prod/steps/mm/");
 		
 		List<Path> stepFiles = Files.list(stepDir)
 								 .filter(file -> file.getFileName().toString().toLowerCase().endsWith(".step.gz"))

@@ -13,9 +13,12 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.geneweaver.domain.AbstractEntity;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Located;
 import org.geneweaver.domain.Peak;
+import org.geneweaver.domain.PeakOverlap;
+import org.geneweaver.domain.Variant;
 
 /**
  * This function reads all the regions from their separate files
@@ -225,6 +228,19 @@ public class PeakOverlapConnector<N extends Entity, E extends Entity> extends Ab
 	 */
 	public void setPeakFeatureFilter(String peakFeatureFilter) {
 		this.peakFeatureFilter = peakFeatureFilter;
+	}
+
+	@Override
+	public <T extends AbstractEntity> T create(Located loc, 
+			Variant variant) {
+		
+		if (loc instanceof Peak) {
+			PeakOverlap ret = new PeakOverlap();
+			ret.setPeak(loc);
+			ret.setVariant(variant);
+			return (T) ret;
+		} 
+		throw new IllegalArgumentException("Cannot intersect with "+loc);
 	}
 
 

@@ -8,8 +8,6 @@ import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 @Generated("POJO")
 @RelationshipEntity(type = "TRANSCRIPT_OVERLAP")
 public class TranscriptOverlap extends AbstractEntity {
@@ -23,25 +21,6 @@ public class TranscriptOverlap extends AbstractEntity {
 	private Located variant;
 
 	/**
-	 * A scalar which is the amount of overlap between the variant and the park.
-	 * a = p.s - v.s;
-	 * a < 0 ? a = 0 : a=a;
-	 * b = v.e - p.e;
-	 * b < 0 ? b = 0 : b=b;
-	 * intersectRange = v.e-v.s-a-b
-	 */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private int intersectRange;
-
-	/**
-	 * The faction of the peak which overlaps the original variant location.
-	 * intersectFraction = intersectRange / (v.e-v.s)
-	 */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private float intersectFraction;
-
-	
-	/**
 	 * Gets the header.
 	 *
 	 * @return the header
@@ -50,10 +29,6 @@ public class TranscriptOverlap extends AbstractEntity {
 	public String getHeader() {
 		StringBuilder buf = new StringBuilder();
 		buf.append(":START_ID(Transcript-Id)");
-		buf.append(getDelimiter());
-		buf.append("intersectRange:int");
-		buf.append(getDelimiter());
-		buf.append("intersectFraction:float");
 		buf.append(getDelimiter());
 		buf.append(":END_ID(Rs-Id)");
 		buf.append(getDelimiter());
@@ -70,10 +45,6 @@ public class TranscriptOverlap extends AbstractEntity {
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
 		buf.append(transcript!=null?transcript.id():"NA");
-		buf.append(getDelimiter());
-		buf.append(getIntersectRange());
-		buf.append(getDelimiter());
-		buf.append(getIntersectFraction());
 		buf.append(getDelimiter());
 		buf.append(variant!=null?variant.id():"NA");
 		buf.append(getDelimiter());
@@ -109,39 +80,11 @@ public class TranscriptOverlap extends AbstractEntity {
 		this.variant = variant;
 	}
 
-	/**
-	 * @return the intersectRange
-	 */
-	public int getIntersectRange() {
-		return intersectRange;
-	}
-
-	/**
-	 * @param intersectRange the intersectRange to set
-	 */
-	public void setIntersectRange(int intersectRange) {
-		this.intersectRange = intersectRange;
-	}
-
-	/**
-	 * @return the intersectFraction
-	 */
-	public float getIntersectFraction() {
-		return intersectFraction;
-	}
-
-	/**
-	 * @param intersectFraction the intersectFraction to set
-	 */
-	public void setIntersectFraction(float intersectFraction) {
-		this.intersectFraction = intersectFraction;
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(intersectFraction, intersectRange, variant, transcript);
+		result = prime * result + Objects.hash(transcript, variant);
 		return result;
 	}
 
@@ -154,8 +97,7 @@ public class TranscriptOverlap extends AbstractEntity {
 		if (!(obj instanceof TranscriptOverlap))
 			return false;
 		TranscriptOverlap other = (TranscriptOverlap) obj;
-		return intersectFraction == other.intersectFraction && intersectRange == other.intersectRange
-				&& Objects.equals(variant, other.variant) && Objects.equals(transcript, other.transcript);
+		return Objects.equals(transcript, other.transcript) && Objects.equals(variant, other.variant);
 	}
 
 	@Override

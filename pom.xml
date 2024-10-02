@@ -7,7 +7,7 @@
 	<groupId>org.geneweaver</groupId>
 	<artifactId>gweaver-stream-io</artifactId>
 	<packaging>jar</packaging>
-	<version>2.7.3-SNAPSHOT</version>
+	<version>2.7.11-SNAPSHOT</version>
 	<name>Geneweaver Stream IO</name>
 
 	<properties>

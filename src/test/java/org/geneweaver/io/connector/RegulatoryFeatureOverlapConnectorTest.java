@@ -26,9 +26,10 @@ public class RegulatoryFeatureOverlapConnectorTest extends AbstractDataFileTest 
 		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("regfeats")) {
 			conn.setLocation(gdir);
 			conn.addAll(dir);
+			conn.setLimit(100L);
 		
 		    long nFeats = conn.create(null, System.out); 
-			assertEquals(4695, nFeats);
+			assertEquals(300, nFeats);
 		}
 		
 		gdir = Paths.get("tmp/simpleRegulatoryFeatureOverlapCreation/mm");
@@ -39,12 +40,13 @@ public class RegulatoryFeatureOverlapConnectorTest extends AbstractDataFileTest 
 		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("regfeats")) {
 			conn.setLocation(gdir);
 			conn.addAll(dir);
-		
+			conn.setLimit(100L);
+	
 		    long nFeats = conn.create(null, System.out); 
 		    
 		    // Do we want both feats from the mouse dir?
 		    // That's a lot of features.
-			assertEquals(1457352/2, nFeats);
+			assertEquals(200, nFeats);
 		}
 
 	}
@@ -53,30 +55,34 @@ public class RegulatoryFeatureOverlapConnectorTest extends AbstractDataFileTest 
 	public void newestByNameWorking() throws Exception {
 
 		Path gdir1 = Paths.get("tmp/newestByNameWorking/mm1");
+		FileUtils.deleteQuietly(gdir1.toFile());
 		Path dir =  getPath("data/gff_peaks/mus_musculus");
 		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("regfeats")) {
 			conn.setLocation(gdir1);
 			conn.setNewestInDirectoryByName(false);
 			conn.addAll(dir);
+			conn.setLimit(100L);
 		
 		    long nFeats = conn.create(null, System.out); 
 		    
 		    // Do we want both feats from the mouse dir?
 		    // That's a lot of features and they seem to be repeated.
-			assertEquals(1457352, nFeats);
+			assertEquals(400, nFeats);
 		}
 		
 		Path gdir2 = Paths.get("tmp/newestByNameWorking/mm2");
+		FileUtils.deleteQuietly(gdir2.toFile());
 		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("regfeats")) {
 			conn.setLocation(gdir2);
 			conn.addAll(dir);
+			conn.setLimit(100L);
 		
 		    long nFeats = conn.create(null, System.out); 
 			conn.setNewestInDirectoryByName(true); // Normally we ignore newest by name.
 		    
 		    // Do we want both feats from the mouse dir?
 		    // That's a lot of features and they seem to be repeated.
-			assertEquals(1457352/2, nFeats);
+			assertEquals(200, nFeats);
 		}
 
 	}

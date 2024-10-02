@@ -2,8 +2,16 @@ package org.geneweaver.io.connector;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.beanutils.BeanMap;
 import org.geneweaver.domain.AbstractEntity;
+import org.geneweaver.domain.EQTLOverlap;
+import org.geneweaver.domain.Gene;
 import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Variant;
 import org.geneweaver.io.reader.AbstractDataFileTest;
@@ -35,7 +43,7 @@ public class OverlapServiceTest extends AbstractDataFileTest  {
 	public void enclosedVariant1OverlapGt1() throws Exception {
 		try {
 			iservice.minOverlap = 2;
-			assertNull(intersection(10, 10, 7, 12));
+			assertNotNull(intersection(10, 10, 7, 12));
 		} finally {
 			iservice.minOverlap = 1;
 		}
@@ -73,7 +81,7 @@ public class OverlapServiceTest extends AbstractDataFileTest  {
 
 	@Test
 	public void enclosedPeak0() throws Exception {
-		assertNull(intersection(10, 10, 10, 10));
+		assertNotNull(intersection(10, 10, 10, 10));
 	}
 
 	@Test
@@ -121,7 +129,7 @@ public class OverlapServiceTest extends AbstractDataFileTest  {
 		assertNotNull(intersection(10, 20, 20, 22));
 	}
 
-	private AbstractEntity intersection(int vs, int ve, int ps, int pe) {
+	private <T extends AbstractEntity> T intersection(int vs, int ve, int ps, int pe) {
 		Variant v = new Variant();
 		v.setStart(vs);
 		v.setEnd(ve);
@@ -129,6 +137,48 @@ public class OverlapServiceTest extends AbstractDataFileTest  {
 		Peak p = new Peak();
 		p.setStart(ps);
 		p.setEnd(pe);
-		return iservice.intersection(v, p);
+		return (T)iservice.intersection(v, p, new PeakOverlapConnector<>(), Collections.emptyMap());
 	}
+	
+	@Test
+	public void eqtl1() throws Exception {
+		
+		Map<String,Object> meta = createTestMeta();
+		EQTLOverlap eo = intersection(10, 15, 8, 16, meta);
+		assertNotNull(eo);
+		
+		BeanMap map = new BeanMap(eo);
+		assertTrue(meta.keySet().stream().allMatch(key->map.get(key)!=null));
+	}
+	
+	@Test
+	public void eqtlOutside() throws Exception {
+		Map<String,Object> meta = createTestMeta();
+		assertNull(intersection(10, 10, 8, 8, meta));
+	}
+	
+	private Map<String,Object> createTestMeta() {
+		Map<String, Object> meta = new HashMap<>();
+		meta.put("chr",  "1");
+		meta.put("bp",   123456);
+		meta.put("lod",  0.1d);
+		meta.put("tissueFileName","striatum file");
+		meta.put("tissueGroup","brain");
+		meta.put("tissueName","striatum");
+		meta.put("uberon","???");
+		meta.put("studyId","JAX123");
+		return meta;
+	}
+
+	private <T extends AbstractEntity> T intersection(int vs, int ve, int gs, int ge, Map<String, Object> meta) {
+		Variant v = new Variant();
+		v.setStart(vs);
+		v.setEnd(ve);
+		
+		Gene g = new Gene();
+		g.setStart(gs);
+		g.setEnd(ge);
+		return (T)iservice.intersection(v, g, new EQTLOverlapConnector<>(), meta);
+	}
+
 }

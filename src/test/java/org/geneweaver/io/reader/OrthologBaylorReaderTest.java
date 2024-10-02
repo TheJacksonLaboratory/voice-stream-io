@@ -1,8 +1,10 @@
 package org.geneweaver.io.reader;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.geneweaver.domain.Ortholog;
 import org.junit.Test;
@@ -42,6 +44,16 @@ public class OrthologBaylorReaderTest extends AbstractDataFileTest {
 		StreamReader<Ortholog> reader = ReaderFactory.getReader(new ReaderRequest(file));
 		long size = reader.stream().count();
 		assertTrue(size>100);
+	}
+
+	@Test
+	public void aonMappings() throws Exception {
+		Path aon = getPath("prod/hom/aon-mappings.csv");
+		ReaderRequest req = new ReaderRequest(aon.toFile());
+		req.setReaderHint("OrthologBaylorReader");
+		StreamReader<Ortholog> reader = ReaderFactory.getReader(req);
+		long size = reader.stream().count();
+		assertEquals(48698, size);
 	}
 
 }

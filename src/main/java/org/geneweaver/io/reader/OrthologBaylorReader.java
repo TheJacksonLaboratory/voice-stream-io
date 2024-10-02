@@ -75,12 +75,16 @@ class OrthologBaylorReader<N extends AbstractEntity> extends LineIteratorReader<
 	@SuppressWarnings("unchecked")
 	@Override
 	protected N create(String line) throws ReaderException {
-        
-		String[] rec = line.split(getDelimiter());
-		Ortholog bean = new Ortholog(rec[2], rec[5]);
-        parseColon(bean, rec[0], rec[3]);
-        bean.setSource("BAYLOR");
-        return (N)bean;
+        try {
+			String[] rec = line.split(getDelimiter());
+			if(rec.length!=6) return null; // Skip bad
+			Ortholog bean = new Ortholog(rec[2], rec[5]);
+	        parseColon(bean, rec[0], rec[3]);
+	        bean.setSource("BAYLOR");
+	        return (N)bean;
+		} catch (ArrayIndexOutOfBoundsException ne) {
+			throw new ReaderException("Cannot parse line: " + line, ne);
+		}
 	}
 
 	private void parseColon(Ortholog orth, String... values) {

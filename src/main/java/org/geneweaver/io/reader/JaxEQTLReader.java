@@ -82,8 +82,10 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 			value = values[i].trim();
 			
 			Class<?> type = d.getType(name);
-			if ("NA".equals(value) && Number.class.isAssignableFrom(type)) {
-				value = "0";
+			if ("NA".equalsIgnoreCase(value.toString()) || "null".equalsIgnoreCase(value.toString())) {
+				if (Number.class.isAssignableFrom(type)) {
+					value = "0";
+				}
 			}
 			if (Integer.class.equals(type)) {
 				value = Double.valueOf(value.toString()).intValue();
@@ -186,10 +188,18 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		headerValues = new HashMap<>();
 		// Something like: strain, tissue, ensembl.version, species, url, date
 		for (int i = 0; i < header.size()-1; i++) {
-			String hline = header.get(i).substring(1);
+			String hline = header.get(i).substring(1).trim();
 			String[] kvs = hline.split(":");
+			if (kvs.length!=2) {
+				logger.debug("Ignored invalid header line: "+hline);
+				continue;
+			}
 			
 			String name = kvs[0].toLowerCase();
+			
+			// Keys with spaces are other comments in the eQTL header.
+			if (name.indexOf(' ')>0) continue; 
+			
 			Object value = kvs[1].trim();
 			
 			// Make all eQTLs have same field names, even if from human data or mouse data.

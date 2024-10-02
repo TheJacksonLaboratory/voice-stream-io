@@ -44,6 +44,16 @@ public class Gene extends GeneticEntity {
 	/** The gene biotype. */
 	private String geneBiotype;
 	
+	public Gene() {
+		
+	}
+	
+	public Gene(String id, int start, int end) {
+		this.setGeneId(id);
+		this.setStart(start);
+		this.setEnd(end);
+	}
+
 	/**
 	 * Gets the header.
 	 *

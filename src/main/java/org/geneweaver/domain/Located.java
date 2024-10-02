@@ -23,10 +23,11 @@ public interface Located extends IdGenerator {
 	
 	/**
 	 * The chromosome on which the entity is located.
+	 * Should not start with the text 'chr'
 	 * @return
 	 */
 	String getChr();
-
+	
 	static Located at(String chr, Integer start, Integer end) {
 		final UUID rand = UUID.randomUUID();
 		return new Located() {

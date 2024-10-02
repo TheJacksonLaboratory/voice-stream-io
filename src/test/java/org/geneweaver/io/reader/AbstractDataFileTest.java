@@ -25,6 +25,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.geneweaver.domain.Variant;
+
 // TODO: Auto-generated Javadoc
 /**
  * A Test able to get data files.
@@ -121,5 +123,16 @@ public abstract class AbstractDataFileTest {
 		 .map(buf::append)
 		 .forEach(b->b.append("\n"));		
 	}
+
+	
+	protected Variant createVariant(String rsId, String chr, int start, int end) {
+		Variant var = new Variant();
+		var.setRsId(rsId);
+		var.setStart(start);
+		var.setEnd(end);
+		var.setChr(chr);
+		return var;
+	}
+
 
 }
