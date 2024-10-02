@@ -68,7 +68,8 @@ public class ReaderFactory {
 		
 		// This one is for the jax csv files which are parsed out of mouse eQTL data.
 		tmp.put(Pattern.compile("^.+\\_balyor\\.csv(\\.gz)?$"), 	OrthologBaylorReader.class);
-		tmp.put("csv", 												Arrays.asList(JaxEQTLReader.class, MapCSVReader.class, JaxIntervalEQTLReader.class));
+		tmp.put(Pattern.compile("^.+aon-mappings\\.csv(\\.gz)?$"), 	OrthologBaylorReader.class);
+		tmp.put("csv", 												Arrays.asList(JaxEQTLReader.class, MapCSVReader.class, JaxIntervalEQTLReader.class, OrthologBaylorReader.class));
 		
 		// These eQTLs are from this paper: https://www.biorxiv.org/content/10.1101/655670v1
 		// And these files: https://zenodo.org/record/3408356#.YQljwlNKii6
