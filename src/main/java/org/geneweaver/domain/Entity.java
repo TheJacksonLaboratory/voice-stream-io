@@ -118,6 +118,7 @@ public interface Entity {
 	 * Override to change delimiter for an object.
 	 * @return
 	 */
+	@JsonIgnore
 	default String getDelimiter() {
 		// We purposely use a character unlikely, the default character "," appears in some values.
 		// You can override the delimier or set it if not writing bulk import files.

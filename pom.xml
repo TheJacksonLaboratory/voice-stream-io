@@ -163,7 +163,35 @@
 
 	<build>
 		<plugins>
-
+			
+			<plugin>
+		    <groupId>cz.habarta.typescript-generator</groupId>
+		    <artifactId>typescript-generator-maven-plugin</artifactId>
+		    <version>3.2.1263</version>
+		    <executions>
+		        <execution>
+		            <id>generate</id>
+		            <goals>
+		                <goal>generate</goal>
+		            </goals>
+		            <phase>process-classes</phase>
+		        </execution>
+		    </executions>
+		    <configuration>
+		        <jsonLibrary>jackson2</jsonLibrary>
+		        <classes>
+                               <class>org.geneweaver.domain.Located</class>
+                                <class>org.geneweaver.domain.Entity</class>
+                                <class>org.geneweaver.domain.AbstractEntity</class>
+                                <class>org.geneweaver.domain.GeneticEntity</class>
+                                <class>org.geneweaver.domain.Gene</class>
+                                <class>org.geneweaver.domain.Peak</class>
+                                <class>org.geneweaver.domain.NamedEntity</class>
+                                <class>org.geneweaver.domain.Variant</class>
+		        </classes>
+		        <outputKind>module</outputKind>
+		    </configuration>
+		</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>

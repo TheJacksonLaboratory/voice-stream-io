@@ -3,10 +3,14 @@ package org.geneweaver.io.reader;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 import org.geneweaver.domain.Ortholog;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class OrthologBaylorReaderTest extends AbstractDataFileTest {
@@ -52,8 +56,34 @@ public class OrthologBaylorReaderTest extends AbstractDataFileTest {
 		ReaderRequest req = new ReaderRequest(aon.toFile());
 		req.setReaderHint("OrthologBaylorReader");
 		StreamReader<Ortholog> reader = ReaderFactory.getReader(req);
-		long size = reader.stream().count();
-		assertEquals(48698, size);
+		
+		Stream<Ortholog> stream = reader.stream().filter(o->{
+			boolean from = o.getGeneIdFrom()!=null && !o.getGeneIdFrom().isBlank();
+			boolean to = o.getGeneIdTo()!=null && !o.getGeneIdTo().isBlank();
+			return from && to;
+		});
+
+		long size = stream.count();
+		assertEquals(48242, size);
+		
 	}
 
+	@Ignore("These lines are valid however they break neo4j. Therefore we will remove them from the Ortholog stream.")
+	@Test
+	public void aonMappingsCheckColumns() throws Exception {
+		Path aon = getPath("prod/hom/aon-mappings.csv");
+        try (BufferedReader reader = Files.newBufferedReader(aon)) {
+			boolean ok = reader.lines().allMatch(line -> {
+				String[] cols = line.split(",");
+				if (cols.length != 6) {
+                    System.out.println("Wrong number of columns: "+line);
+				}
+				if (cols[0].isBlank()) {
+                    System.out.println("No symbol: "+line);
+				}
+				return !cols[0].isBlank() && cols.length == 6;
+			});
+			assertTrue(ok);
+        }
+	}
 }
