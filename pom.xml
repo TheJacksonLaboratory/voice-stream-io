@@ -467,15 +467,22 @@
 								
 								<!--  Get from (where '-' IS TWO!!):       gpg -list-secret-keys -keyid-format=long 
 									  Then name is after slash:
-									sec   ed25519/F3168809691CBA81 2022-02-11 [SC]
-									      ECE7120F2BB5E60007433194F3168809691CBA81
-									uid                 [ultimate] Matthew Gerring (Geanweaver software developer) <matthew.gerring@gmail.com>
-									ssb   cv25519/03373BF46A84B6AE 2022-02-11 [E]
+									
+									sec   rsa4096/ABE36B913FF6D9EA 2025-01-02 [SC]
+									      95D4F054EC94347B7B53877BABE36B913FF6D9EA
+									uid                 [ultimate] Matthew Gerring (VoICE and Geneweaver developer) <matthew.gerring@gmail.com>
+									ssb   rsa4096/6CF47BE2871A2EDA 2025-01-02 [E]
 									
 									Remember that .m2/settings.xml must have JIRA password for sonatype.
+									
+									If you forget the gpg key, can create a new one for signing using:
+									gpg -full-generate-key  # '-' IS TWO!!
+									choosing rsa 
+									provide sec in this xml
+									provide key password during signing.
 								-->
 								<configuration>
-        							<keyname>F3168809691CBA81</keyname>
+        							<keyname>ABE36B913FF6D9EA</keyname>
         					    </configuration>
 							</execution>
 						</executions>
