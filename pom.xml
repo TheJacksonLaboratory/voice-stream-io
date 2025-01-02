@@ -476,10 +476,10 @@
 									Remember that .m2/settings.xml must have JIRA password for sonatype.
 									
 									If you forget the gpg key, can create a new one for signing using:
-									gpg -full-generate-key  # '-' IS TWO!!
-									choosing rsa 
-									provide sec in this xml
-									provide key password during signing.
+									1. gpg -full-generate-key  # '-' IS TWO!, use rsa 
+									3. provide sec in this xml
+									4. gpg -keyserver keyserver.ubuntu.com -send-keys <long key id> # '-' IS TWO!!
+									5. provide key password during signing (below)
 								-->
 								<configuration>
         							<keyname>ABE36B913FF6D9EA</keyname>
