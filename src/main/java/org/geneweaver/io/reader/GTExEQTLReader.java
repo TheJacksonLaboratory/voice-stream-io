@@ -18,6 +18,8 @@
  */
 package org.geneweaver.io.reader;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,6 +76,8 @@ that you cannot create a node from EQTL and use eqtlVariantId as its unique id.
  * @param <N>
  */
 class GTExEQTLReader<N extends Entity> extends LineIteratorReader<N> {
+	
+	private static UberonService uberonService = new UberonService();
 
 	/**
 	 * Create the reader by setting its data
@@ -108,7 +112,8 @@ class GTExEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		setVariantInfo(ret, segs[indices.get("variant_id")]);
 		ret.setSlope(Double.parseDouble(segs[indices.get("slope")]));
 		
-		setTissueInfo(ret, getCurrentFileName());
+		// We cache tissue info since same for all files of name.
+		setTissueInfoAndCache(ret, getCurrentFileName());
 		
 		String fileSrc = indices.get("gene_id")==0
 					   ? "eGenes" : "pairs";
@@ -122,6 +127,27 @@ class GTExEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		return (N)ret;
 	}
 
+	private Map<String,EQTL> tissueCache = new HashMap<>();
+	private void setTissueInfoAndCache(EQTL ret, String name) {
+
+		if (tissueCache.containsKey(name)) {
+			EQTL cached = this.tissueCache.get(name);
+			ret.setTissueFileName(cached.getTissueFileName());
+			ret.setTissueName(cached.getTissueName());
+			ret.setVersion(cached.getVersion());
+			ret.setUberon(cached.getUberon());
+			return;
+		}
+		setTissueInfo(ret, name);
+		this.tissueCache.put(name, ret);
+	}
+	
+	public void close() throws IOException {
+		super.close();
+		if (tissueCache!=null) tissueCache.clear();
+	}
+
+	
 	/** Example names:
 	 
 	 Brain_Amygdala.v8.egenes.txt.gz							Liver.v8.signif_variant_gene_pairs.txt.gz
@@ -134,8 +160,11 @@ class GTExEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		if (name==null) return;
 		
 		String[] frags = name.split("\\.");
-		ret.setTissueFileName(frags[0].replace('_', ' '));
+		String tName = frags[0].replace('_', ' ');
+		ret.setTissueFileName(name);
+		ret.setTissueName(tName);
 		ret.setVersion(frags[1]);
+		ret.setUberon(uberonService.getUberonCode(tName));
 	}
 
 	private String clean(String geneId) {

@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 	
 	private static Logger logger = LoggerFactory.getLogger(JaxEQTLReader.class);
+	private static UberonService uberonService = new UberonService();
 
 	/**
 	 * Create the reader by setting its data
@@ -225,6 +226,13 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 			}
 			headerValues.put(name, value);
 		}
+		
+		// If the headerValues contains a tissueName, we can set the uberon.
+		if (headerValues.containsKey("tissueName")) {
+            String tName = headerValues.get("tissueName").toString();
+            headerValues.put("uberon", uberonService.getUberonCode(tName));
+		}
+		
 		return headerValues;
 	}
 

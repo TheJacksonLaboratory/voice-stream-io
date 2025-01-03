@@ -1,0 +1,110 @@
+# GTEx,Term,Code
+Adipose - Subcutaneous,subcutaneous adipose tissue,UBERON:0002190
+Adipose - Visceral (Omentum),visceral abdominal adipose tissue,UBERON:0014454
+Adipose Subcutaneous,subcutaneous abdominal adipose tissue,UBERON:0014455
+Adipose Tissue,adipose tissue,UBERON:0001013
+Adipose Visceral Omentum,visceral abdominal adipose tissue,UBERON:0014454
+Adrenal Gland,adrenal gland,UBERON:0002369
+Artery - Aorta,aorta,UBERON:0000947
+Artery - Coronary,coronary artery,UBERON:0001621
+Artery - Tibial,tibial artery,UBERON:0007610
+Artery Aorta,aorta,UBERON:0000947
+Artery Coronary,coronary artery,UBERON:0001621
+Artery Tibial,tibial artery,UBERON:0007610
+Blood,blood,UBERON:0000178
+Blood Vessel,blood vessel,UBERON:0001981
+Brain,brain,UBERON:0000955
+Brain - Amygdala,amygdala,UBERON:0001876
+Brain - Anterior cingulate cortex (BA24),anterior cingulate cortex,UBERON:0009835
+Brain - Caudate (basal ganglia),basal ganglion,UBERON:0002420
+Brain - Cerebellar Hemisphere,cerebellar hemisphere,UBERON:0002245
+Brain - Cerebellum,cerebellum,UBERON:0002037
+Brain - Cortex,cerebral cortex,UBERON:0000956
+Brain - Frontal Cortex (BA9),frontal cortex,UBERON:0001870
+Brain - Hippocampus,hippocampal formation,UBERON:0002421
+Brain - Hypothalamus,hypothalamus,UBERON:0001898
+Brain - Nucleus accumbens (basal ganglia),nucleus accumbens,UBERON:0001882
+Brain - Putamen (basal ganglia),putamen,UBERON:0001874
+Brain - Spinal cord (cervical c-1),cervical spinal cord,UBERON:0002726
+Brain - Substantia nigra,substantia nigra,UBERON:0002038
+Brain Amygdala,amygdala,UBERON:0001876
+Brain Anterior cingulate cortex BA24,anterior cingulate cortex,UBERON:0009835
+Brain Caudate basal ganglia,basal ganglion,UBERON:0002420
+Brain Cerebellar Hemisphere,cerebellar hemisphere,UBERON:0002245
+Brain Cerebellum,cerebellum,UBERON:0002037
+Brain Cortex,cerebral cortex,UBERON:0000956
+Brain Frontal Cortex BA9,frontal cortex,UBERON:0001870
+Brain Hippocampus,hippocampal formation,UBERON:0002421
+Brain Hypothalamus,hypothalamus,UBERON:0001898
+Brain Nucleus accumbens basal ganglia,nucleus accumbens,UBERON:0001882
+Brain Putamen basal ganglia,putamen,UBERON:0001874
+Brain Spinal cord cervical c-1,cervical spinal cord,UBERON:0002726
+Brain Substantia nigra,substantia nigra,UBERON:0002038
+Breast,breast,UBERON:0000310
+Breast - Mammary Tissue,breast,UBERON:0000310
+Breast Mammary Tissue,breast,UBERON:0000310
+Cells - Cultured fibroblasts,fibroblast,CL:0000057
+Cells - EBV-transformed lymphocytes,lymphocyte,CL:0000542
+Cells Cultured fibroblasts,fibroblast,CL:0000057
+Cells EBV-transformed lymphocytes,lymphocyte,CL:0000542
+Colon,colon,UBERON:0001155
+Colon - Sigmoid,sigmoid colon,UBERON:0001159
+Colon - Transverse,transverse colon,UBERON:0001157
+Colon Sigmoid,sigmoid colon,UBERON:0001159
+Colon Transverse,transverse colon,UBERON:0001157
+Esophagus,esophagus,UBERON:0001043
+Esophagus - Gastroesophageal Junction,esophagogastric junction,UBERON:0007650
+Esophagus - Mucosa,esophagus mucosa,UBERON:0002469
+Esophagus - Muscularis,esophagus muscularis mucosa,UBERON:0004648
+Esophagus Gastroesophageal Junction,esophagogastric junction,UBERON:0007650
+Esophagus Mucosa,esophagus mucosa,UBERON:0002469
+Esophagus Muscularis,esophagus muscularis mucosa,UBERON:0004648
+Heart,heart,UBERON:0000948
+Heart - Atrial Appendage,atrium auricular region,UBERON:0006618
+Heart - Left Ventricle,heart left ventricle,UBERON:0002084
+Heart Atrial Appendage,atrium auricular region,UBERON:0006618
+Heart Left Ventricle,heart left ventricle,UBERON:0002084
+Kidney,kidney,UBERON:0002113
+Kidney - Cortex,cortex of kidney,UBERON:0001225
+Kidney Cortex,cortex of kidney,UBERON:0001225
+Liver,liver,UBERON:0002107
+Lung,lung,UBERON:0002048
+Minor Salivary Gland,minor salivary gland,UBERON:0001830
+Muscle,muscle tissue,UBERON:0002385
+Muscle - Skeletal,skeletal muscle tissue,UBERON:0001134
+Muscle Skeletal,skeletal muscle tissue,UBERON:0001134
+Nerve,nerve,UBERON:0001021
+Nerve - Tibial,tibial nerve,UBERON:0001323
+Nerve Tibial,tibial nerve,UBERON:0001323
+Ovary,ovary,UBERON:0000992
+PacreaticIslets_independent,endocrine pancreas,UBERON:0000016
+Pancreas,pancreas,UBERON:0001264
+Pituitary,pituitary gland,UBERON:0000007
+Prostate,prostate gland,UBERON:0002367
+Salivary Gland,saliva-secreting gland,UBERON:0001044
+Skelly_mESC_DO.csv.gz,Mouse Embryonic Stem Cells,OMIT:0001088
+Skin,skin of body,UBERON:0002097
+Skin - Not Sun Exposed (Suprapubic),suprapubic skin,UBERON:0036149
+Skin - Sun Exposed (Lower leg),skin of body,UBERON:0002097
+Skin Not Sun Exposed Suprapubic,suprapubic skin,UBERON:0036149
+Skin Sun Exposed Lower leg,skin of body,UBERON:0002097
+Small Intestine,small intestine,UBERON:0002108
+Small Intestine - Terminal Ileum,ileum,UBERON:0002116
+Small Intestine Terminal Ileum,ileum,UBERON:0002116
+Spleen,spleen,UBERON:0002106
+Stomach,stomach,UBERON:0000945
+Testis,testis,UBERON:0000473
+Thyroid,thyroid gland,UBERON:0002046
+Uterus,uterus,UBERON:0000995
+Vagina,vagina,UBERON:0000996
+Whole Blood,blood,UBERON:0000178
+adipose,adipose tissue,UBERON:0001013
+bone,bone tissue,UBERON:0002481
+heart,heart,UBERON:0000948
+hippocampus,hippocampal formation,UBERON:0002421
+islet,islet of Langerhans,UBERON:0000006
+kidney,kidney,UBERON:0002113
+liver,liver,UBERON:0002107
+mesc,Mouse Embryonic Stem Cells,OMIT:0001088
+skeletalmuscle,skeletal muscle tissue,UBERON:0001134
+striatum,striatum,UBERON:0002435

@@ -483,7 +483,7 @@
 								-->
 								<configuration>
         							<keyname>ABE36B913FF6D9EA</keyname>
-        					    </configuration>
+        				</configuration>
 							</execution>
 						</executions>
 					</plugin>
