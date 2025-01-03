@@ -168,8 +168,8 @@ public class EQTLFunction<N extends EQTL, E extends EQTL> implements Function<N,
 				logger.error("Cannot parse sample attributes!", ne);
 			}
 		}
-		Sample sample = roughMap.get(new TissueKey(t.getTissueFileName()));
-		if (sample==null && t.getTissueFileName()!=null) throw new RuntimeException("Cannot find sample for "+t.getTissueFileName());
+		Sample sample = roughMap.get(new TissueKey(t.getTissueName()));
+		if (sample==null && t.getTissueName()!=null) throw new RuntimeException("Cannot find sample for "+t.getTissueName());
 		if (sample!=null) {
 			t.setTissueGroup(sample.getTissueGroup());
 			t.setTissueName(sample.getOriginalTissueName());

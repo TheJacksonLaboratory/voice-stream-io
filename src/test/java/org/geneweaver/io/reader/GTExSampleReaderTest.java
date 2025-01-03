@@ -52,8 +52,8 @@ public class GTExSampleReaderTest extends AbstractDataFileTest {
 			EQTL eqtl = new EQTL();
 			GTExEQTLReader.setTissueInfo(eqtl, name);
 			
-			Sample sample = roughMap.get(new TissueKey(eqtl.getTissueFileName()));
-			assertNotNull("Not matched: "+eqtl.getTissueFileName(), sample);
+			Sample sample = roughMap.get(new TissueKey(eqtl.getTissueName()));
+			assertNotNull("Not matched: "+eqtl.getTissueName(), sample);
 		}
 	}
 }
