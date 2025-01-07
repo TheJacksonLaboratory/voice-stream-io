@@ -18,11 +18,11 @@
  */
 package org.geneweaver.io.connector;
 
-import java.io.PrintStream;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.geneweaver.domain.Entity;
+import org.geneweaver.io.IPrintStream;
 import org.neo4j.ogm.session.Session;
 
 /**
@@ -80,6 +80,6 @@ public interface Connector<I extends Entity, T extends Entity> extends Function<
 	 * @param log for logging usually set in a -v command line to generate more verbose messages. Null for a normal run.
 	 * @return Stream of connections including the original entity.
 	 */
-	abstract Stream<T> stream(I ent, Session session, PrintStream log);
+	abstract Stream<T> stream(I ent, Session session, IPrintStream log);
 	
 }

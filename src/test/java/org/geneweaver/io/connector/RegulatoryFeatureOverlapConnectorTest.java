@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Variant;
+import org.geneweaver.io.IPrintStream;
 import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.junit.Test;
 
@@ -28,7 +29,7 @@ public class RegulatoryFeatureOverlapConnectorTest extends AbstractDataFileTest 
 			conn.addAll(dir);
 			conn.setLimit(100L);
 		
-		    long nFeats = conn.create(null, System.out); 
+		    long nFeats = conn.create(null, IPrintStream.of(System.out)); 
 			assertEquals(300, nFeats);
 		}
 		
@@ -42,7 +43,7 @@ public class RegulatoryFeatureOverlapConnectorTest extends AbstractDataFileTest 
 			conn.addAll(dir);
 			conn.setLimit(100L);
 	
-		    long nFeats = conn.create(null, System.out); 
+		    long nFeats = conn.create(null, IPrintStream.of(System.out)); 
 		    
 		    // Do we want both feats from the mouse dir?
 		    // That's a lot of features.
@@ -63,7 +64,7 @@ public class RegulatoryFeatureOverlapConnectorTest extends AbstractDataFileTest 
 			conn.addAll(dir);
 			conn.setLimit(100L);
 		
-		    long nFeats = conn.create(null, System.out); 
+		    long nFeats = conn.create(null, IPrintStream.of(System.out)); 
 		    
 		    // Do we want both feats from the mouse dir?
 		    // That's a lot of features and they seem to be repeated.
@@ -77,7 +78,7 @@ public class RegulatoryFeatureOverlapConnectorTest extends AbstractDataFileTest 
 			conn.addAll(dir);
 			conn.setLimit(100L);
 		
-		    long nFeats = conn.create(null, System.out); 
+		    long nFeats = conn.create(null, IPrintStream.of(System.out)); 
 			conn.setNewestInDirectoryByName(true); // Normally we ignore newest by name.
 		    
 		    // Do we want both feats from the mouse dir?

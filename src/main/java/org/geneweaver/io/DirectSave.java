@@ -46,14 +46,19 @@ import org.geneweaver.domain.Entity;
  */
 public class DirectSave implements AutoCloseable {
 	
-	private PrintStream log;
+	private IPrintStream log;
 	private boolean verbose;
 	
 	public DirectSave() {
-		this(null, false);
+		this((IPrintStream)null, false);
 	}
 	
 	public DirectSave(PrintStream log, boolean verbose) {
+		this.log = IPrintStream.of(log);
+		this.verbose = verbose;
+	}
+
+	public DirectSave(IPrintStream log, boolean verbose) {
 		this.log = log;
 		this.verbose = verbose;
 	}

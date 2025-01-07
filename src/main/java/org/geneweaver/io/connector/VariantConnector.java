@@ -18,7 +18,6 @@
  */
 package org.geneweaver.io.connector;
 
-import java.io.PrintStream;
 import java.lang.ref.SoftReference;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,6 +34,7 @@ import org.geneweaver.domain.GeneticEntity;
 import org.geneweaver.domain.Transcript;
 import org.geneweaver.domain.Variant;
 import org.geneweaver.domain.VariantEffect;
+import org.geneweaver.io.IPrintStream;
 import org.neo4j.ogm.cypher.ComparisonOperator;
 import org.neo4j.ogm.cypher.Filter;
 import org.neo4j.ogm.cypher.Filters;
@@ -107,7 +107,7 @@ public class VariantConnector<N extends GeneticEntity, E extends Entity> impleme
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public Stream<E> stream(N ge, Session session, PrintStream log) {
+	public Stream<E> stream(N ge, Session session, IPrintStream log) {
 
 		if (!useSessions) {
 			return apply(ge);

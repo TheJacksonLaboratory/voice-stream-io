@@ -17,6 +17,7 @@ import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Variant;
 import org.geneweaver.io.DirectSave;
+import org.geneweaver.io.IPrintStream;
 import org.geneweaver.io.Timer;
 import org.geneweaver.io.connector.PeakOverlapConnector;
 import org.geneweaver.io.connector.RegulatoryFeatureOverlapConnector;
@@ -151,7 +152,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		Timer timer = b.createTimer();
 		
 		// Directly saving the streams with no chunks is fast.
-		try (DirectSave saver = new DirectSave(null, false)){
+		try (DirectSave saver = new DirectSave((IPrintStream)null, false)){
 			long saved = reader.stream()
 							  .map(g->saver.save(g, b.getPaths(), b.getWriters(), dir, timer, false))
 							  .count();

@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 import org.geneweaver.domain.Entity;
 import org.geneweaver.io.DirectSave;
+import org.geneweaver.io.IPrintStream;
 import org.geneweaver.io.Timer;
 import org.geneweaver.io.connector.Connector;
 import org.geneweaver.io.reader.ReaderException;
@@ -92,7 +93,7 @@ public class ExportBuilder implements AutoCloseable {
 	 * Stream for printing messages of each export run.
 	 */
 	@JsonIgnore
-	private PrintStream out = System.out;
+	private IPrintStream out = IPrintStream.of(System.out);
 	
 	private boolean verbose = false;
 	
@@ -172,7 +173,7 @@ public class ExportBuilder implements AutoCloseable {
 		
 		String message = "";
 		for (Throwable err : errors) {
-			err.printStackTrace(out);
+			err.printStackTrace(out.getPrintStream());
 			message = message+err.getMessage()+"\n";
 		}
 		return message;
@@ -440,7 +441,7 @@ public class ExportBuilder implements AutoCloseable {
 	 * @return the out
 	 */
 	@JsonIgnore
-	public PrintStream getOut() {
+	public IPrintStream getOut() {
 		return out;
 	}
 
@@ -449,6 +450,12 @@ public class ExportBuilder implements AutoCloseable {
 	 */
 	@JsonIgnore
 	public ExportBuilder setOut(PrintStream out) {
+		this.out = IPrintStream.of(out);
+		return this;
+	}
+
+	@JsonIgnore
+	public ExportBuilder setOut(IPrintStream out) {
 		this.out = out;
 		return this;
 	}

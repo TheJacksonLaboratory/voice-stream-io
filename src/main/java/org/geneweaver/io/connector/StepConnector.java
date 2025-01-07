@@ -19,6 +19,7 @@ import org.geneweaver.domain.Gene;
 import org.geneweaver.domain.Located;
 import org.geneweaver.domain.Step;
 import org.geneweaver.domain.Variant;
+import org.geneweaver.io.IPrintStream;
 import org.geneweaver.io.reader.ReaderRequest;
 import org.neo4j.ogm.session.Session;
 
@@ -109,7 +110,7 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 	 * using this dataset which are known as CONTACT
 	 */
 	@Override
-	public Stream<Contact> stream(Step step, Session session, PrintStream log) {
+	public Stream<Contact> stream(Step step, Session session, IPrintStream log) {
 		
 		Located start = Located.at(step.getChr1(), step.getStart1(), step.getEnd1());		
 		Set<String> geneIds = lookup(start, Gene.class, "ens", log);
@@ -138,7 +139,7 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 		return contact;
 	}
 
-	private Set<String> lookup(Located loc, Class<?> type, String prefix, PrintStream log) {
+	private Set<String> lookup(Located loc, Class<?> type, String prefix, IPrintStream log) {
 		
 		setFileName(type.getSimpleName());
 		setLocation(getParentDirectory()); // Sorts out paths to databases

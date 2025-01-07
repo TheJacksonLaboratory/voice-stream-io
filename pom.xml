@@ -7,7 +7,7 @@
 	<groupId>org.geneweaver</groupId>
 	<artifactId>gweaver-stream-io</artifactId>
 	<packaging>jar</packaging>
-	<version>2.7.16-SNAPSHOT</version>
+	<version>2.8.0-SNAPSHOT</version>
 	<name>Geneweaver Stream IO</name>
 
 	<properties>
@@ -142,6 +142,13 @@
 		    <version>2.1.214</version>
 		</dependency>	
 			
+		<!-- https://mvnrepository.com/artifact/org.jetbrains.bio/big -->
+		<dependency>
+		    <groupId>org.jetbrains.bio</groupId>
+		    <artifactId>big</artifactId>
+		    <version>0.9.1</version>
+		</dependency>
+	
 		<!-- https://mvnrepository.com/artifact/com.github.samtools/htsjdk -->
 		<!-- Contains readers which work with streams
 		<dependency>

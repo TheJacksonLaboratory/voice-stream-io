@@ -14,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.EQTLOverlap;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Variant;
+import org.geneweaver.io.IPrintStream;
 import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.geneweaver.io.reader.ReaderFactory;
 import org.geneweaver.io.reader.ReaderRequest;
@@ -35,7 +36,7 @@ public class EQTLOverlapConnectorTest extends AbstractDataFileTest{
 			conn.setLocation(gdir);
 			conn.add(input);
 		
-		    long neqtl = conn.create(null, System.out); 
+		    long neqtl = conn.create(null, IPrintStream.of(System.out)); 
 			assertEquals(27444, neqtl);
 			
 			// First line in Chesler_Striatum_DO_pr69k_lo.csv
@@ -112,7 +113,7 @@ public class EQTLOverlapConnectorTest extends AbstractDataFileTest{
 			conn.setLocation(gdir);
 			conn.add(input);
 		
-		    long neqtl = conn.create(null, System.out); 
+		    long neqtl = conn.create(null, IPrintStream.of(System.out)); 
 			assertEquals(10, neqtl);
 		}
 	}
@@ -134,7 +135,7 @@ public class EQTLOverlapConnectorTest extends AbstractDataFileTest{
 			conn.setLocation(gdir);
 			conn.add(input);
 		
-		    long neqtl = conn.create(null, System.out); 
+		    long neqtl = conn.create(null, IPrintStream.of(System.out)); 
 			assertEquals(size, neqtl);
 			
 			StreamReader<Variant> vars = ReaderFactory.getReader(new ReaderRequest(vpath.getFileName().toString(), vpath));

@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Variant;
+import org.geneweaver.io.IPrintStream;
 import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.junit.Test;
 
@@ -27,7 +28,7 @@ public class TranscriptOverlapConnectorTest extends AbstractDataFileTest{
 			conn.setLocation(gdir);
 			conn.add(input);
 		
-		    long ntrans = conn.create(null, System.out); 
+		    long ntrans = conn.create(null, IPrintStream.of(System.out)); 
 			assertEquals(171, ntrans);
 		}
 	}
@@ -44,7 +45,7 @@ public class TranscriptOverlapConnectorTest extends AbstractDataFileTest{
 			conn.setLocation(gdir);
 			conn.add(input);
 		
-		    long ntrans = conn.create(null, System.out); 
+		    long ntrans = conn.create(null, IPrintStream.of(System.out)); 
 			assertEquals(68918, ntrans);
 		}
 	}

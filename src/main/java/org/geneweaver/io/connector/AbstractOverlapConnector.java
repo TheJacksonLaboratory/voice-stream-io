@@ -2,7 +2,6 @@ package org.geneweaver.io.connector;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,6 +30,7 @@ import org.geneweaver.domain.AbstractEntity;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Located;
 import org.geneweaver.domain.Variant;
+import org.geneweaver.io.IPrintStream;
 import org.geneweaver.io.reader.ReaderException;
 import org.geneweaver.io.reader.ReaderFactory;
 import org.geneweaver.io.reader.ReaderRequest;
@@ -152,7 +152,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	}
 	
 	public long create() throws SQLException, ReaderException, IOException {
-		return create(null, System.out);
+		return create(null, IPrintStream.of(System.out));
 	}
 
 	/**
@@ -163,7 +163,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 * @throws ReaderException
 	 * @throws IOException
 	 */
-	public final <T extends Located> long create(String prefix, PrintStream out) throws SQLException, ReaderException, IOException {
+	public final <T extends Located> long create(String prefix, IPrintStream out) throws SQLException, ReaderException, IOException {
 
 		if (source==null || source.isEmpty()) throw new IllegalArgumentException();
 		int index = -1;
@@ -210,7 +210,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Stream<E> stream(N ent, Session session, PrintStream log) {
+	public Stream<E> stream(N ent, Session session, IPrintStream log) {
 		
 		// Other streams may run through this connector, but
 		// if they send other objects, we return them.
@@ -338,7 +338,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		return true;
 	}
 
-	protected <T extends Located> T store(T line, String prefix, PrintStream out) {
+	protected <T extends Located> T store(T line, String prefix, IPrintStream out) {
 		
 		int lower = Math.min(line.getStart(), line.getEnd());
 		int upper = Math.max(line.getStart(), line.getEnd());
@@ -364,7 +364,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	}
 
 
-	private <T extends Located> void storeBase(String shardName, T line, String prefix, PrintStream out) {
+	private <T extends Located> void storeBase(String shardName, T line, String prefix, IPrintStream out) {
 		
 		if (shardName==null) return;
 		try {
@@ -401,7 +401,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	}
 	
 	
-	private PreparedStatement getInsertStatement(String chr, String shardName, PrintStream out) throws Exception {
+	private PreparedStatement getInsertStatement(String chr, String shardName, IPrintStream out) throws Exception {
 		Connection conn = getConnection(chr, false, out);
 		if (conn==null) return null;
 		PreparedStatement stmt = insertCache.get(shardName);
@@ -427,7 +427,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		return stmt;
 	}
 	
-	protected synchronized PreparedStatement getSelectStatement(String chr, String shardName, PrintStream out) throws Exception {
+	protected synchronized PreparedStatement getSelectStatement(String chr, String shardName, IPrintStream out) throws Exception {
 		
 		String name = Thread.currentThread().getName();
 		String cacheKey = name+"/"+fileName+"/"+shardName;
@@ -446,7 +446,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		return stmt;
 	}
 
-	protected Connection getConnection(String chr, boolean readOnly, PrintStream out) throws Exception {
+	protected Connection getConnection(String chr, boolean readOnly, IPrintStream out) throws Exception {
 		
 		String connKey = fileName+"/"+chr;
 		Connection ret = connCache.get(connKey);
@@ -457,7 +457,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		return ret;
 	}
 
-	private Connection newConnection(String chr, boolean readOnly, PrintStream out) throws SQLException, IOException {
+	private Connection newConnection(String chr, boolean readOnly, IPrintStream out) throws SQLException, IOException {
 		
 		chr = cservice.getChromosome(chr);
 		if (chr==null) return null;

@@ -44,6 +44,7 @@ import org.geneweaver.domain.EQTL;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.NamedEntity;
 import org.geneweaver.io.DirectSave;
+import org.geneweaver.io.IPrintStream;
 import org.geneweaver.io.connector.EQTLFunction;
 import org.geneweaver.io.writer.ExportBuilder;
 import org.junit.Ignore;
@@ -209,7 +210,7 @@ public class GTExEQTLReaderTest extends AbstractDataFileTest {
 	private String map(Path dir, ExportBuilder b, StreamReader<EQTL> eqtls, Path path) throws Exception {
 		
 		try (EQTLFunction<EQTL, EQTL> func = new EQTLFunction<EQTL, EQTL>(path, getPath("data/eQTL/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt.gz"));
-				 DirectSave saver = new DirectSave(null, false)) {
+				 DirectSave saver = new DirectSave((IPrintStream)null, false)) {
 			func.setLocation(dir);
 			
 			func.create(); // Make the database.

@@ -20,6 +20,7 @@ import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Gene;
 import org.geneweaver.domain.Step;
 import org.geneweaver.domain.Variant;
+import org.geneweaver.io.IPrintStream;
 import org.geneweaver.io.reader.AbstractDataFileTest;
 import org.geneweaver.io.reader.ReaderException;
 import org.geneweaver.io.reader.ReaderFactory;
@@ -301,7 +302,7 @@ public class StepConnectorTest extends AbstractDataFileTest {
 			func.setLimit(limit);
 			
 			func.add(file);
-			func.create(prefix, System.out); // Creates indexed database.
+			func.create(prefix, IPrintStream.of(System.out)); // Creates indexed database.
 		}
 		return tdir;
 	}
