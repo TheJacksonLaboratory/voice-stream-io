@@ -172,7 +172,7 @@ public class TissueKey {
 			frag = frag.replace("(", "");
 			frag = frag.replace(")", "");
 			
-			if (frag.equals("tissue")) {
+			if (frag.equals("tissue") && ret.size()>(i-1)) {
 				if ("adipose".equals(ret.get(i-1))) {
 					continue;
 				}
