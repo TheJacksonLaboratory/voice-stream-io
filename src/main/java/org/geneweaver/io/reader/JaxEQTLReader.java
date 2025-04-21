@@ -64,7 +64,7 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		
 		EQTL bean = new EQTL();
 		bean.setTissueFileName(request.name());
-		bean.setStudyId(createFudgedStudyId(request.name()));
+		//bean.setStudyId(createFudgedStudyId(request.name()));
 		BeanMap d = new BeanMap(bean);
 		
 		String[] values = line.split(getDelimiter());
@@ -93,6 +93,7 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 			} else if (Double.class.equals(type)) {
 				value = Double.valueOf(value.toString());
 			}
+			
 			try {
 				if (value.toString().length()<1) continue;
 				d.put(name, value);
@@ -180,6 +181,7 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 			if (name.equals("rsid")) name = "rsId";
 			if (name.equals("geneid")) name = "geneId";
 			if (name.equals("bpmm10")) name = "bp";
+			if (name.equals("bpm39"))  name = "bp";
 			if (name.equals("strain")) name = "population";
 			// TODO lod
 			headerNames.add(name);

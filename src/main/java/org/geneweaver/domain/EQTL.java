@@ -113,7 +113,6 @@ public class EQTL extends EQTLBase {
 	public String getHeader() {
 		
 		return delimify(":START_ID(Rs-Id)",
-				"type",
 				"chr",
 				"slope:double",
 				"tissueFileName",
@@ -125,7 +124,6 @@ public class EQTL extends EQTLBase {
 				"marker",
 				"lod:double",
 				"bp:int",
-				"studyId",
 				":END_ID(Gene-Id)",
 				":TYPE");
 	}
@@ -139,7 +137,6 @@ public class EQTL extends EQTLBase {
 	public String toCsv() {
 		
 		return delimify(getRsId(),
-				getType(),
 				getChrGRCm39()!=null?getChrGRCm39():getChr(),
 				getSlope(),
 				getTissueFileName(),
@@ -151,7 +148,6 @@ public class EQTL extends EQTLBase {
 				getMarker(),
 				getLod()!=null?getLod():-1,
 				getBpGRCm39()!=null?getBpGRCm39():-1,
-				getStudyId(),
 				getGeneId(),
 				getClass().getSimpleName().toUpperCase());
 	}
