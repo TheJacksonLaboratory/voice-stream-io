@@ -3,15 +3,23 @@ package org.geneweaver.io.writer;
 import java.io.BufferedWriter;
 import java.io.PrintStream;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -90,6 +98,11 @@ public class ExportBuilder implements AutoCloseable {
 	private boolean parallelFiles = false;
 	
 	/**
+	 * When processing connections we can use parallel with this option.
+	 */
+	private boolean parallelConnections = false;
+	
+	/**
 	 * Stream for printing messages of each export run.
 	 */
 	@JsonIgnore
@@ -133,39 +146,32 @@ public class ExportBuilder implements AutoCloseable {
 		}		
 	}
 
-	private void parallelExport() throws InterruptedException {
+	private void parallelExport() throws InterruptedException, ExecutionException {
 		
-		ThreadGroup pool = new ThreadGroup("Exporters");
-		
-		// Have to use list as inputs is just an iterator and
-		// does not know its size.
-		List<CountDownLatch> latches = new LinkedList<>();
+		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+		List<Future<String>> futures = new ArrayList<>();
 		
 		// Mostly the number of files is around 23 for all the chromosome
 		// files. 23 long running threads should be reasonably efficient without
 		// using executor service. If swapping small tasks would use.
 		for (Path input : inputs) {
-			CountDownLatch latch = new CountDownLatch(1);
-			latches.add(latch);
 			
-			Thread thread = new Thread(pool, ()->exportQuietly(input, latch));
-			thread.setName("Export "+input.getFileName());
-			thread.start();
+			Future<String> future = executor.submit(()->exportQuietly(input));
+			futures.add(future);
 		}
 		
-		for (CountDownLatch latch : latches) {
-			latch.await();
+		for (Future<String> future : futures) {
+			future.get();
 		}
 	}
 
-	private void exportQuietly(Path input, CountDownLatch count) {
+	private String exportQuietly(Path input) {
 		try {
-			exporter.export(this, input);
+			return exporter.export(this, input);
 		} catch (Exception e) {
 			errors.add(e);
-		} finally {
-			count.countDown();
-		}
+			return null;
+		} 
 	}
 	
 	public String status() {
@@ -201,7 +207,7 @@ public class ExportBuilder implements AutoCloseable {
 			for (Function<Entity, Stream<Entity>> c : conns) {
 				getOut().println("Connector type: "+c.getClass().getName());
 				boolean isConnector = (c instanceof Connector<Entity, Entity>);
-				getOut().println("Conector instance of 'Connector' class: "+isConnector);
+				getOut().println("Connector instance of 'Connector' class: "+isConnector);
 			}
 		}
 
@@ -209,22 +215,108 @@ public class ExportBuilder implements AutoCloseable {
 			
 			Timer timer = createTimer();
 			
-			Stream<Entity> stream = reader.stream();
+			long total = 0L;
+			if (isParallelConnections()) {
+				// This is likely to fail tests and is not used in production.
+				total = parallelConnectors(reader, saver, conns, timer, append);
+			} else {
+				total = standardConnectors(reader, saver, conns, timer, append);
+			}
+			
+			return "Wrote bulk file(s) for '"+input.getFileName()+"' in "+timer.getFormattedTime()+" parsed "+total+" objects.";
+		}
+	}
+
+	private long standardConnectors(StreamReader<Entity> reader, DirectSave saver,
+								Collection<Function<Entity, 
+								Stream<Entity>>> conns, 
+								Timer timer, boolean append) throws ReaderException {
+		
+		Stream<Entity> stream = reader.stream().distinct();
+		for (Function<Entity, Stream<Entity>> c : conns) {
+			boolean isConnector = (c instanceof Connector<Entity, Entity>);
+			if (isVerbose() && isConnector) {
+				Connector<Entity, Entity> conn = (Connector<Entity, Entity>)c;
+				stream = stream.flatMap(g->conn.stream(g, null, getOut()));
+			} else {
+				stream = stream.flatMap(g->c.apply(g));
+			}
+		}
+		
+		return stream.map(g->saver.save(g, paths, writers, dir, timer, append))
+				     .count();
+	}
+
+	/**
+	 * TODO In tests having parallel connections neither speeded things up nor
+	 * got the right answer. The stream of objects contains repeats because it is
+	 * not a single stream flat mapped over to file (I think).
+	 * @param reader
+	 * @param saver
+	 * @param conns
+	 * @param timer
+	 * @param append
+	 * @return size of saved items
+	 * @throws ReaderException
+	 */
+	private long parallelConnectors(StreamReader<Entity> reader, DirectSave saver, 
+								Collection<Function<Entity, 
+								Stream<Entity>>> conns, 
+								Timer timer, boolean append) throws ReaderException {
+		
+		// For each of the file processors, we have ten connection processors.
+		// In tests it seems that the connections are bounded by lookup, each being
+		// slowish at least on a large scale but many in parallel being possible.
+		ExecutorService executor = Executors.newFixedThreadPool(10);
+		
+		// When it comes to looking up all the variant connections,
+		// all these flat maps are the slow parts. Other connections are
+		// quite fast but these require lookups into the peak tables which
+		// makes it slow.
+		Stream<Entity> stream = reader.stream().distinct();
+		List<Future<Long>> saved = new ArrayList<>();
+		stream.forEach(g -> {
+			Future<Long> future = executor.submit(createSaver(g, conns, saver, timer, append));
+			saved.add(future);
+		});
+		
+		long total = 0L;
+		for (Future<Long> future : saved) {
+			try {
+				total+=future.get();
+			} catch (Exception e) {
+				errors.add(e);
+				e.printStackTrace(getOut().getPrintStream());
+			}
+		}
+		
+		return total;
+	}
+
+	private Callable<Long> createSaver(Entity entity, 
+								Collection<Function<Entity, Stream<Entity>>> conns,
+								DirectSave saver,
+								Timer timer,
+								boolean append) {
+		return () -> {
+			
+			Set<Entity> toSave = new LinkedHashSet<>();
 			for (Function<Entity, Stream<Entity>> c : conns) {
+				
 				boolean isConnector = (c instanceof Connector<Entity, Entity>);
 				if (isVerbose() && isConnector) {
 					Connector<Entity, Entity> conn = (Connector<Entity, Entity>)c;
-					stream = stream.flatMap(g->conn.stream(g, null, getOut()));
+					toSave.addAll(conn.stream(entity, null, getOut()).toList());
 				} else {
-					stream = stream.flatMap(g->c.apply(g));
+					toSave.addAll(c.apply(entity).toList());
 				}
 			}
-			
-			long saved = stream.map(g->saver.save(g, paths, writers, dir, timer, append))
-							   .count();
-	
-			return "Wrote bulk file(s) for '"+input.getFileName()+"' in "+timer.getFormattedTime()+" parsed "+saved+" objects.";
-		}
+
+			for (Entity s : toSave) {
+				saver.save(s, paths, writers, dir, timer, append);
+			}
+			return (long)toSave.size();
+		};
 	}
 
 	private Collection<Function<Entity, Stream<Entity>>> getConnnectors(StreamReader<Entity> reader) {
@@ -502,6 +594,21 @@ public class ExportBuilder implements AutoCloseable {
 	 */
 	public ExportBuilder setVerbose(boolean verbose) {
 		this.verbose = verbose;
+		return this;
+	}
+
+	/**
+	 * @return the parallelConnections
+	 */
+	public boolean isParallelConnections() {
+		return parallelConnections;
+	}
+
+	/**
+	 * @param parallelConnections the parallelConnections to set
+	 */
+	public ExportBuilder setParallelConnections(boolean parallelConnections) {
+		this.parallelConnections = parallelConnections;
 		return this;
 	}
 

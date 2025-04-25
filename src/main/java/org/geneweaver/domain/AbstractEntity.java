@@ -66,7 +66,7 @@ public abstract class AbstractEntity implements Entity {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(chr, delimiter, uid);
+		return Objects.hash(chr, uid);
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public abstract class AbstractEntity implements Entity {
 		if (!(obj instanceof AbstractEntity))
 			return false;
 		AbstractEntity other = (AbstractEntity) obj;
-		return Objects.equals(chr, other.chr) && Objects.equals(delimiter, other.delimiter)
+		return Objects.equals(chr, other.chr) 
 				&& Objects.equals(uid, other.uid);
 	}
 
