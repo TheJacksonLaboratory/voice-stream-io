@@ -113,6 +113,7 @@ public class EQTL extends EQTLBase {
 	public String getHeader() {
 		
 		return delimify(":START_ID(Rs-Id)",
+				"type",
 				"chr",
 				"slope:double",
 				"tissueFileName",
@@ -137,6 +138,7 @@ public class EQTL extends EQTLBase {
 	public String toCsv() {
 		
 		return delimify(getRsId(),
+				getType(),
 				getChrGRCm39()!=null?getChrGRCm39():getChr(),
 				getSlope(),
 				getTissueFileName(),

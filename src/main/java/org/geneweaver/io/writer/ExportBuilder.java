@@ -8,17 +8,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -96,11 +92,6 @@ public class ExportBuilder implements AutoCloseable {
 	 * parallel exporter will run each file with a separate thread.
 	 */
 	private boolean parallelFiles = false;
-	
-	/**
-	 * When processing connections we can use parallel with this option.
-	 */
-	private boolean parallelConnections = false;
 	
 	/**
 	 * Stream for printing messages of each export run.
@@ -215,108 +206,22 @@ public class ExportBuilder implements AutoCloseable {
 			
 			Timer timer = createTimer();
 			
-			long total = 0L;
-			if (isParallelConnections()) {
-				// This is likely to fail tests and is not used in production.
-				total = parallelConnectors(reader, saver, conns, timer, append);
-			} else {
-				total = standardConnectors(reader, saver, conns, timer, append);
-			}
-			
-			return "Wrote bulk file(s) for '"+input.getFileName()+"' in "+timer.getFormattedTime()+" parsed "+total+" objects.";
-		}
-	}
-
-	private long standardConnectors(StreamReader<Entity> reader, DirectSave saver,
-								Collection<Function<Entity, 
-								Stream<Entity>>> conns, 
-								Timer timer, boolean append) throws ReaderException {
-		
-		Stream<Entity> stream = reader.stream().distinct();
-		for (Function<Entity, Stream<Entity>> c : conns) {
-			boolean isConnector = (c instanceof Connector<Entity, Entity>);
-			if (isVerbose() && isConnector) {
-				Connector<Entity, Entity> conn = (Connector<Entity, Entity>)c;
-				stream = stream.flatMap(g->conn.stream(g, null, getOut()));
-			} else {
-				stream = stream.flatMap(g->c.apply(g));
-			}
-		}
-		
-		return stream.map(g->saver.save(g, paths, writers, dir, timer, append))
-				     .count();
-	}
-
-	/**
-	 * TODO In tests having parallel connections neither speeded things up nor
-	 * got the right answer. The stream of objects contains repeats because it is
-	 * not a single stream flat mapped over to file (I think).
-	 * @param reader
-	 * @param saver
-	 * @param conns
-	 * @param timer
-	 * @param append
-	 * @return size of saved items
-	 * @throws ReaderException
-	 */
-	private long parallelConnectors(StreamReader<Entity> reader, DirectSave saver, 
-								Collection<Function<Entity, 
-								Stream<Entity>>> conns, 
-								Timer timer, boolean append) throws ReaderException {
-		
-		// For each of the file processors, we have ten connection processors.
-		// In tests it seems that the connections are bounded by lookup, each being
-		// slowish at least on a large scale but many in parallel being possible.
-		ExecutorService executor = Executors.newFixedThreadPool(10);
-		
-		// When it comes to looking up all the variant connections,
-		// all these flat maps are the slow parts. Other connections are
-		// quite fast but these require lookups into the peak tables which
-		// makes it slow.
-		Stream<Entity> stream = reader.stream().distinct();
-		List<Future<Long>> saved = new ArrayList<>();
-		stream.forEach(g -> {
-			Future<Long> future = executor.submit(createSaver(g, conns, saver, timer, append));
-			saved.add(future);
-		});
-		
-		long total = 0L;
-		for (Future<Long> future : saved) {
-			try {
-				total+=future.get();
-			} catch (Exception e) {
-				errors.add(e);
-				e.printStackTrace(getOut().getPrintStream());
-			}
-		}
-		
-		return total;
-	}
-
-	private Callable<Long> createSaver(Entity entity, 
-								Collection<Function<Entity, Stream<Entity>>> conns,
-								DirectSave saver,
-								Timer timer,
-								boolean append) {
-		return () -> {
-			
-			Set<Entity> toSave = new LinkedHashSet<>();
+			Stream<Entity> stream = reader.stream();
 			for (Function<Entity, Stream<Entity>> c : conns) {
-				
 				boolean isConnector = (c instanceof Connector<Entity, Entity>);
 				if (isVerbose() && isConnector) {
 					Connector<Entity, Entity> conn = (Connector<Entity, Entity>)c;
-					toSave.addAll(conn.stream(entity, null, getOut()).toList());
+					stream = stream.flatMap(g->conn.stream(g, null, getOut()));
 				} else {
-					toSave.addAll(c.apply(entity).toList());
+					stream = stream.flatMap(g->c.apply(g));
 				}
 			}
-
-			for (Entity s : toSave) {
-				saver.save(s, paths, writers, dir, timer, append);
-			}
-			return (long)toSave.size();
-		};
+			
+			long saved = stream.map(g->saver.save(g, paths, writers, dir, timer, append))
+							   .count();
+	
+			return "Wrote bulk file(s) for '"+input.getFileName()+"' in "+timer.getFormattedTime()+" parsed "+saved+" objects.";
+		}
 	}
 
 	private Collection<Function<Entity, Stream<Entity>>> getConnnectors(StreamReader<Entity> reader) {
@@ -594,21 +499,6 @@ public class ExportBuilder implements AutoCloseable {
 	 */
 	public ExportBuilder setVerbose(boolean verbose) {
 		this.verbose = verbose;
-		return this;
-	}
-
-	/**
-	 * @return the parallelConnections
-	 */
-	public boolean isParallelConnections() {
-		return parallelConnections;
-	}
-
-	/**
-	 * @param parallelConnections the parallelConnections to set
-	 */
-	public ExportBuilder setParallelConnections(boolean parallelConnections) {
-		this.parallelConnections = parallelConnections;
 		return this;
 	}
 
