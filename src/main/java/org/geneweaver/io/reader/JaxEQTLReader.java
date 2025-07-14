@@ -181,7 +181,7 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 			if (name.equals("rsid")) name = "rsId";
 			if (name.equals("geneid")) name = "geneId";
 			if (name.equals("bpmm10")) name = "bp";
-			if (name.equals("bpm39"))  name = "bp";
+			if (name.equals("bpm39"))  name = "bpGRCm39";
 			if (name.equals("strain")) name = "population";
 			// TODO lod
 			headerNames.add(name);

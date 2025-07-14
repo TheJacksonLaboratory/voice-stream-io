@@ -150,6 +150,7 @@ class JaxIntervalEQTLReader extends LineIteratorReader<EQTL> {
 			if (lc.equals("geneid")) name = "geneId";
 			if (lc.equals("genename")) name = "geneName";
 			if (lc.equals("bpmm10")) name = "bp";
+			if (lc.equals("bpm39"))  name = "bpGRCm39";
 			// TODO lod
 			headerNames.add(name);
 		}
@@ -177,6 +178,7 @@ class JaxIntervalEQTLReader extends LineIteratorReader<EQTL> {
 			if (name.equals("geneid")) name = "geneId";
 			if (name.equals("genename")) name = "geneName";
 			if (name.equals("bpmm10")) name = "bp";
+			if (name.equals("bpmm39")) name = "bpGRCm39";
 			if (name.equals("species")) continue; // Repeated information
 			if (name.equals("url")) name = "source";
 			if (name.equals("date")) {
