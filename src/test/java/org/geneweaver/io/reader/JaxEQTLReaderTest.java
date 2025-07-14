@@ -144,7 +144,7 @@ public class JaxEQTLReaderTest extends AbstractDataFileTest {
 			assertNotNull(e.getGeneId());
 			assertNotNull(e.getPopulation());
 			assertNotNull(e.getTissueName());
-			assertNotNull(e.getBp());
+			assertTrue(e.getBp()!=null||e.getBpGRCm39()!=null); // Either one must be set
 		});		
 	}
 	
