@@ -18,28 +18,48 @@
  */
 package org.geneweaver.domain;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 final class SpeciesData {
+	// @see https://useast.ensembl.org/info/about/species.html
 	// @see https://www.ncbi.nlm.nih.gov/Taxonomy/Browser
 	// We cannot deal with that many species in our graph for now.
 	// Later this map can be replaced with a service call or a larger
 	// cache or another mechanism.
-	public static final Map<String, Long> species;
+	public static final Map<String, Integer> species;
+	public static final Map<Integer, String> codes;
 	static {
-		Map<String, Long> tmp = new HashMap<>();
-		tmp.put("mus musculus", 10090L);
-		tmp.put("homo sapiens", 9606L);
-		tmp.put("rattus norvegicus", 10116L);
-		tmp.put("danio rerio", 7955L);
-		tmp.put("pan troglodytes", 9598L);
-		species = Collections.unmodifiableMap(tmp);
+		codes = Map.of(
+				10090, "Mus musculus", 
+				9606, "Homo sapiens",
+				10116, "Rattus norvegicus",
+				7955, "Danio rerio",
+				9598, "Pan troglodytes");
+		species = codes.entrySet().stream()
+		                    .collect(Collectors.toMap(
+		                    	e->e.getValue().toLowerCase(), 
+		                        Map.Entry::getKey     
+		                    ));
 	}
-	public static Long get(String sspecies) {
+	
+	/**
+	 * Get code for species, case insensitive
+	 * @param sspecies
+	 * @return
+	 */
+	public static Integer code(String sspecies) {
 		if (sspecies==null) return null;
 		sspecies = sspecies.toLowerCase();
 		return species.get(sspecies);
+	}
+	
+	/**
+	 * Get name for code.
+	 * @param code
+	 * @return spcies or null if not found.
+	 */
+	public static String name(Integer code) {
+		return codes.get(code);
 	}
 }

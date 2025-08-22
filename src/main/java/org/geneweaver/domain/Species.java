@@ -18,12 +18,50 @@
  */
 package org.geneweaver.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public interface Species {
 
-	String getSpecies();
+	Integer getSpecies();
 	
+	void setSpecies(Integer species);
+	
+	/**
+	 * We do this to save space in neo4j.
+	 * @return
+	 */
+	@JsonIgnore
+	default String getSpeciesName() {
+		return getSpeciesName(getSpecies());
+	}
+	
+	/**
+	 * We use the ensembl species codes which
+	 * take up less space (1 int) in neo4j
+	// @see https://useast.ensembl.org/info/about/species.html
+	 * @param code
+	 * @return
+	 */
+	@JsonIgnore
+	static String getSpeciesName(Integer code) {
+		return SpeciesData.name(code);
+	}
+
+	@JsonIgnore
 	default Long taxon() {
-		return SpeciesData.get(getSpecies());
+		return Long.valueOf(getSpecies());
+	}
+
+	/**
+	 * We use the ensembl species codes which
+	 * take up less space
+	 * @see https://useast.ensembl.org/info/about/species.html
+	 * @param code
+	 * @return
+	 */
+	@JsonIgnore
+	static int code(String species) {
+		return SpeciesData.code(species);
 	}
 }
 

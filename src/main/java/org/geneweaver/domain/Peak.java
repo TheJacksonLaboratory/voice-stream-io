@@ -208,7 +208,7 @@ public class Peak  extends NamedEntity implements Located {
 	public Peak(String peakId, String species, String chr, int start, int end, String name, int score, Strand strand, int thickStart, int thickEnd) {
 		
 		this.peakId = peakId;
-		setSpecies(species);
+		setSpecies(Species.code(species));
 		setChr(chr);
 		this.start = start;
 		this.end = end;
@@ -233,9 +233,9 @@ public class Peak  extends NamedEntity implements Located {
 	@Override
 	public String getHeader() {
 		StringBuilder buf = new StringBuilder();
-		String fields = delimify("peakId:ID(Peak-Id)",
-				"epigenome", "tissueDescription", "featureType", "filterType",
-				"start:int", "end:int", "chr", "score:int", "strand", ":LABEL");
+		String fields = delimify("peakId:ID(Peak-Id)", "species:int",
+				// TODO Should move featureType and epigenome to int codes then look then up.
+			    "featureType", "epigenome", "start:int", "end:int", "chr", "score:int", "strand", ":LABEL");
 		buf.append(fields);
 		
 		String sheader = super.getHeader();
@@ -255,9 +255,8 @@ public class Peak  extends NamedEntity implements Located {
 	public String toCsv() {
 		
 		StringBuilder buf = new StringBuilder();
-		String values = delimify(getPeakId(),
-				getEpigenome(), getTissueDescription(), getFeatureType(), getFilterType(),
-				getStart(), getEnd(), getChr(), getScore(), strandCharacter(getStrand()),
+		String values = delimify(getPeakId(), getSpecies(),
+				getFeatureType(), getEpigenome(), getStart(), getEnd(), getChr(), getScore(), strandCharacter(getStrand()),
 				getClass().getSimpleName().toString());
 		buf.append(values);
 		

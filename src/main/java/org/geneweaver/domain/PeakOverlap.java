@@ -8,8 +8,6 @@ import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 @Generated("POJO")
 @RelationshipEntity(type = "PEAK_OVERLAP")
 public class PeakOverlap extends AbstractEntity {

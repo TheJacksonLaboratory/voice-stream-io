@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import org.geneweaver.domain.NamedEntity;
 import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Peak.Strand;
+import org.geneweaver.domain.Species;
 import org.geneweaver.domain.Track;
 import org.junit.Test;
 
@@ -217,7 +218,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 	@Test
 	public void testHomoSapDescriptions() throws Exception {
 		BedReader<Peak> reader = new BedReader<>();
-		Map<String,String> des = reader.getEpigenomeDescriptions("Homo sapiens");
+		Map<String,String> des = reader.getEpigenomeDescriptions(Species.code("Homo sapiens"));
 		assertNotNull(des);
 		des.keySet().forEach(key->{
 			assertTrue(key+" has unexpected characters", key.matches("[a-z0-9]+"));
@@ -236,7 +237,7 @@ public class BedReaderTest extends AbstractDataFileTest {
 	@Test
 	public void testMusMusDescriptions() throws Exception {
 		BedReader<Peak> reader = new BedReader<>();
-		Map<String,String> des = reader.getEpigenomeDescriptions("Mus musculus");
+		Map<String,String> des = reader.getEpigenomeDescriptions(Species.code("Mus musculus"));
 		assertNotNull(des);
 		des.keySet().forEach(key->{
 			assertTrue(key+" has unexpected characters", key.matches("[a-z0-9]+"));
