@@ -24,7 +24,7 @@ public abstract class NamedEntity extends AbstractEntity implements Species {
 
 
 	private String name;
-	private int species;
+	private Integer species;
 	/**
 	 * @return the name
 	 */
