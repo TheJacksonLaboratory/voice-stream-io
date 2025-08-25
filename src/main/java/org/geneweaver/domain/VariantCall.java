@@ -53,7 +53,7 @@ public class VariantCall extends AbstractEntity implements Species {
 		return alt == other.alt && Objects.equals(chrom, other.chrom) && Objects.equals(filter, other.filter)
 				&& Objects.equals(format, other.format) && Objects.equals(id, other.id)
 				&& Objects.equals(info, other.info) && pos == other.pos && qual == other.qual && ref == other.ref
-				&& species == other.species;
+				&& Objects.equals(species, other.species);
 	}
 
 	public String getChrom() {

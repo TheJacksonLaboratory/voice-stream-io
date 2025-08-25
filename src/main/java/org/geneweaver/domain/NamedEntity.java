@@ -65,6 +65,6 @@ public abstract class NamedEntity extends AbstractEntity implements Species {
 		if (!(obj instanceof NamedEntity))
 			return false;
 		NamedEntity other = (NamedEntity) obj;
-		return Objects.equals(name, other.name) && species == other.species;
+		return Objects.equals(name, other.name) && Objects.equals(species, other.species);
 	}
 }

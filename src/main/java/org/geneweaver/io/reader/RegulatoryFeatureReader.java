@@ -26,6 +26,7 @@ import org.apache.commons.beanutils.BeanMap;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.GeneticEntity;
 import org.geneweaver.domain.RegulatoryFeature;
+import org.geneweaver.domain.Species;
 import org.geneweaver.io.connector.RegulatoryFeatureOverlapConnector;
 
 // TODO: Auto-generated Javadoc
@@ -102,7 +103,9 @@ class RegulatoryFeatureReader<N extends GeneticEntity> extends LineIteratorReade
 	        	
 	        	if (dedot.length>=7) {
 	        	// 0. species
-		        	d.put("species", getFixedSpecies(dedot[0]));
+	        		String species = getFixedSpecies(dedot[0]);
+	        		Integer sp = Species.code(species);
+		        	d.put("species", sp);
 		        	// 1. assembly version,
 		        	d.put("assemblyVersion", dedot[1]);
 		        	// 2. cell type (if applicable),
