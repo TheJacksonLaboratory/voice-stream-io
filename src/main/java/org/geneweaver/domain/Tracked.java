@@ -96,7 +96,7 @@ public class Tracked  extends AbstractEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(peak, track);
+		result = prime * result + Objects.hash(chr, peak, track);
 		return result;
 	}
 
@@ -109,7 +109,7 @@ public class Tracked  extends AbstractEntity {
 		if (!(obj instanceof Tracked))
 			return false;
 		Tracked other = (Tracked) obj;
-		return Objects.equals(peak, other.peak) && Objects.equals(track, other.track);
+		return Objects.equals(chr, other.chr) && Objects.equals(peak, other.peak) && Objects.equals(track, other.track);
 	}
 
 	/**

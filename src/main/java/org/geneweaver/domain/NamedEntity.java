@@ -24,7 +24,7 @@ public abstract class NamedEntity extends AbstractEntity implements Species {
 
 
 	private String name;
-	private String species;
+	private Integer species;
 	/**
 	 * @return the name
 	 */
@@ -40,13 +40,13 @@ public abstract class NamedEntity extends AbstractEntity implements Species {
 	/**
 	 * @return the species
 	 */
-	public String getSpecies() {
+	public Integer getSpecies() {
 		return species;
 	}
 	/**
 	 * @param species the species to set
 	 */
-	public void setSpecies(String species) {
+	public void setSpecies(Integer species) {
 		this.species = species;
 	}
 	@Override
@@ -65,6 +65,6 @@ public abstract class NamedEntity extends AbstractEntity implements Species {
 		if (!(obj instanceof NamedEntity))
 			return false;
 		NamedEntity other = (NamedEntity) obj;
-		return Objects.equals(name, other.name) && Objects.equals(species, other.species);
+		return Objects.equals(name, other.name) && species == other.species;
 	}
 }

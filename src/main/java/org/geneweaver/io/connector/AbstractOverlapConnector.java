@@ -39,6 +39,7 @@ import org.neo4j.ogm.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -340,27 +341,37 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 
 	protected <T extends Located> T store(T line, String prefix, IPrintStream out) {
 		
-		int lower = Math.min(line.getStart(), line.getEnd());
-		int upper = Math.max(line.getStart(), line.getEnd());
-		String chr = line.getChr();
-		String lshardName = oservice.getShardName(chr, lower);
-		if (lshardName==null) {
-			String msg = "Could not find shard for "+chr;
-			logger.warn(msg);
-			out.println(msg);
-			return null; // No shard
+		try {
+			int lower = Math.min(line.getStart(), line.getEnd());
+			int upper = Math.max(line.getStart(), line.getEnd());
+			String chr = line.getChr();
+			String lshardName = oservice.getShardName(chr, lower);
+			if (lshardName==null) {
+				String msg = "Could not find shard for "+chr;
+				logger.warn(msg);
+				out.println(msg);
+				return null; // No shard
+			}
+			storeBase(lshardName, line, prefix, out);
+			
+			String ubshardName = oservice.getShardName(chr, upper);
+			if (ubshardName==null) {
+				String msg = "Could not find shard for "+chr;
+				logger.warn(msg);
+				out.println(msg);
+				return null; // No shard
+			}
+			if (!ubshardName.equals(lshardName)) storeBase(ubshardName, line, prefix, out);
+			return line;
+		} catch (Exception ne) {
+			out.println("Trying to process "+line+" failed: "+ne.getMessage());
+			try {
+				out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(line));
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			}
+			throw ne;
 		}
-		storeBase(lshardName, line, prefix, out);
-		
-		String ubshardName = oservice.getShardName(chr, upper);
-		if (ubshardName==null) {
-			String msg = "Could not find shard for "+chr;
-			logger.warn(msg);
-			out.println(msg);
-			return null; // No shard
-		}
-		if (!ubshardName.equals(lshardName)) storeBase(ubshardName, line, prefix, out);
-		return line;
 	}
 
 

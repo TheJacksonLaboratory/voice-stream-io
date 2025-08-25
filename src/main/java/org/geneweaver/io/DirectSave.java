@@ -32,7 +32,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
 import org.geneweaver.domain.Entity;
@@ -75,6 +77,7 @@ public class DirectSave implements AutoCloseable {
 		return save(e, paths, writers, dir, timer, false);
 	}
 	
+	
 	/**
 	 * This function uses the map passed in to cache writers.
 	 * It is synchronized to avoid writing to the same file at the same
@@ -86,7 +89,9 @@ public class DirectSave implements AutoCloseable {
 	 * @param timer - may be null
 	 * @return
 	 */
-	public Entity save(Entity e, Map<Class<? extends Entity>, Map<String,Path>> paths, Map<Class<? extends Entity>, Map<String,BufferedWriter>> writers, Path dir, Timer timer, boolean append) {
+	public Entity save(Entity e, Map<Class<? extends Entity>, Map<String,Path>> paths, 
+								 Map<Class<? extends Entity>, Map<String,BufferedWriter>> writers, 
+								 Path dir, Timer timer, boolean append) {
 		
 		synchronized(e.getClass()) {
 			try {
@@ -129,18 +134,21 @@ public class DirectSave implements AutoCloseable {
 				}
 				
 				BufferedWriter writer = writers.get(e.getClass()).get(chr);
-				writer.write(e.toCsv());
+				
+				String csv = e.toCsv();
+				writer.write(csv);
 				writer.newLine();
 				if (timer!=null) {
 					Path path = paths.get(e.getClass()).get(chr);
 					timer.time(path.toString(), verbose);
 				}
+				
+				return e;
+				
 			} catch (IOException ne) {
 				throw new RuntimeException(ne);
 			}
 		}
-
-		return e;
 	}
 	
 	/**

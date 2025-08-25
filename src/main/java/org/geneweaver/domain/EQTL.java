@@ -112,6 +112,11 @@ public class EQTL extends EQTLBase {
 	@Override
 	public String getHeader() {
 		
+		// Bad lines written in hs Build of v3 May 2025
+		// Might be because directory not cleared between builds?
+		//rs145039153|PEAK|23|-0.573746|null|null|PacreaticIslets_independent|null|null|Homo sapiens|null|-1.0|-1|null|ENSG00000160219|EQTL
+		//rs7056315|       23|-0.504562|null|null|PacreaticIslets_independent|null|null|Homo sapiens|null|-1.0|-1|     ENSG00000005889|EQTL
+		
 		return delimify(":START_ID(Rs-Id)",
 				"type",
 				"chr",
@@ -125,7 +130,6 @@ public class EQTL extends EQTLBase {
 				"marker",
 				"lod:double",
 				"bp:int",
-				"studyId",
 				":END_ID(Gene-Id)",
 				":TYPE");
 	}
@@ -151,7 +155,6 @@ public class EQTL extends EQTLBase {
 				getMarker(),
 				getLod()!=null?getLod():-1,
 				getBpGRCm39()!=null?getBpGRCm39():-1,
-				getStudyId(),
 				getGeneId(),
 				getClass().getSimpleName().toUpperCase());
 	}

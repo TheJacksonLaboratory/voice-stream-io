@@ -81,8 +81,6 @@ public class Variant extends GeneticEntity {
 		StringBuilder buf = new StringBuilder();
 		buf.append("rsId:ID(Rs-Id)");
 		buf.append(getDelimiter());
-		buf.append("dbxRef");
-		buf.append(getDelimiter());
 		buf.append("id");
 		buf.append(getDelimiter());
 		buf.append("refAllele");
@@ -106,8 +104,6 @@ public class Variant extends GeneticEntity {
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
 		buf.append(getRsId());
-		buf.append(getDelimiter());
-		buf.append(getDbxRef());
 		buf.append(getDelimiter());
 		buf.append(getId());
 		buf.append(getDelimiter());

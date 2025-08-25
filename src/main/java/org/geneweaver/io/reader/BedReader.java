@@ -38,6 +38,7 @@ import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.NamedEntity;
 import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.Peak.Strand;
+import org.geneweaver.domain.Species;
 import org.geneweaver.domain.Track;
 import org.geneweaver.io.connector.BedConnector;
 import org.geneweaver.io.connector.ChromosomeService;
@@ -142,7 +143,7 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		
 		int start = peak.getStart();
 		int end = peak.getEnd();
-		String peakId = createPeakId(peak.getEpigenome(), peak.getChr(), start, end, peak.getTissueDescription());
+		String peakId = createPeakId(peak.getFeatureType(), peak.getChr(), start, end, peak.getTissueDescription());
 		peak.setPeakId(peakId);
 		return peak;
 	}
@@ -159,10 +160,10 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	 * @param removeSpecialChars
 	 * @return the peak id as a string.
 	 */
-	public static String createPeakId(String epiGen, String chr, int start, int end, String tissue) {
+	public static String createPeakId(String featType, String chr, int start, int end, String tissue) {
 		
 		StringBuilder buf = new StringBuilder();
-		buf.append(epiGen);
+		buf.append(featType);
 		buf.append("@");
 		buf.append(chr);
 		buf.append("#");
@@ -256,8 +257,9 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	 */
 	private static final Map<String,Map<String,String>> descriptions = new HashMap<>();
 	
-	Map<String,String> getEpigenomeDescriptions(String species) throws ReaderException {
+	Map<String,String> getEpigenomeDescriptions(Integer speciesCode) throws ReaderException {
 		
+		String species = Species.getSpeciesName(speciesCode);
 		if (species==null) return Collections.emptyMap();
 		if (descriptions.get(species)!=null) return descriptions.get(species);
 		

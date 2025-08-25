@@ -113,7 +113,8 @@ public class JaxEQTLReaderTest extends AbstractDataFileTest {
 		
 		check(eqtls);
 		
-		eqtls.stream().allMatch(e->e.getStudyId().equals("Project999901"));
+		// We remove fake study id, no one is using it.
+		//eqtls.stream().allMatch(e->e.getStudyId().equals("Project999901"));
 	}
 	
 
@@ -143,7 +144,7 @@ public class JaxEQTLReaderTest extends AbstractDataFileTest {
 			assertNotNull(e.getGeneId());
 			assertNotNull(e.getPopulation());
 			assertNotNull(e.getTissueName());
-			assertNotNull(e.getBp());
+			assertTrue(e.getBp()!=null||e.getBpGRCm39()!=null); // Either one must be set
 		});		
 	}
 	
@@ -185,4 +186,11 @@ public class JaxEQTLReaderTest extends AbstractDataFileTest {
 		reader.stream().collect(Collectors.toList());
 	}
 	
+	@Test
+	public void haosNewmm39Files() throws Exception {
+		JaxEQTLReader<EQTL> reader = new JaxEQTLReader<>();
+		reader.init(new ReaderRequest("Mus musculus", getFile("data/eQTL/mm/STRI_DO595_array_GRCm39_small.csv")));
+		List<EQTL> eqtls = reader.stream().collect(Collectors.toList());
+	    assertEquals(993, eqtls.size());
+	}
 }

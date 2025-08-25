@@ -39,6 +39,7 @@ import java.util.stream.StreamSupport;
 
 import org.apache.commons.beanutils.BeanMap;
 import org.geneweaver.domain.Entity;
+import org.geneweaver.domain.Species;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -624,9 +625,10 @@ public abstract class LineIteratorReader<T extends Entity> extends AbstractStrea
 	/**
 	 * @return the species
 	 */
-	public String getSpecies() {
+	public Integer getSpecies() {
 		if (request==null) return null;
-		return request.getSource();
+		String species = request.getSource();
+		return Species.code(species);
 	}
 
 	/**

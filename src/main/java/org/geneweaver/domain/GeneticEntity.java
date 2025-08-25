@@ -61,9 +61,9 @@ public abstract class GeneticEntity extends AbstractEntity implements Species, L
 	@JsonInclude(JsonInclude.Include.NON_NULL)
     private String source;
     
-    /** The species. */
+    /** The species code. */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-    private String species;
+    private Integer species;
     
     /** The start. */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -102,7 +102,7 @@ public abstract class GeneticEntity extends AbstractEntity implements Species, L
 		buf.append(getDelimiter());
 		buf.append("source");
 		buf.append(getDelimiter());
-		buf.append("species");
+		buf.append("species:int");
 		buf.append(getDelimiter());
 		buf.append("start:int");
 		buf.append(getDelimiter());
@@ -281,7 +281,7 @@ public abstract class GeneticEntity extends AbstractEntity implements Species, L
 	 *
 	 * @return the species
 	 */
-	public String getSpecies() {
+	public Integer getSpecies() {
 		return species;
 	}
 
@@ -290,7 +290,7 @@ public abstract class GeneticEntity extends AbstractEntity implements Species, L
 	 *
 	 * @param species the species to set
 	 */
-	public void setSpecies(String species) {
+	public void setSpecies(Integer species) {
 		this.species = species;
 	}
 

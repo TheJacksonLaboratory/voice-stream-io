@@ -3,6 +3,7 @@ package org.geneweaver.io.writer;
 import java.io.BufferedWriter;
 import java.io.PrintStream;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,7 +12,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -133,39 +137,32 @@ public class ExportBuilder implements AutoCloseable {
 		}		
 	}
 
-	private void parallelExport() throws InterruptedException {
+	private void parallelExport() throws InterruptedException, ExecutionException {
 		
-		ThreadGroup pool = new ThreadGroup("Exporters");
-		
-		// Have to use list as inputs is just an iterator and
-		// does not know its size.
-		List<CountDownLatch> latches = new LinkedList<>();
+		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+		List<Future<String>> futures = new ArrayList<>();
 		
 		// Mostly the number of files is around 23 for all the chromosome
 		// files. 23 long running threads should be reasonably efficient without
 		// using executor service. If swapping small tasks would use.
 		for (Path input : inputs) {
-			CountDownLatch latch = new CountDownLatch(1);
-			latches.add(latch);
 			
-			Thread thread = new Thread(pool, ()->exportQuietly(input, latch));
-			thread.setName("Export "+input.getFileName());
-			thread.start();
+			Future<String> future = executor.submit(()->exportQuietly(input));
+			futures.add(future);
 		}
 		
-		for (CountDownLatch latch : latches) {
-			latch.await();
+		for (Future<String> future : futures) {
+			future.get();
 		}
 	}
 
-	private void exportQuietly(Path input, CountDownLatch count) {
+	private String exportQuietly(Path input) {
 		try {
-			exporter.export(this, input);
+			return exporter.export(this, input);
 		} catch (Exception e) {
 			errors.add(e);
-		} finally {
-			count.countDown();
-		}
+			return null;
+		} 
 	}
 	
 	public String status() {
@@ -201,7 +198,7 @@ public class ExportBuilder implements AutoCloseable {
 			for (Function<Entity, Stream<Entity>> c : conns) {
 				getOut().println("Connector type: "+c.getClass().getName());
 				boolean isConnector = (c instanceof Connector<Entity, Entity>);
-				getOut().println("Conector instance of 'Connector' class: "+isConnector);
+				getOut().println("Connector instance of 'Connector' class: "+isConnector);
 			}
 		}
 
