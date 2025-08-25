@@ -60,6 +60,7 @@ final class SpeciesData {
 	 * @return spcies or null if not found.
 	 */
 	public static String name(Integer code) {
+		if (code==null) return null;
 		return codes.get(code);
 	}
 }

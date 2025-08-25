@@ -60,7 +60,8 @@ public interface Species {
 	 * @return
 	 */
 	@JsonIgnore
-	static int code(String species) {
+	static Integer code(String species) {
+		if (species==null) return null;
 		return SpeciesData.code(species);
 	}
 }
