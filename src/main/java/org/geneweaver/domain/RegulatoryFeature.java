@@ -115,6 +115,8 @@ public class RegulatoryFeature extends GeneticEntity {
 		StringBuilder buf = new StringBuilder();
 		buf.append("featureId:ID(Feature-Id)");
 		buf.append(getDelimiter());
+		buf.append("species:int");
+		buf.append(getDelimiter());
 		buf.append("activity");
 		buf.append(getDelimiter());
 		buf.append("epigenome");
@@ -140,6 +142,8 @@ public class RegulatoryFeature extends GeneticEntity {
 	public String toCsv() {
 		StringBuilder buf = new StringBuilder();
 		buf.append(getFeatureId());
+		buf.append(getDelimiter());
+		buf.append(getSpecies());
 		buf.append(getDelimiter());
 		buf.append(getActivity());
 		buf.append(getDelimiter());
