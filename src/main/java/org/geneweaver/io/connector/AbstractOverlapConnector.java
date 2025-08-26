@@ -90,6 +90,11 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 */
 	private Long limit;
 	private Long skip;
+	private String species;
+
+	public AbstractOverlapConnector(String species) {
+		this.species = species;
+	}
 
 	public void add(Path hFile) throws FileNotFoundException {
 		if (!Files.exists(hFile)) throw new FileNotFoundException(hFile.toString());
@@ -175,7 +180,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			++index;
 			if (out!=null) out.println("Input "+path+" "+index+" of "+source.size());
 
-			ReaderRequest request = new ReaderRequest(path.getFileName().toString(), path);
+			ReaderRequest request = new ReaderRequest(species, path);
 			configure(request);
 			
 			StreamReader<?> reader = ReaderFactory.getReader(request);

@@ -52,7 +52,7 @@ public class PeakOverlapConnector<N extends Entity, E extends Entity> extends Ab
 	private String peakFeatureFilter = null;
 	
 	public PeakOverlapConnector() {
-		this("peaks");
+		this("Homo sapiens", "peaks");
 	}
 
 	/**
@@ -60,7 +60,8 @@ public class PeakOverlapConnector<N extends Entity, E extends Entity> extends Ab
 	 * The database is sharded by file so this
 	 * @param databaseFileName
 	 */
-	public PeakOverlapConnector(String databaseFileName) {
+	public PeakOverlapConnector(String species, String databaseFileName) {
+		super(species);
 		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
 		setFileName(databaseFileName);
 		setFileFilters(".bed.gz", ".bed");

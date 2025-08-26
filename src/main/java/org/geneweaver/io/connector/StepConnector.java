@@ -1,6 +1,5 @@
 package org.geneweaver.io.connector;
 
-import java.io.PrintStream;
 import java.nio.file.Path;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -48,6 +47,7 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 	 * Used when mapping the step file.
 	 */
 	public StepConnector() {
+		super("Mus musculus");
 		clazz  = null;
 		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
 	}
@@ -56,8 +56,8 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 	 * Used when caching the data sources.
 	 * @param clazz
 	 */
-	public StepConnector(Class<?> clazz) {
-		this(clazz, clazz.getSimpleName()); // Or variants, we have to process both.
+	public StepConnector(String species,Class<?> clazz) {
+		this(species,clazz, clazz.getSimpleName()); // Or variants, we have to process both.
 	}
 
 	/**
@@ -65,7 +65,8 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 	 * The database is sharded by file so this
 	 * @param databaseFileName
 	 */
-	public StepConnector(Class<?> clazz, String databaseFileName) {
+	public StepConnector(String species, Class<?> clazz, String databaseFileName) {
+		super(species);
 		this.clazz = clazz;
 		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
 		setFileName(databaseFileName);

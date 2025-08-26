@@ -240,7 +240,7 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 
 		// Create a massive database
 		Path rpath = getPath("data/bed_peaks/some.bed");
-		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("peaks")) {
+		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("Mus musculus", "peaks")) {
 			// 1. Create a database with things that match.
 			conn.setLocation(dir);
 			conn.add(rpath);
@@ -269,7 +269,7 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 
 		// Create a massive database
 		Path rpath = getPath("data/bed_peaks/some.bed");
-		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("peaks")) {
+		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("Mus musculus", "peaks")) {
 			// 1. Create a database with things that match.
 			conn.setLocation(dir);
 			conn.add(rpath);
@@ -294,7 +294,7 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 			copies.add(tmp);
 		}
 
-		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("peaks")) {
+		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("Mus musculus", "peaks")) {
 			conn.setLocation(dir);
 
 			try (@SuppressWarnings("resource")
@@ -333,7 +333,7 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 	@Test
 	public void ignoreOlderBedFilesMouse() throws Exception {
 		Path dir = getPath("data/bed_peaks/mus_musculus");
-		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("peaks")) {
+		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("Mus musculus", "peaks")) {
 			Collection<Path> added = conn.addAll(dir);
 			
 			// e.g. ...peaks.20201021.bed.gz
@@ -346,7 +346,7 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 	@Test
 	public void ignoreOlderBedFilesHuman() throws Exception {
 		Path dir = getPath("data/bed_peaks/homo_sapiens");
-		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("peaks")) {
+		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("Mus musculus", "peaks")) {
 			Collection<Path> added = conn.addAll(dir);
 			
 			// e.g. ...peaks.20201021.bed.gz

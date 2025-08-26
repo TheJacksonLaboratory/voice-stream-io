@@ -24,7 +24,7 @@ public class TranscriptOverlapConnectorTest extends AbstractDataFileTest{
 		
 		// Should use just the transcript locations.
 		Path input =  getPath("data/1000/hs_gtf/hg38_2.gtf");
-		try (AbstractOverlapConnector<Variant, Entity> conn = new TranscriptOverlapConnector<>("transcripts")) {
+		try (AbstractOverlapConnector<Variant, Entity> conn = new TranscriptOverlapConnector<>("Homo sapiens", "transcripts")) {
 			conn.setLocation(gdir);
 			conn.add(input);
 		
@@ -41,7 +41,7 @@ public class TranscriptOverlapConnectorTest extends AbstractDataFileTest{
 		Files.createDirectories(gdir);
 	
 		Path input =  getPath("data/gz/mm10_1.gtf.gz");
-		try (AbstractOverlapConnector<Variant, Entity> conn = new TranscriptOverlapConnector<>("transcripts")) {
+		try (AbstractOverlapConnector<Variant, Entity> conn = new TranscriptOverlapConnector<>("Mus musculus", "transcripts")) {
 			conn.setLocation(gdir);
 			conn.add(input);
 		

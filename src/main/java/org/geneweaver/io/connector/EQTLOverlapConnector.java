@@ -21,7 +21,7 @@ import org.geneweaver.domain.Variant;
 public class EQTLOverlapConnector<N extends Entity, E extends Entity> extends AbstractOverlapConnector<N,E> {
 
 	public EQTLOverlapConnector() {
-		this("eqtloverlaps");
+		this("Homo sapiens", "eqtloverlaps");
 	}
 
 	/**
@@ -29,7 +29,8 @@ public class EQTLOverlapConnector<N extends Entity, E extends Entity> extends Ab
 	 * The database is sharded by file so this
 	 * @param databaseFileName
 	 */
-	public EQTLOverlapConnector(String databaseFileName) {
+	public EQTLOverlapConnector(String species, String databaseFileName) {
+		super(species);
 		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
 		setFileName(databaseFileName);
 		setFileFilters(".csv.gz", ".csv");

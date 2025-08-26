@@ -16,7 +16,7 @@ import org.geneweaver.domain.Variant;
 public class TranscriptOverlapConnector<N extends Entity, E extends Entity> extends AbstractOverlapConnector<N,E> {
 
 	public TranscriptOverlapConnector() {
-		this("transcripts");
+		this("Homo sapiens", "transcripts");
 	}
 
 	/**
@@ -24,7 +24,8 @@ public class TranscriptOverlapConnector<N extends Entity, E extends Entity> exte
 	 * The database is sharded by file so this
 	 * @param databaseFileName
 	 */
-	public TranscriptOverlapConnector(String databaseFileName) {
+	public TranscriptOverlapConnector(String species, String databaseFileName) {
+		super(species);
 		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
 		setFileName(databaseFileName);
 		setFileFilters(".gtf.gz", ".gtf");

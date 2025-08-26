@@ -36,7 +36,7 @@ public class StepConnectorTest extends AbstractDataFileTest {
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void noAdd() throws Exception {
-		try (StepConnector func = new StepConnector(Gene.class)) {
+		try (StepConnector func = new StepConnector("Mus musculus", Gene.class)) {
 			func.create(); // Creates indexed database.
 		}
 	}
@@ -45,7 +45,7 @@ public class StepConnectorTest extends AbstractDataFileTest {
 	public void badGeneFile() throws Exception {
 		Path mFile = getPath("data/1000/hs_gtf/hg38_2.gtf");
 		Path hFile = getPath("data/NOTTHERE");
-		try (StepConnector func = new StepConnector(Gene.class)) {
+		try (StepConnector func = new StepConnector("Mus musculus", Gene.class)) {
 			func.add(mFile);
 			func.add(hFile);
 		}
@@ -73,7 +73,7 @@ public class StepConnectorTest extends AbstractDataFileTest {
 		Path tdir = Paths.get("./tmp/"+testName);
 		FileUtils.deleteQuietly(tdir.toFile());
 		
-		try (StepConnector func = new StepConnector(type)) {
+		try (StepConnector func = new StepConnector("Mus musculus", type)) {
 			func.setLocation(tdir);
 			
 			// limit is used here just to avoid caching all the test files i.e. test goes quicker.
@@ -296,7 +296,7 @@ public class StepConnectorTest extends AbstractDataFileTest {
 		Path tdir = Paths.get("./tmp/"+testName);
 		assertTrue(Files.exists(file));
 		
-		try (StepConnector func = new StepConnector(type)) {
+		try (StepConnector func = new StepConnector("Mus musculus", type)) {
 			func.setLocation(tdir);
 			func.setSkip(skip);
 			func.setLimit(limit);

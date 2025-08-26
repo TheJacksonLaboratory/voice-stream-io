@@ -24,7 +24,7 @@ public class RegulatoryFeatureOverlapConnectorTest extends AbstractDataFileTest 
 		
 		// Should use just the transcript locations.
 		Path dir =  getPath("data/gff_peaks/homo_sapiens");
-		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("regfeats")) {
+		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("Homo sapiens", "regfeats")) {
 			conn.setLocation(gdir);
 			conn.addAll(dir);
 			conn.setLimit(100L);
@@ -38,7 +38,7 @@ public class RegulatoryFeatureOverlapConnectorTest extends AbstractDataFileTest 
 		Files.createDirectories(gdir);
 
 		dir =  getPath("data/gff_peaks/mus_musculus");
-		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("regfeats")) {
+		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("Mus musculus", "regfeats")) {
 			conn.setLocation(gdir);
 			conn.addAll(dir);
 			conn.setLimit(100L);
@@ -58,7 +58,7 @@ public class RegulatoryFeatureOverlapConnectorTest extends AbstractDataFileTest 
 		Path gdir1 = Paths.get("tmp/newestByNameWorking/mm1");
 		FileUtils.deleteQuietly(gdir1.toFile());
 		Path dir =  getPath("data/gff_peaks/mus_musculus");
-		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("regfeats")) {
+		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("Mus musculus", "regfeats")) {
 			conn.setLocation(gdir1);
 			conn.setNewestInDirectoryByName(false);
 			conn.addAll(dir);
@@ -73,7 +73,7 @@ public class RegulatoryFeatureOverlapConnectorTest extends AbstractDataFileTest 
 		
 		Path gdir2 = Paths.get("tmp/newestByNameWorking/mm2");
 		FileUtils.deleteQuietly(gdir2.toFile());
-		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("regfeats")) {
+		try (AbstractOverlapConnector<Variant, Entity> conn = new RegulatoryFeatureOverlapConnector<>("Mus musculus", "regfeats")) {
 			conn.setLocation(gdir2);
 			conn.addAll(dir);
 			conn.setLimit(100L);

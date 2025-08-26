@@ -32,7 +32,7 @@ public class EQTLOverlapConnectorTest extends AbstractDataFileTest{
 		Files.createDirectories(gdir);
 	
 		Path input =  getPath("data/eQTL/mm/lo/Chesler_Striatum_DO_pr69k_lo.csv");
-		try (AbstractOverlapConnector<Variant, Entity> conn = new EQTLOverlapConnector<>("eqtloverlaps")) {
+		try (AbstractOverlapConnector<Variant, Entity> conn = new EQTLOverlapConnector<>("Mus musculus", "eqtloverlaps")) {
 			conn.setLocation(gdir);
 			conn.add(input);
 		
@@ -109,7 +109,7 @@ public class EQTLOverlapConnectorTest extends AbstractDataFileTest{
 		Files.createDirectories(gdir);
 	
 		Path input =  getPath("data/eQTL/mm/lo/Aging_Bone_withErrors_lo.csv");
-		try (AbstractOverlapConnector<Variant, Entity> conn = new EQTLOverlapConnector<>("eqtloverlaps")) {
+		try (AbstractOverlapConnector<Variant, Entity> conn = new EQTLOverlapConnector<>("Mus musculus", "eqtloverlaps")) {
 			conn.setLocation(gdir);
 			conn.add(input);
 		
@@ -131,7 +131,7 @@ public class EQTLOverlapConnectorTest extends AbstractDataFileTest{
 	}
 
 	private void testIntersections(Path gdir, Path input, int size, Path vpath, int expected) throws Exception {
-		try (AbstractOverlapConnector<Variant, Entity> conn = new EQTLOverlapConnector<>("eqtloverlaps")) {
+		try (AbstractOverlapConnector<Variant, Entity> conn = new EQTLOverlapConnector<>("Mus musculus", "eqtloverlaps")) {
 			conn.setLocation(gdir);
 			conn.add(input);
 		

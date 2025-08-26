@@ -34,7 +34,7 @@ import org.geneweaver.domain.Variant;
 public class RegulatoryFeatureOverlapConnector<N extends Entity, E extends Entity> extends AbstractOverlapConnector<N,E> {
 
 	public RegulatoryFeatureOverlapConnector() {
-		this("regfeats");
+		this("Homo sapiens", "regfeats");
 	}
 
 	/**
@@ -42,7 +42,8 @@ public class RegulatoryFeatureOverlapConnector<N extends Entity, E extends Entit
 	 * The database is sharded by file so this
 	 * @param databaseFileName
 	 */
-	public RegulatoryFeatureOverlapConnector(String databaseFileName) {
+	public RegulatoryFeatureOverlapConnector(String species, String databaseFileName) {
+		super(species);
 		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
 		setFileName(databaseFileName);
 		setFileFilters(".gff.gz", ".gff");
