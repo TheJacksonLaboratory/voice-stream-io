@@ -16,6 +16,7 @@ import org.geneweaver.domain.Contact;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Gene;
 import org.geneweaver.domain.Located;
+import org.geneweaver.domain.Species;
 import org.geneweaver.domain.Step;
 import org.geneweaver.domain.Variant;
 import org.geneweaver.io.IPrintStream;
@@ -137,6 +138,7 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 		contact.setGeneId(ids.get(0));
 		contact.setRsId(ids.get(1));
 		contact.setChr(step.getChr1());
+		contact.setSpecies(Species.code(species));
 		return contact;
 	}
 
@@ -213,7 +215,7 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 	}
 
 	@Override
-	protected Located createIntersectionObject(String id, int start, int end) {
+	protected Located createIntersectionObject(Object id, int start, int end) {
 		// Does nothing in this case because we override stream(...)
 		return null;
 	}

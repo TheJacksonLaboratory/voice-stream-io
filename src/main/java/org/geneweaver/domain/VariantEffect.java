@@ -23,8 +23,6 @@ import java.util.Objects;
 import javax.annotation.processing.Generated;
 
 import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
@@ -69,7 +67,7 @@ public class VariantEffect extends AbstractEntity {
 	@Override
 	public String getHeader() {
 		StringBuilder buf = new StringBuilder();
-		buf.append(":START_ID(Rs-Id)");
+		buf.append(":START_ID(Rs-Id-"+getSpecies()+")");
 		buf.append(getDelimiter());
 		buf.append("sequenceVariant");
 		buf.append(getDelimiter());

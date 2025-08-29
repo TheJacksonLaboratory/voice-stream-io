@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,6 +56,12 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 
 	private ChromosomeService cservice = ChromosomeService.getInstance();
 	
+	private static AtomicLong peakIdCounter = null;
+	
+	public static void clearCounting() {
+		peakIdCounter = null;
+	}
+	
 	/**
 	 * Create the reader by setting its data
 	 * 
@@ -66,6 +73,14 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	public BedReader<N> init(ReaderRequest request) throws ReaderException {
 		super.setup(request);
 		setDelimiter("\\s+");
+		
+		// The id counter starts from a base value. In this way
+		// external commands can control the value from which the
+		// counter starts and we can ingest human and mouse at the
+		// same time for instance.
+		if (peakIdCounter==null) {
+			peakIdCounter = new AtomicLong(this.request.getStartIndex());
+		}
 		return this;
 	}
 
@@ -143,11 +158,12 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		
 		int start = peak.getStart();
 		int end = peak.getEnd();
-		String peakId = createPeakId(peak.getFeatureType(), peak.getChr(), start, end, peak.getTissueDescription());
+		Long peakId = createPeakId(peak.getFeatureType(), peak.getChr(), start, end, peak.getTissueDescription());
 		peak.setPeakId(peakId);
 		return peak;
 	}
 
+	
 	/**
 	 * Try to make a repeatable unique peakId from the properties
 	 * of the peak.
@@ -160,21 +176,16 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	 * @param removeSpecialChars
 	 * @return the peak id as a string.
 	 */
-	public static String createPeakId(String featType, String chr, int start, int end, String tissue) {
+	public Long createPeakId(String featType, String chr, int start, int end, String tissue) {
 		
-		StringBuilder buf = new StringBuilder();
-		buf.append(featType);
-		buf.append("@");
-		buf.append(chr);
-		buf.append("#");
-		buf.append(start);
-		buf.append(":");
-		buf.append(end);
-		// Using this can find out from id if tissue
-		// was identified.
-		String tc = tissue!=null && !tissue.isBlank() ? "+t" : "-t";
-		buf.append(tc);
-		return buf.toString();
+		if (peakIdCounter==null) {
+			synchronized(this) {
+				if (peakIdCounter==null) {
+					peakIdCounter = new AtomicLong(this.request.getStartIndex());
+				}
+			}
+		}
+		return peakIdCounter.getAndIncrement();
 	}
 
 	// Parse name in Ensembl format e.g. 

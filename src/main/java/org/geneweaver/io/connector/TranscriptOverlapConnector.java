@@ -3,6 +3,7 @@ package org.geneweaver.io.connector;
 import org.geneweaver.domain.AbstractEntity;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Located;
+import org.geneweaver.domain.Species;
 import org.geneweaver.domain.Transcript;
 import org.geneweaver.domain.TranscriptOverlap;
 import org.geneweaver.domain.Variant;
@@ -32,8 +33,10 @@ public class TranscriptOverlapConnector<N extends Entity, E extends Entity> exte
 	}
 		
 	@Override
-	protected Located createIntersectionObject(String id, int start, int end) {
-		return new Transcript(id, start, end);
+	protected Located createIntersectionObject(Object id, int start, int end) {
+		if (id==null) return null;
+		String transId = (String)id;
+		return new Transcript(transId, start, end);
 	}
 
 	/**
@@ -54,6 +57,7 @@ public class TranscriptOverlapConnector<N extends Entity, E extends Entity> exte
 		
 		if (loc instanceof Transcript) {
 			TranscriptOverlap ret = new TranscriptOverlap();
+			ret.setSpecies(Species.code(species));
 			ret.setTranscript(loc);
 			ret.setVariant(variant);
 			return (T) ret;

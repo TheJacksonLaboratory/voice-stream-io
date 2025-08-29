@@ -79,7 +79,7 @@ public class Variant extends GeneticEntity {
 	@Override
 	public String getHeader() {
 		StringBuilder buf = new StringBuilder();
-		buf.append("rsId:ID(Rs-Id)");
+		buf.append("rsId:ID(Rs-Id-"+getSpecies()+")");
 		buf.append(getDelimiter());
 		buf.append("id");
 		buf.append(getDelimiter());
@@ -94,7 +94,7 @@ public class Variant extends GeneticEntity {
 		buf.append(super.getHeader());
 		return buf.toString();
 	}
-	
+
 	/**
 	 * To csv.
 	 *

@@ -63,6 +63,7 @@ class JaxEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		}
 		
 		EQTL bean = new EQTL();
+		bean.setSpecies(getSpecies());
 		bean.setTissueFileName(request.name());
 		//bean.setStudyId(createFudgedStudyId(request.name()));
 		BeanMap d = new BeanMap(bean);

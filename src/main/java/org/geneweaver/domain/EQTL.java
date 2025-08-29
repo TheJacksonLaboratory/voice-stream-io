@@ -117,7 +117,9 @@ public class EQTL extends EQTLBase {
 		//rs145039153|PEAK|23|-0.573746|null|null|PacreaticIslets_independent|null|null|Homo sapiens|null|-1.0|-1|null|ENSG00000160219|EQTL
 		//rs7056315|       23|-0.504562|null|null|PacreaticIslets_independent|null|null|Homo sapiens|null|-1.0|-1|     ENSG00000005889|EQTL
 		
-		return delimify(":START_ID(Rs-Id)",
+		// rsId is not unique across species so we add the species
+		// code to the rsId.
+		return delimify(":START_ID(Rs-Id-"+getSpecies()+")",
 				"type",
 				"chr",
 				"slope:double",

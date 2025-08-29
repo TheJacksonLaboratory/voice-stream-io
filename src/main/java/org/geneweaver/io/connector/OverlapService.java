@@ -19,7 +19,7 @@ import org.geneweaver.io.CLI;
 public class OverlapService {
 	
 	private ChromosomeService cservice = ChromosomeService.getInstance();
-	private static final int baseSize = Integer.parseInt(System.getenv().getOrDefault("BASE_SIZE", "100000"));
+	private static final long baseSize = Integer.parseInt(System.getenv().getOrDefault("BASE_SIZE", "100000"));
 	static int minOverlap;
 
 	static {
@@ -48,11 +48,11 @@ public class OverlapService {
 	public <T extends AbstractEntity> T intersection(Variant variant, Located loc, 
 											IntersectionCreator creator, Map<String,Object> meta) {
 		
-		int vs = Math.min(variant.getStart(), variant.getEnd());
-		int ve = Math.max(variant.getStart(), variant.getEnd());
+		long vs = Math.min(variant.getStart(), variant.getEnd());
+		long ve = Math.max(variant.getStart(), variant.getEnd());
 		
-		int ps = Math.min(loc.getStart(), loc.getEnd());
-		int pe = Math.max(loc.getStart(), loc.getEnd());
+		long ps = Math.min(loc.getStart(), loc.getEnd());
+		long pe = Math.max(loc.getStart(), loc.getEnd());
 		
 		// Does (a,b) bisect (lower,upper)?
 		// (a <= upper) && (lower <= b);
@@ -70,11 +70,11 @@ public class OverlapService {
 	 * @param loc
 	 * @return
 	 */
-	public int getShardBase(int loc) {
+	public long getShardBase(long loc) {
 		return Math.round(loc/baseSize);
 	}
 
-	public String getShardName(String chr, int loc) {
+	public String getShardName(String chr, long loc) {
 		StringBuilder b = new StringBuilder();
 		
 		// Must have a valid chromosome for a shard.

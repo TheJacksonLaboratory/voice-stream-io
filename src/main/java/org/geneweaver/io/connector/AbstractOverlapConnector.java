@@ -90,10 +90,16 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 */
 	private Long limit;
 	private Long skip;
-	private String species;
+	protected String species;
+	private Class<?> idClass;
 
-	public AbstractOverlapConnector(String species) {
+	protected AbstractOverlapConnector(String species) {
+		this(species, String.class);
+	}
+
+	protected AbstractOverlapConnector(String species, Class<?> idClass) {
 		this.species = species;
+		this.idClass = idClass;
 	}
 
 	public void add(Path hFile) throws FileNotFoundException {
@@ -244,12 +250,12 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 				int b = Math.max(variant.getStart(), variant.getEnd());
 				lookup.setInt(2, b);
 	
-				Set<String> usedIds = new HashSet<>();
+				Set<Object> usedIds = new HashSet<>();
 				
 				try (ResultSet res = lookup.executeQuery()) {
 
 					while(res.next()) {
-						String id = res.getString(1);
+						Object id = get(res, idClass, 1);
 						if (id==null) continue;
 						if (usedIds.contains(id)) {
 							logger.info("Encountered duplicate id ("+getClass().getSimpleName()+"): "+id);
@@ -293,6 +299,17 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	
 	}
 	
+	private Object get(ResultSet res, Class<?> idClass2, int i) throws SQLException {
+		return switch (idClass2.getSimpleName()) {
+			case "String"  -> res.getString(i);
+			case "Long"    -> res.getLong(i);
+			case "Integer" -> res.getInt(i);
+			case "Double"  -> res.getDouble(i);
+			case "Float"   -> res.getFloat(i);
+			default        -> res.getObject(i);
+		};
+	}
+
 	/**
 	 * Create an intersection object which we will compare with intersection,
 	 * fill in parameters and return as the overlap object.
@@ -301,9 +318,9 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 * @param end - bp end
 	 * @return intersection object which we will compare with intersection
 	 */
-	protected abstract Located createIntersectionObject(String id, int start, int end);
+	protected abstract Located createIntersectionObject(Object id, int start, int end);
 		
-	protected boolean testId(String id) {
+	protected boolean testId(Object id) {
 		return true;
 	}
 
@@ -387,13 +404,18 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			PreparedStatement stmt = getInsertStatement(line.getChr(), shardName, out);
 			if (stmt==null) return; // Not all peaks have reasonable chromosomes.
 			
-			// Put the key in, lower case.
-			String id = line.id();
+			// Put the key in, lower case if string.
+			Object id = line.id();
 			if (id==null) return; // We cannot map unnamed peaks.
-			if (prefix!=null && !id.startsWith(prefix)) {
-				throw new IllegalArgumentException("The id '"+id+"' should have started with '"+prefix+"'");
+			if (idClass==String.class) {
+				String sid = (String)id;
+				if (prefix!=null && !sid.startsWith(prefix)) {
+					throw new IllegalArgumentException("The id '"+sid+"' should have started with '"+prefix+"'");
+				}
+				stmt.setString(1, sid);	
+			} else if (idClass==Long.class) {
+				stmt.setLong(1, (Long)id);	
 			}
-			stmt.setString(1, id);	
 			
 			int lower = Math.min(line.getStart(), line.getEnd());
 			stmt.setInt(2,lower);
@@ -423,12 +445,21 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		PreparedStatement stmt = insertCache.get(shardName);
 		if (stmt==null) {
 			try (Statement create = conn.createStatement() ) {  
+				
+				String idColumn;
+				if(idClass==String.class) {
+					idColumn = "entityId CHARACTER(128) NOT NULL, ";
+				} else if (idClass==Long.class || idClass==Integer.class) {
+					idColumn = "entityId BIGINT NOT NULL UNIQUE, ";
+				} else {
+					throw new IllegalArgumentException("Cannot use id class "+idClass);
+				}
 
 				String sql =  "CREATE TABLE IF NOT EXISTS " + tableName+shardName + 
-						" (id int NOT NULL AUTO_INCREMENT, " + 
+						" (id BIGINT NOT NULL AUTO_INCREMENT, " + 
 						// Important UNIQUE means there is an index and
 						// that the later lookup will be fast.
-						" entityId VARCHAR(128) NOT NULL, " +  
+						idColumn +
 						" lower INTEGER," +
 						" upper INTEGER," +
 						" meta CHARACTER(1024));"; 

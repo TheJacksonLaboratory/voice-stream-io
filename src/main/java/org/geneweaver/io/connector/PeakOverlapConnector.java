@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,6 +17,7 @@ import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Located;
 import org.geneweaver.domain.Peak;
 import org.geneweaver.domain.PeakOverlap;
+import org.geneweaver.domain.Species;
 import org.geneweaver.domain.Variant;
 
 /**
@@ -61,7 +61,7 @@ public class PeakOverlapConnector<N extends Entity, E extends Entity> extends Ab
 	 * @param databaseFileName
 	 */
 	public PeakOverlapConnector(String species, String databaseFileName) {
-		super(species);
+		super(species, Long.class);
 		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
 		setFileName(databaseFileName);
 		setFileFilters(".bed.gz", ".bed");
@@ -117,20 +117,21 @@ public class PeakOverlapConnector<N extends Entity, E extends Entity> extends Ab
 	}
 	
 	@Override
-	protected Located createIntersectionObject(String id, int start, int end) {
-		return new Peak(id, start, end);
+	protected Located createIntersectionObject(Object id, int start, int end) {
+		Long lid = id instanceof Long ? (Long)id : Long.valueOf(id.toString());
+		return new Peak(lid, start, end);
 	}
 
 	@Override
-	protected boolean testId(String peakId) {
-		if (!allowNulls && peakId.contains("null")) { // One of the properties making up the id is unset.
+	protected boolean testId(Object peakId) {
+		if (!allowNulls && (peakId==null || "null".equals(peakId))) { // One of the properties making up the id is unset.
 			logger.info("Peak missing information: "+peakId);
 			return false;
 		}
-		if (!allowNoTissue && peakId.endsWith("-t")) { // No tissue identified
-			logger.info("Peak missing tissue information: "+peakId);
-			return false;
-		}
+//		if (!allowNoTissue && peakId.endsWith("-t")) { // No tissue identified
+//			logger.info("Peak missing tissue information: "+peakId);
+//			return false;
+//		}
 		return true;
 	}
 	
@@ -179,7 +180,7 @@ public class PeakOverlapConnector<N extends Entity, E extends Entity> extends Ab
 		for (int i = 0; i < nrows; i++) {
 
 			Peak peak = new Peak();
-			peak.setPeakId(UUID.randomUUID().toString());
+			peak.setPeakId(Math.round(Math.random()*Integer.MAX_VALUE));
 			peak.setStart((int)(Math.random()*roughBPperChr));
 			peak.setEnd((int)(Math.random()*roughBPperChr));
 			peak.setChr(chr);
@@ -237,6 +238,7 @@ public class PeakOverlapConnector<N extends Entity, E extends Entity> extends Ab
 		
 		if (loc instanceof Peak) {
 			PeakOverlap ret = new PeakOverlap();
+			ret.setSpecies(Species.code(species));
 			ret.setPeak(loc);
 			ret.setVariant(variant);
 			return (T) ret;

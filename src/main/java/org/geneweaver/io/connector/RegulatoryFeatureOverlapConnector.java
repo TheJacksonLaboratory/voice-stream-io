@@ -5,6 +5,7 @@ import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Located;
 import org.geneweaver.domain.RegulatoryFeature;
 import org.geneweaver.domain.RegulatoryFeatureOverlap;
+import org.geneweaver.domain.Species;
 import org.geneweaver.domain.Variant;
 
 /**
@@ -52,8 +53,11 @@ public class RegulatoryFeatureOverlapConnector<N extends Entity, E extends Entit
 	
 	
 	@Override
-	protected Located createIntersectionObject(String id, int start, int end) {
-		return new RegulatoryFeature(id, start, end);
+	protected Located createIntersectionObject(Object id, int start, int end) {
+		
+		if (id==null) return null;
+		String featureId = (String)id;
+		return new RegulatoryFeature(featureId, start, end);
 	}
 
 	/**
@@ -74,6 +78,7 @@ public class RegulatoryFeatureOverlapConnector<N extends Entity, E extends Entit
 		
 		if (loc instanceof RegulatoryFeature) {
 			RegulatoryFeatureOverlap ret = new RegulatoryFeatureOverlap();
+			ret.setSpecies(Species.code(species));
 			ret.setRegFeature(loc);
 			ret.setVariant(variant);
 			return (T) ret;

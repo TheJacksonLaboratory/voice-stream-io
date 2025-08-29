@@ -124,13 +124,13 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 		List<Entity> ret = testIntersections("testInterleaves", vpath, rpath);
 		
 		// In this data the first three variants all match the same peak
-		String peak1 = ((PeakOverlap)ret.get(1)).getPeak().id();
+		Long peak1 = (Long)((PeakOverlap)ret.get(1)).getPeak().id();
 		assertEquals(peak1, ((PeakOverlap)ret.get(3)).getPeak().id());
 		assertEquals(peak1, ((PeakOverlap)ret.get(5)).getPeak().id());
 		
 		// The 4th variant matches a different peak.
 		assertNotEquals(peak1, ((PeakOverlap)ret.get(7)).getPeak().id());
-		String peak2 = ((PeakOverlap)ret.get(7)).getPeak().id();
+		Long peak2 = (Long)((PeakOverlap)ret.get(7)).getPeak().id();
 		assertEquals(peak2, ((PeakOverlap)ret.get(9)).getPeak().id());
 		assertEquals(peak2, ((PeakOverlap)ret.get(11)).getPeak().id());
 		assertEquals(peak2, ((PeakOverlap)ret.get(13)).getPeak().id());

@@ -67,19 +67,19 @@ public class BedReaderTest extends AbstractDataFileTest {
 	private void check04998(String fileName, List<NamedEntity> lines, String path) {
 		
 		// line 0: chr1 959245 959305 NOC2L_1 900 - 959245 959256
-		String peakId = BedReader.createPeakId(null, "1", 959245, 959305, null);
-		Peak r0 = new Peak(peakId, "Homo sapiens", "chr1", 959245, 959305, "NOC2L_1", 900, Strand.REVERSE, 959245, 959256);
-		assertEquals(r0, lines.get(0));
+		Peak r0 = new Peak(0L, "Homo sapiens", "chr1", 959245, 959305, "NOC2L_1", 900, Strand.REVERSE, 959245, 959256);
+		Peak with = (Peak)lines.get(0);
+		assertEquals(r0, with);
 
 		// line 49: chr1 1727706 1727766 SLC35E2B_3 900 - 1727706 1727717
-		peakId = BedReader.createPeakId(null, "1", 1727706, 1727766, null);
-		Peak r49 = new Peak(peakId, "Homo sapiens", "1", 1727706, 1727766, "SLC35E2B_3", 900, Strand.REVERSE, 1727706, 1727717);
-		assertEquals(r49, lines.get(49));
+		Peak r49 = new Peak(49L, "Homo sapiens", "1", 1727706, 1727766, "SLC35E2B_3", 900, Strand.REVERSE, 1727706, 1727717);
+		with = (Peak)lines.get(49);
+		assertEquals(r49, with);
 
 		// line 98: chr1 3752400 3752460 CCDC27_1 900 + 3752449 3752460
-		peakId = BedReader.createPeakId(null, "1", 3752400, 3752460, null);
-		Peak r98 = new Peak(peakId, "Homo sapiens", "chr1", 3752400, 3752460, "CCDC27_1", 900, Strand.FORWARD, 3752449, 3752460);
-		assertEquals(r98, lines.get(98));
+		Peak r98 = new Peak(98L, "Homo sapiens", "chr1", 3752400, 3752460, "CCDC27_1", 900, Strand.FORWARD, 3752449, 3752460);
+		with = (Peak)lines.get(98);
+		assertEquals(r98, with);
 	}
 
 	@Test
@@ -255,21 +255,28 @@ public class BedReaderTest extends AbstractDataFileTest {
 
 	@Test
 	public void idsReproducible1() throws Exception {
-		StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", 
-										getPath("data/bed_peaks/homo_sapiens/A549/BCL3/homo_sapiens.GRCh38.A549.BCL3.SWEmbl_R0005.peaks.20210107.bed.gz")));
+		
+		ReaderRequest req = new ReaderRequest("Homo sapiens", 
+				getPath("data/bed_peaks/homo_sapiens/A549/BCL3/homo_sapiens.GRCh38.A549.BCL3.SWEmbl_R0005.peaks.20210107.bed.gz"));
+		req.setStartIndex(1000000L);
+		StreamReader<Peak> reader = ReaderFactory.getReader(req);
 		idsReproducible(reader);
 	}
 	
 	@Test
 	public void idsReproducible2() throws Exception {
-		StreamReader<Peak> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", 
-										getPath("data/bed_peaks/mus_musculus/CH12_LX/BHLHE40/mus_musculus.GRCm39.CH12_LX.BHLHE40.SWEmbl_R0005.peaks.20201021.bed.gz")));
+		
+		ReaderRequest req = new ReaderRequest("Mus musculus", 
+				getPath("data/bed_peaks/mus_musculus/CH12_LX/BHLHE40/mus_musculus.GRCm39.CH12_LX.BHLHE40.SWEmbl_R0005.peaks.20201021.bed.gz"));
+		req.setStartIndex(2000000L);
+		StreamReader<Peak> reader = ReaderFactory.getReader(req);
 		idsReproducible(reader);
 	}
 
 	private void idsReproducible(StreamReader<Peak> reader) throws ReaderException {
 		
 		List<String> idsPass1 = reader.stream().map(p->p.getPeakId().toString()).collect(Collectors.toList());
+		BedReader.clearCounting();
 		List<String> idsPass2 = reader.stream().map(p->p.getPeakId().toString()).collect(Collectors.toList());
 		assertEquals(idsPass1, idsPass2);
 		

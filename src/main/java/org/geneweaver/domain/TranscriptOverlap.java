@@ -30,7 +30,7 @@ public class TranscriptOverlap extends AbstractEntity {
 		StringBuilder buf = new StringBuilder();
 		buf.append(":START_ID(Transcript-Id)");
 		buf.append(getDelimiter());
-		buf.append(":END_ID(Rs-Id)");
+		buf.append(":END_ID(Rs-Id-"+getSpecies()+")");
 		buf.append(getDelimiter());
 		buf.append(":TYPE");
 		return buf.toString();

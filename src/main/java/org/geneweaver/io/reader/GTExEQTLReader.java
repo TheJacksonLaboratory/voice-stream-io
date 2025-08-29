@@ -106,6 +106,7 @@ class GTExEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		}
 		
 		EQTL ret = new EQTL();
+		ret.setSpecies(getSpecies());
 		String fullGeneId = segs[indices.get("gene_id")];
 		ret.setGeneId(clean(fullGeneId));
 		ret.setFullGeneId(fullGeneId);

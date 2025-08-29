@@ -62,6 +62,7 @@ public class FlexEQTLReader<N extends Entity> extends LineIteratorReader<N> {
 		}
 		
 		EQTL bean = new EQTL();
+		bean.setSpecies(getSpecies());
 		BeanMap d = new BeanMap(bean);
 		
 		String[] values = line.split(getDelimiter());

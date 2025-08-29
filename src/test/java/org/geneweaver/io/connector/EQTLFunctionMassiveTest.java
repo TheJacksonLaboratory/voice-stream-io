@@ -171,6 +171,7 @@ public class EQTLFunctionMassiveTest extends AbstractDataFileTest {
 	
 	private void testEQTL(EQTLFunction<EQTL, EQTL> func, String variantId, String rsId) {
 		EQTL eqtl = new EQTL("test", variantId, null); 
+		eqtl.setSpecies(10090);
 		assertNull(eqtl.getRsId());
 		func.apply(eqtl);
 		assertEquals(rsId, eqtl.getRsId());

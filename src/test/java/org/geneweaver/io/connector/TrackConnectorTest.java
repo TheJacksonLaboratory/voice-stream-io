@@ -42,7 +42,6 @@ import org.geneweaver.io.reader.ReaderRequest;
 import org.geneweaver.io.reader.StreamReader;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class TrackConnectorTest extends AbstractDataFileTest {
@@ -51,6 +50,7 @@ public class TrackConnectorTest extends AbstractDataFileTest {
 	
 	@Before
 	public void before() throws Exception {
+		BedReader.clearCounting();
 		connector = new BedConnector<>();
 	}
 	
@@ -90,19 +90,19 @@ public class TrackConnectorTest extends AbstractDataFileTest {
 
 	private void check04998(final String fileName, List<Entity> lines, String path) {
 		// line 0: chr1 959245 959305 NOC2L_1 900 - 959245 959256
-		String peakId = BedReader.createPeakId(null, "1", 959245, 959305, null);
-		Peak r0 = new Peak(peakId, "Homo sapiens", "chr1", 959245, 959305, "NOC2L_1", 900, Strand.REVERSE, 959245, 959256);
-		assertEquals(r0, lines.get(0));
+		Peak r0 = new Peak(0L, "Homo sapiens", "chr1", 959245, 959305, "NOC2L_1", 900, Strand.REVERSE, 959245, 959256);
+		Peak with = (Peak)lines.get(0);
+		assertEquals(r0, with);
 
 		// line 49: chr1 1727706 1727766 SLC35E2B_3 900 - 1727706 1727717
-		peakId = BedReader.createPeakId(null, "1", 1727706, 1727766, null);
-		Peak r49 = new Peak(peakId, "Homo sapiens", "chr1", 1727706, 1727766, "SLC35E2B_3", 900, Strand.REVERSE, 1727706, 1727717);
-		assertEquals(r49, lines.get(49));
+		Peak r49 = new Peak(49L, "Homo sapiens", "chr1", 1727706, 1727766, "SLC35E2B_3", 900, Strand.REVERSE, 1727706, 1727717);
+		with = (Peak)lines.get(49);
+		assertEquals(r49, with);
 
 		// line 98: chr1 3752400 3752460 CCDC27_1 900 + 3752449 3752460
-		peakId = BedReader.createPeakId(null, "1", 3752400, 3752460, null);
-		Peak r98 = new Peak(peakId, "Homo sapiens", "chr1", 3752400, 3752460, "CCDC27_1", 900, Strand.FORWARD, 3752449, 3752460);
-		assertEquals(r98, lines.get(98));
+		Peak r98 = new Peak(98L, "Homo sapiens", "chr1", 3752400, 3752460, "CCDC27_1", 900, Strand.FORWARD, 3752449, 3752460);
+		with = (Peak)lines.get(98);
+		assertEquals(r98, with);
 	}
 
 	@Test

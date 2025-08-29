@@ -9,6 +9,7 @@ import org.geneweaver.domain.EQTLOverlap;
 import org.geneweaver.domain.Entity;
 import org.geneweaver.domain.Gene;
 import org.geneweaver.domain.Located;
+import org.geneweaver.domain.Species;
 import org.geneweaver.domain.Variant;
 
 /**
@@ -37,10 +38,12 @@ public class EQTLOverlapConnector<N extends Entity, E extends Entity> extends Ab
 	}
 		
 	@Override
-	protected Located createIntersectionObject(String id, int start, int end) {
+	protected Located createIntersectionObject(Object id, int start, int end) {
 		// We process the eQTLs for the location but use
 		// the geneId for the id.
-		return new Gene(id, start, end);
+		if (id==null) return null;
+		String geneId = (String)id;
+		return new Gene(geneId, start, end);
 	}
 	
 	/**
@@ -52,6 +55,7 @@ public class EQTLOverlapConnector<N extends Entity, E extends Entity> extends Ab
 		Map<String, Object> meta = new HashMap<>();
 		meta.put("chr",  eqtl.getChrGRCm39());
 		meta.put("bp",   eqtl.getBpGRCm39());
+		meta.put("species",eqtl.getSpecies());
 		meta.put("lod",  eqtl.getLod());
 		meta.put("tissueFileName",eqtl.getTissueFileName());
 		meta.put("tissueGroup",eqtl.getTissueGroup());
@@ -82,6 +86,7 @@ public class EQTLOverlapConnector<N extends Entity, E extends Entity> extends Ab
 		
 		if (loc instanceof Gene) {
 			EQTLOverlap ret = new EQTLOverlap();
+			ret.setSpecies(Species.code(species));
 			ret.setGene(loc);
 			ret.setVariant(variant);
 			return (T) ret;

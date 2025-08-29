@@ -131,6 +131,11 @@ public class ReaderRequest {
 	 */
 	private String readerHint;
 	
+	/**
+	 * If the reader indices the entities it parses in then 
+	 * we can use this to control the start;
+	 */
+	private Long startIndex = 0L;
 	
 	public ReaderRequest() {
 		
@@ -292,7 +297,7 @@ public class ReaderRequest {
 	@Override
 	public int hashCode() {
 		return Objects.hash(closeInputStream, expectedSize, file, fileFilter, includeAll, initRequired, name,
-				noInputStream, source);
+				noInputStream, source, startIndex);
 	}
 
 	@Override
@@ -306,8 +311,9 @@ public class ReaderRequest {
 				&& Objects.equals(file, other.file) && Objects.equals(fileFilter, other.fileFilter)
 				&& includeAll == other.includeAll && initRequired == other.initRequired
 				&& Objects.equals(name, other.name) && noInputStream == other.noInputStream
-				&& Objects.equals(source, other.source);
+				&& Objects.equals(source, other.source) && Objects.equals(startIndex, other.startIndex);
 	}
+
 
 	@JsonIgnore
 	String name() {
@@ -478,6 +484,20 @@ public class ReaderRequest {
 	 */
 	public void setReaderHint(String readerHint) {
 		this.readerHint = readerHint;
+	}
+
+	/**
+	 * @return the startIndex
+	 */
+	public Long getStartIndex() {
+		return startIndex;
+	}
+
+	/**
+	 * @param startIndex the startIndex to set
+	 */
+	public void setStartIndex(Long startIndex) {
+		this.startIndex = startIndex;
 	}
 	
 }

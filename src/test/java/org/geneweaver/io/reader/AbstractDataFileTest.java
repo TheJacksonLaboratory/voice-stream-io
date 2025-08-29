@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.geneweaver.domain.Variant;
+import org.junit.Before;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -34,6 +35,11 @@ import org.geneweaver.domain.Variant;
  *
  */
 public abstract class AbstractDataFileTest {
+	
+	@Before
+	public void before() throws Exception {
+		BedReader.clearCounting();
+	}
 	
 	/**
 	 * You must clone git clone git@bitbucket.org:geneweaver/variant-orthology-data.git

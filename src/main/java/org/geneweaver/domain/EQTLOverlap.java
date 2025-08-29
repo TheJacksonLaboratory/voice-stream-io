@@ -30,7 +30,7 @@ public class EQTLOverlap extends EQTLBase {
 	@Override
 	public String getHeader() {
 		
-		return delimify(":START_ID(Rs-Id)",
+		return delimify(":START_ID(Rs-Id-"+getSpecies()+")",
 				"chr",
 				"tissueFileName",
 				"tissueGroup",
@@ -120,7 +120,7 @@ public class EQTLOverlap extends EQTLBase {
 
 	@JsonIgnore
 	@Override
-	public String id() {
+	public Object id() {
 		return gene.id();
 	}
 

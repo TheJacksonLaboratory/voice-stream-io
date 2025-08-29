@@ -35,7 +35,7 @@ public class Contact extends AbstractContact {
 		buf.append(getDelimiter());
 		buf.append("originalAssembly");
 		buf.append(getDelimiter());
-		buf.append(":END_ID(Rs-Id)");
+		buf.append(":END_ID(Rs-Id-"+getSpecies()+")");
 		buf.append(getDelimiter());
 		buf.append(":TYPE");
 		return buf.toString();

@@ -94,7 +94,7 @@ public class Peak  extends NamedEntity implements Located {
 
 	@Index(unique=true)
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String peakId;
+	private Long peakId;
 
 	/**
 	 * The epigenome code from ensembl 
@@ -205,7 +205,7 @@ public class Peak  extends NamedEntity implements Located {
 		this.setName(name);
 	}
 
-	public Peak(String peakId, String species, String chr, int start, int end, String name, int score, Strand strand, int thickStart, int thickEnd) {
+	public Peak(Long peakId, String species, String chr, int start, int end, String name, int score, Strand strand, int thickStart, int thickEnd) {
 		
 		this.peakId = peakId;
 		setSpecies(Species.code(species));
@@ -219,7 +219,7 @@ public class Peak  extends NamedEntity implements Located {
 		this.thickEnd = thickEnd;
 	}
 
-	public Peak(String speakId, int low, int high) {
+	public Peak(Long speakId, int low, int high) {
 		this.peakId = speakId;
 		this.start = low;
 		this.end = high;
@@ -467,14 +467,14 @@ public class Peak  extends NamedEntity implements Located {
 	/**
 	 * @return the peakId
 	 */
-	public String getPeakId() {
+	public Long getPeakId() {
 		return peakId;
 	}
 
 	/**
 	 * @param peakId the peakId to set
 	 */
-	public void setPeakId(String peakId) {
+	public void setPeakId(Long peakId) {
 		this.peakId = peakId;
 	}
 
@@ -535,7 +535,7 @@ public class Peak  extends NamedEntity implements Located {
 	}
 
 	@Override
-	public String id() {
+	public Object id() {
 		return getPeakId();
 	}
 

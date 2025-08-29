@@ -16,6 +16,6 @@ public interface IdGenerator {
 	 * @return id
 	 */
 	@JsonIgnore
-	String id();
+	Object id(); // Usually a String or Long
 
 }

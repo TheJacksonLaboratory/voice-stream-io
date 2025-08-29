@@ -60,11 +60,7 @@ public abstract class GeneticEntity extends AbstractEntity implements Species, L
     /** The source. */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
     private String source;
-    
-    /** The species code. */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-    private Integer species;
-    
+        
     /** The start. */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer start = 0;
@@ -182,7 +178,7 @@ public abstract class GeneticEntity extends AbstractEntity implements Species, L
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + Objects.hash(active, build, end, geneId, phase, score, sequenceId, source,
-				species, start, strand, type);
+				start, strand, type);
 		return result;
 	}
 
@@ -199,7 +195,7 @@ public abstract class GeneticEntity extends AbstractEntity implements Species, L
 				&& Objects.equals(end, other.end)
 				&& Objects.equals(geneId, other.geneId) && Objects.equals(phase, other.phase)
 				&& Objects.equals(score, other.score) && Objects.equals(sequenceId, other.sequenceId)
-				&& Objects.equals(source, other.source) && Objects.equals(species, other.species)
+				&& Objects.equals(source, other.source) 
 				&& Objects.equals(start, other.start) && Objects.equals(strand, other.strand)
 				&& Objects.equals(type, other.type);
 	}
@@ -274,24 +270,6 @@ public abstract class GeneticEntity extends AbstractEntity implements Species, L
 	 */
 	public void setSource(String source) {
 		this.source = source;
-	}
-
-	/**
-	 * Gets the species.
-	 *
-	 * @return the species
-	 */
-	public Integer getSpecies() {
-		return species;
-	}
-
-	/**
-	 * Sets the species.
-	 *
-	 * @param species the species to set
-	 */
-	public void setSpecies(Integer species) {
-		this.species = species;
 	}
 
 	/**

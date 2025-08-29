@@ -42,6 +42,10 @@ public abstract class AbstractEntity implements Entity {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String delimiter = System.getProperty("delimiter", "|");// Character used for delimiter in bulk import files.
 	
+    /** The species code. */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer species;
+
 	/**
 	 * The chromosome on which this entity belongs.
 	 */
@@ -66,7 +70,7 @@ public abstract class AbstractEntity implements Entity {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(chr, uid);
+		return Objects.hash(chr, uid, species);
 	}
 
 	@Override
@@ -77,7 +81,8 @@ public abstract class AbstractEntity implements Entity {
 			return false;
 		AbstractEntity other = (AbstractEntity) obj;
 		return Objects.equals(chr, other.chr) 
-				&& Objects.equals(uid, other.uid);
+				&& Objects.equals(uid, other.uid)
+				&& Objects.equals(species, other.species);
 	}
 
 	/**
@@ -125,6 +130,24 @@ public abstract class AbstractEntity implements Entity {
 		} catch (Exception ne) {
 			return super.toString();
 		}
+	}
+
+	/**
+	 * Gets the species.
+	 *
+	 * @return the species
+	 */
+	public Integer getSpecies() {
+		return species;
+	}
+
+	/**
+	 * Sets the species.
+	 *
+	 * @param species the species to set
+	 */
+	public void setSpecies(Integer species) {
+		this.species = species;
 	}
 
 }
