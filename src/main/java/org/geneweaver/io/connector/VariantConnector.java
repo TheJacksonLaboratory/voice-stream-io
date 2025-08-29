@@ -221,8 +221,10 @@ public class VariantConnector<N extends GeneticEntity, E extends Entity> impleme
 	private VariantEffect registerTranscript(Variant v, VariantEffect e, Map<String, Transcript> tmap) {
 		Transcript t = tmap.get(e.getFeatureId());
 		if (t==null) return null; // We cannot link this one, no relationship will be made.
+		t.setSpecies(v.getSpecies());
 		e.setTranscript(t);
 		e.setVariant(v);
+		e.setSpecies(v.getSpecies());
 		return e;
 	}
 

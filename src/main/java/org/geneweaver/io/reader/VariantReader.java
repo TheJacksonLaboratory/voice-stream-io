@@ -117,6 +117,7 @@ class VariantReader<N extends GeneticEntity> extends LineIteratorReader<N>{
 			// sequence_variant index feature_type feature_ID 
 			VariantEffect effect = new VariantEffect();
 			effect.setChr(bean.getChr());
+			effect.setSpecies(getSpecies());
 			effect.setSequenceVariant(vals[0]);
 			effect.setIndex(Integer.parseInt(vals[1]));
 			effect.setFeatureType(vals[2]);
