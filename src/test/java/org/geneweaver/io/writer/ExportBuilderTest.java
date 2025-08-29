@@ -23,6 +23,7 @@ import org.geneweaver.io.connector.PeakOverlapConnector;
 import org.geneweaver.io.connector.RegulatoryFeatureOverlapConnector;
 import org.geneweaver.io.connector.TranscriptOverlapConnector;
 import org.geneweaver.io.reader.AbstractDataFileTest;
+import org.geneweaver.io.reader.BedReader;
 import org.geneweaver.io.reader.ReaderException;
 import org.geneweaver.io.reader.ReaderFactory;
 import org.geneweaver.io.reader.ReaderRequest;
@@ -268,6 +269,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 			copies.add(tmp);
 		}
 
+		BedReader.clearCounting();
 		try (PeakOverlapConnector<Variant, Entity> pconn = new PeakOverlapConnector<>();
 			 TranscriptOverlapConnector<Variant, Entity> tconn = new TranscriptOverlapConnector<>();
 			 RegulatoryFeatureOverlapConnector<Variant, Entity> rconn = new RegulatoryFeatureOverlapConnector<>()) {

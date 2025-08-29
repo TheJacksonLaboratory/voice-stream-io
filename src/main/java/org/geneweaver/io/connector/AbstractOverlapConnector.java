@@ -339,7 +339,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 * @param request
 	 */
 	protected void configure(ReaderRequest request) {
-		request.setStartIndex(limit);
+		request.setStartIndex(startIndex);
 	}
 
 	/**
