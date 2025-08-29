@@ -90,6 +90,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 */
 	private Long limit;
 	private Long skip;
+	private Long startIndex = 0L;
 	protected String species;
 	private Class<?> idClass;
 
@@ -338,8 +339,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 * @param request
 	 */
 	protected void configure(ReaderRequest request) {
-		// TODO Auto-generated method stub
-		
+		request.setStartIndex(limit);
 	}
 
 	/**
@@ -697,6 +697,20 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 */
 	public void setNewestInDirectoryByName(boolean newestInDirectoryByName) {
 		this.newestInDirectoryByName = newestInDirectoryByName;
+	}
+
+	/**
+	 * @return the startIndex
+	 */
+	public Long getStartIndex() {
+		return startIndex;
+	}
+
+	/**
+	 * @param startIndex the startIndex to set
+	 */
+	public void setStartIndex(Long startIndex) {
+		this.startIndex = startIndex;
 	}
 
 }

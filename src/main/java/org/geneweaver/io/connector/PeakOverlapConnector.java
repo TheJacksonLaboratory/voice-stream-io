@@ -246,5 +246,4 @@ public class PeakOverlapConnector<N extends Entity, E extends Entity> extends Ab
 		throw new IllegalArgumentException("Cannot intersect with "+loc);
 	}
 
-
 }
