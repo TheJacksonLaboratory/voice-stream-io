@@ -256,6 +256,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		}
 		assertTrue(Files.exists(dir.resolve("RegulatoryFeature-chr1.csv.gz")));
 		assertTrue(Files.exists(dir.resolve("RegulatoryFeature-header.csv")));
+		assertFalse(Files.readString(dir.resolve("RegulatoryFeature-header.csv")).contains("(Rs-Id-null)"));
 
 		// We make 23 copies of the input in order to test 
 		// in parallel mode.
@@ -313,6 +314,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 
 		assertTrue(Files.exists(dir.resolve("PeakOverlap-header.csv")));
 		assertTrue(Files.exists(dir.resolve("TranscriptOverlap-header.csv")));
+		assertFalse(Files.readString(dir.resolve("TranscriptOverlap-header.csv")).contains("(Rs-Id-null)"));
 		assertTrue(Files.exists(dir.resolve("RegulatoryFeatureOverlap-header.csv")));
 		assertTrue(Files.exists(dir.resolve("Peak-chr1.csv.gz")));
 		assertTrue(Files.size(dir.resolve("Peak-chr1.csv.gz"))>100);
@@ -321,6 +323,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		assertTrue(Files.exists(dir.resolve("Peak-header.csv")));
 		assertTrue(Files.exists(dir.resolve("VariantEffect-chr1.csv.gz")));
 		assertTrue(Files.exists(dir.resolve("VariantEffect-header.csv")));
+		assertFalse(Files.readString(dir.resolve("VariantEffect-header.csv")).contains("(Rs-Id-null)"));
 	}
 	
 	private void assertNumber(Path dir, String name, int size) throws IOException, ReaderException {
