@@ -220,6 +220,7 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 			conn.setAllowNoTissue(true);  // Just for testing
 			conn.setLocation(tdir);
 			conn.add(rpath);
+			conn.setStartIndex(0L);
 			conn.create();
 			
 			StreamReader<Variant> vars = ReaderFactory.getReader(new ReaderRequest(testName, vpath));

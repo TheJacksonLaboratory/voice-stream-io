@@ -79,7 +79,10 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		// counter starts and we can ingest human and mouse at the
 		// same time for instance.
 		if (peakIdCounter==null) {
-			peakIdCounter = new AtomicLong(this.request.getStartIndex());
+			Long start = this.request!=null && this.request.getStartIndex()!=null 
+					   ? this.request.getStartIndex() 
+					   : 0L;
+			peakIdCounter = new AtomicLong(start);
 		}
 		return this;
 	}
