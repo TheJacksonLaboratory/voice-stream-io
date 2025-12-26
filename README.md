@@ -1,7 +1,7 @@
 ![](https://travis-ci.com/geneweaver/gweaver-stream-io.svg?branch=master)
 
 
-#  ![](./icons/GW2-logo-blue.png) Gene Weaver Stream IO #
+#  ![](./icons/GW2-logo-blue.png) Voice Weaver Stream IO #
 
 
 ## Introduction

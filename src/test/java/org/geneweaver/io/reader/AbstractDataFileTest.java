@@ -85,7 +85,15 @@ public abstract class AbstractDataFileTest {
 	private Path getData() throws IOException {
 		String[] paths = new String[] {"./", "../", "../../", "../../../", "../../../../", "/Volumes/Work/JAX/repos/"};
 		for (String spath : paths) {
-			Path path = Paths.get(spath+"gweaver-test-data");
+			Path path = Paths.get(spath+"voice-test-data");
+			if (Files.exists(path) && Files.isDirectory(path)) {
+				return path;
+			}
+			path = Paths.get(spath+"voice-test-data.git");
+			if (Files.exists(path) && Files.isDirectory(path)) {
+				return path;
+			}
+			path = Paths.get(spath+"gweaver-test-data");
 			if (Files.exists(path) && Files.isDirectory(path)) {
 				return path;
 			}
@@ -104,7 +112,7 @@ public abstract class AbstractDataFileTest {
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	private String getFileMessage() throws IOException {
-		StringBuilder buf = new StringBuilder("Please run 'git clone git@bitbucket.org:geneweaver/gweaver-test-data.git'\n");
+		StringBuilder buf = new StringBuilder("Please run 'gsutil cp -r gs://jax-voice-test-data voice-test-data'\n");
 		buf.append("Working directory: ");
 		appendDir(".", buf);
 		
