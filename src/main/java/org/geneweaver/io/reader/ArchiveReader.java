@@ -228,7 +228,13 @@ public class ArchiveReader<T extends Entity> extends AbstractStreamReader<T> {
 				entry = zstream.getNextEntry();
 				if (entry==null) return null;
 			}
-			this.reader = ReaderFactory.getReader(new ReaderRequest(zstream, entry.getName(), false));
+			
+			ReaderRequest req = new ReaderRequest(zstream, entry.getName(), false);
+			String source = ArchiveReader.this.request.getSource();
+			if (source!=null) {
+				req.setSource(source);
+			}
+			this.reader = ReaderFactory.getReader(req);
 			reader.setChunkSize(getChunkSize());
 			reader.setEntryName(entry.getName());
 			return reader.stream().iterator();

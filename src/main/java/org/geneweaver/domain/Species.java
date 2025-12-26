@@ -21,6 +21,9 @@ package org.geneweaver.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public interface Species {
+	
+	public static final Integer HUMAN = 9606; 
+	public static final Integer MOUSE = 10090; 
 
 	Integer getSpecies();
 	
