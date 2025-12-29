@@ -1,5 +1,6 @@
 ![](https://travis-ci.com/geneweaver/gweaver-stream-io.svg?branch=master)
 
+[![Maven](https://github.com/TheJacksonLaboratory/voice-stream-io/actions/workflows/maven.yml/badge.svg)](https://github.com/TheJacksonLaboratory/voice-stream-io/actions/workflows/maven.yml)
 
 #  ![](./icons/GW2-logo-blue.png) Voice Stream IO #
 
