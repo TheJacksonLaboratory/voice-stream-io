@@ -35,15 +35,9 @@ import java.util.stream.Collectors;
 
 import org.jax.voice.domain.NamedEntity;
 import org.jax.voice.domain.Peak;
+import org.jax.voice.domain.Peak.Strand;
 import org.jax.voice.domain.Species;
 import org.jax.voice.domain.Track;
-import org.jax.voice.domain.Peak.Strand;
-import org.jax.voice.io.reader.BedReader;
-import org.jax.voice.io.reader.LineIteratorReader;
-import org.jax.voice.io.reader.ReaderException;
-import org.jax.voice.io.reader.ReaderFactory;
-import org.jax.voice.io.reader.ReaderRequest;
-import org.jax.voice.io.reader.StreamReader;
 import org.junit.Test;
 
 public class BedReaderTest extends AbstractDataFileTest {

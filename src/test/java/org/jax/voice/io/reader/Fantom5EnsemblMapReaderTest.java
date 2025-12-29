@@ -21,10 +21,6 @@ package org.jax.voice.io.reader;
 import static org.junit.Assert.assertEquals;
 
 import org.jax.voice.domain.Fantom5Link;
-import org.jax.voice.io.reader.Fantom5EnsemblMapReader;
-import org.jax.voice.io.reader.LineIteratorReader;
-import org.jax.voice.io.reader.ReaderFactory;
-import org.jax.voice.io.reader.ReaderRequest;
 import org.junit.Test;
 
 public class Fantom5EnsemblMapReaderTest extends AbstractDataFileTest {

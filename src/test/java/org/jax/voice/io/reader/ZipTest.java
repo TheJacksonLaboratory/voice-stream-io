@@ -29,9 +29,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.jax.voice.domain.Entity;
-import org.jax.voice.io.reader.ReaderFactory;
-import org.jax.voice.io.reader.ReaderRequest;
-import org.jax.voice.io.reader.StreamReader;
 import org.junit.Test;
 
 // TODO: Auto-generated Javadoc

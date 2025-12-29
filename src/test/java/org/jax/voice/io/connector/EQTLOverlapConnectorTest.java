@@ -15,8 +15,6 @@ import org.jax.voice.domain.EQTLOverlap;
 import org.jax.voice.domain.Entity;
 import org.jax.voice.domain.Variant;
 import org.jax.voice.io.IPrintStream;
-import org.jax.voice.io.connector.AbstractOverlapConnector;
-import org.jax.voice.io.connector.EQTLOverlapConnector;
 import org.jax.voice.io.reader.AbstractDataFileTest;
 import org.jax.voice.io.reader.ReaderFactory;
 import org.jax.voice.io.reader.ReaderRequest;

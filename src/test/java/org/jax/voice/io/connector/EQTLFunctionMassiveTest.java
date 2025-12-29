@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.jax.voice.domain.EQTL;
-import org.jax.voice.io.connector.EQTLFunction;
 import org.jax.voice.io.reader.AbstractDataFileTest;
 import org.jax.voice.io.reader.ReaderFactory;
 import org.jax.voice.io.reader.ReaderRequest;

@@ -19,20 +19,11 @@
 package org.jax.voice.io.reader;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.jax.voice.domain.GeneticEntity;
 import org.jax.voice.domain.RegulatoryFeature;
-import org.jax.voice.io.reader.ReaderFactory;
-import org.jax.voice.io.reader.ReaderRequest;
-import org.jax.voice.io.reader.RegulatoryFeatureReader;
 import org.junit.Test;
 
 /**

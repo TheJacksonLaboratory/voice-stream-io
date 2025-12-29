@@ -34,9 +34,9 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.jax.voice.io.Configuration;
+import org.jax.voice.io.Configuration.ZipType;
 import org.jax.voice.io.PartitionException;
 import org.jax.voice.io.Partitioner;
-import org.jax.voice.io.Configuration.ZipType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;

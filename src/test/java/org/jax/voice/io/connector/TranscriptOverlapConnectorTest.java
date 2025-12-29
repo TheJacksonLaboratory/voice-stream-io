@@ -10,8 +10,6 @@ import org.apache.commons.io.FileUtils;
 import org.jax.voice.domain.Entity;
 import org.jax.voice.domain.Variant;
 import org.jax.voice.io.IPrintStream;
-import org.jax.voice.io.connector.AbstractOverlapConnector;
-import org.jax.voice.io.connector.TranscriptOverlapConnector;
 import org.jax.voice.io.reader.AbstractDataFileTest;
 import org.junit.Test;
 

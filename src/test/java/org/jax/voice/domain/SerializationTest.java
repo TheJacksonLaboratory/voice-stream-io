@@ -36,7 +36,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.jax.voice.domain.Entity;
 import org.jax.voice.io.TimeInfo;
 import org.jax.voice.io.reader.ReaderRequest;
 import org.junit.Before;

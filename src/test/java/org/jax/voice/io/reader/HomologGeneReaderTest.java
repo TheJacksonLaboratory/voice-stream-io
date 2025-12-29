@@ -36,11 +36,6 @@ import org.jax.voice.domain.Entity;
 import org.jax.voice.domain.Homolog;
 import org.jax.voice.domain.HomologGene;
 import org.jax.voice.domain.NamedEntity;
-import org.jax.voice.io.reader.HomologGeneReader;
-import org.jax.voice.io.reader.LineIteratorReader;
-import org.jax.voice.io.reader.ReaderFactory;
-import org.jax.voice.io.reader.ReaderRequest;
-import org.jax.voice.io.reader.StreamReader;
 import org.junit.Ignore;
 import org.junit.Test;
 

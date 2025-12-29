@@ -10,11 +10,6 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import org.jax.voice.domain.Ortholog;
-import org.jax.voice.io.reader.OrthologBaylorReader;
-import org.jax.voice.io.reader.ReaderException;
-import org.jax.voice.io.reader.ReaderFactory;
-import org.jax.voice.io.reader.ReaderRequest;
-import org.jax.voice.io.reader.StreamReader;
 import org.junit.Ignore;
 import org.junit.Test;
 

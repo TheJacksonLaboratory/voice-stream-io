@@ -29,11 +29,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jax.voice.domain.GeneticEntity;
-import org.jax.voice.io.reader.GeneReader;
-import org.jax.voice.io.reader.LineIteratorReader;
-import org.jax.voice.io.reader.ReaderFactory;
-import org.jax.voice.io.reader.ReaderRequest;
-import org.jax.voice.io.reader.StreamReader;
 import org.junit.Test;
 
 /**

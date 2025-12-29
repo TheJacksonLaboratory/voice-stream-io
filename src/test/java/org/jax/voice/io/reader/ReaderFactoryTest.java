@@ -25,9 +25,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jax.voice.domain.Entity;
-import org.jax.voice.io.reader.ReaderFactory;
-import org.jax.voice.io.reader.ReaderRequest;
-import org.jax.voice.io.reader.StreamReader;
 import org.junit.Test;
 
 public class ReaderFactoryTest {

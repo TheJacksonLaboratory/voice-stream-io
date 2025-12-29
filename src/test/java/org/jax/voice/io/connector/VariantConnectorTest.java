@@ -30,8 +30,6 @@ import java.util.stream.Stream;
 import org.jax.voice.domain.Entity;
 import org.jax.voice.domain.GeneticEntity;
 import org.jax.voice.domain.Variant;
-import org.jax.voice.io.connector.Connector;
-import org.jax.voice.io.connector.VariantConnector;
 import org.jax.voice.io.reader.AbstractDataFileTest;
 import org.jax.voice.io.reader.LineIteratorReader;
 import org.jax.voice.io.reader.ReaderFactory;

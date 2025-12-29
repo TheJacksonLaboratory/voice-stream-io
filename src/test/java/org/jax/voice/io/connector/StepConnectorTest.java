@@ -21,7 +21,6 @@ import org.jax.voice.domain.Gene;
 import org.jax.voice.domain.Step;
 import org.jax.voice.domain.Variant;
 import org.jax.voice.io.IPrintStream;
-import org.jax.voice.io.connector.StepConnector;
 import org.jax.voice.io.reader.AbstractDataFileTest;
 import org.jax.voice.io.reader.ReaderException;
 import org.jax.voice.io.reader.ReaderFactory;

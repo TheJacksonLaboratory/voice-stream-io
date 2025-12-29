@@ -32,7 +32,6 @@ import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
 import org.jax.voice.domain.EQTL;
-import org.jax.voice.io.connector.EQTLFunction;
 import org.jax.voice.io.reader.AbstractDataFileTest;
 import org.junit.After;
 import org.junit.Before;

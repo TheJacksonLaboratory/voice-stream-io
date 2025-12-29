@@ -14,13 +14,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.jax.voice.domain.EQTL;
-import org.jax.voice.io.reader.AbstractCSVReader;
-import org.jax.voice.io.reader.JaxEQTLReader;
-import org.jax.voice.io.reader.MapCSVReader;
-import org.jax.voice.io.reader.ReaderException;
-import org.jax.voice.io.reader.ReaderFactory;
-import org.jax.voice.io.reader.ReaderRequest;
-import org.jax.voice.io.reader.StreamReader;
 import org.junit.Test;
 
 public class JaxEQTLReaderTest extends AbstractDataFileTest {

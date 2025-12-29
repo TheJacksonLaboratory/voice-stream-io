@@ -11,10 +11,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jax.voice.domain.EQTL;
-import org.jax.voice.io.reader.FlexEQTLReader;
-import org.jax.voice.io.reader.ReaderFactory;
-import org.jax.voice.io.reader.ReaderRequest;
-import org.jax.voice.io.reader.StreamReader;
 import org.junit.Test;
 
 public class FlexEQTLReaderTest extends AbstractDataFileTest {

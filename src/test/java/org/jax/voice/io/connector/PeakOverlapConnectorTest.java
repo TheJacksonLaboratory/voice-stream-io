@@ -19,7 +19,6 @@ import org.apache.commons.io.FileUtils;
 import org.jax.voice.domain.Entity;
 import org.jax.voice.domain.PeakOverlap;
 import org.jax.voice.domain.Variant;
-import org.jax.voice.io.connector.PeakOverlapConnector;
 import org.jax.voice.io.reader.AbstractDataFileTest;
 import org.jax.voice.io.reader.ReaderFactory;
 import org.jax.voice.io.reader.ReaderRequest;

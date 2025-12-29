@@ -13,10 +13,6 @@ import java.util.TreeSet;
 import org.jax.voice.domain.EQTL;
 import org.jax.voice.domain.Sample;
 import org.jax.voice.io.connector.TissueKey;
-import org.jax.voice.io.reader.GTExEQTLReader;
-import org.jax.voice.io.reader.ReaderFactory;
-import org.jax.voice.io.reader.ReaderRequest;
-import org.jax.voice.io.reader.StreamReader;
 import org.junit.Test;
 
 public class GTExSampleReaderTest extends AbstractDataFileTest {

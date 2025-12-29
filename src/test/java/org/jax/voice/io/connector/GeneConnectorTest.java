@@ -29,8 +29,6 @@ import org.jax.voice.domain.Entity;
 import org.jax.voice.domain.Gene;
 import org.jax.voice.domain.GeneticEntity;
 import org.jax.voice.domain.Variant;
-import org.jax.voice.io.connector.ConnectorException;
-import org.jax.voice.io.connector.GeneConnector;
 import org.jax.voice.io.reader.AbstractDataFileTest;
 import org.jax.voice.io.reader.LineIteratorReader;
 import org.jax.voice.io.reader.ReaderFactory;

@@ -26,7 +26,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.jax.voice.domain.Variant;
-import org.jax.voice.io.reader.BedReader;
 import org.junit.Before;
 
 // TODO: Auto-generated Javadoc

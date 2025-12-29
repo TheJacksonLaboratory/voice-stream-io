@@ -23,10 +23,6 @@ import static org.junit.Assert.assertEquals;
 import org.jax.voice.domain.Anchor;
 import org.jax.voice.domain.ChromatinInteraction;
 import org.jax.voice.domain.ExperimentMetadata;
-import org.jax.voice.io.reader.AbstractXlsReader;
-import org.jax.voice.io.reader.ChiapetReader;
-import org.jax.voice.io.reader.ReaderFactory;
-import org.jax.voice.io.reader.ReaderRequest;
 import org.junit.Test;
 
 public class ChiapetReaderTest extends AbstractDataFileTest {

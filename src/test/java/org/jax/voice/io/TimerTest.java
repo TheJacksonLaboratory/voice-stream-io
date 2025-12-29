@@ -24,8 +24,6 @@ import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jax.voice.io.TimeInfo;
-import org.jax.voice.io.Timer;
 import org.junit.Test;
 
 /**

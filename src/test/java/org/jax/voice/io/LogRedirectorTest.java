@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.IntStream;
 
-import org.jax.voice.io.LogRedirector;
 import org.junit.Test;
 
 public class LogRedirectorTest {

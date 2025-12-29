@@ -15,7 +15,6 @@ import org.jax.voice.domain.Homolog;
 import org.jax.voice.domain.HomologGene;
 import org.jax.voice.io.DirectSave;
 import org.jax.voice.io.Timer;
-import org.jax.voice.io.connector.HomologFunction;
 import org.jax.voice.io.reader.AbstractDataFileTest;
 import org.jax.voice.io.reader.StreamReader;
 import org.jax.voice.io.writer.ExportBuilder;

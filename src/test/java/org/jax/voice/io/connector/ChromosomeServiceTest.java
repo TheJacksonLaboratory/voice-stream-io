@@ -3,7 +3,6 @@ package org.jax.voice.io.connector;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import org.jax.voice.io.connector.ChromosomeService;
 import org.jax.voice.io.reader.AbstractDataFileTest;
 import org.junit.After;
 import org.junit.Before;

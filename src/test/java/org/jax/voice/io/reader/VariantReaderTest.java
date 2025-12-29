@@ -30,11 +30,6 @@ import java.util.stream.Collectors;
 import org.jax.voice.domain.Gene;
 import org.jax.voice.domain.GeneticEntity;
 import org.jax.voice.domain.Variant;
-import org.jax.voice.io.reader.ReaderFactory;
-import org.jax.voice.io.reader.ReaderRequest;
-import org.jax.voice.io.reader.RepeatedLineReader;
-import org.jax.voice.io.reader.StreamReader;
-import org.jax.voice.io.reader.VariantReader;
 import org.junit.Ignore;
 import org.junit.Test;
 

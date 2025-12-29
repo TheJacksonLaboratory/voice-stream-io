@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.cli.MissingOptionException;
-import org.jax.voice.io.CLI;
 import org.jax.voice.io.reader.AbstractDataFileTest;
 import org.jax.voice.io.writer.JsonToCSVParser;
 import org.junit.Test;
