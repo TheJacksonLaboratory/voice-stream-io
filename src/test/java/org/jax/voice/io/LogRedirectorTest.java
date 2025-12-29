@@ -4,13 +4,20 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.IntStream;
 
+import org.junit.Before;
 import org.junit.Test;
 
 public class LogRedirectorTest {
+	
+	@Before
+	public void setup() throws IOException {
+		Files.createDirectories(Paths.get("tmp"));
+	}
 	
 	@Test
 	public void noRollOver10() throws Exception {
