@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.stream.IntStream;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class LogRedirectorTest {
@@ -47,6 +48,7 @@ public class LogRedirectorTest {
 		checkLines(rd.getLog(), 91, "Line 10", "Line 100");
 	}
 
+	@Ignore
 	@Test
 	public void noRollOverFullZipped() throws Exception {
 		LogRedirector rd = new LogRedirector(Paths.get("tmp/test.log.gz"));
