@@ -39,7 +39,7 @@ jobs:
           
       - name: Deploy
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: mvn deploy -Dmaven.javadoc.skip=true -DskipTests=true -Djacoco.skip=true
+        run: mvn deploy -Dmaven.javadoc.skip=true -DskipTests=true -Djacoco.skip=true -DdeployJax=true -DperformRelease=false 
 
       - name: Upload maven artifacts
         uses: actions/upload-artifact@v4
