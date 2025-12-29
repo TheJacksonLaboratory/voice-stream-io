@@ -1,0 +1,161 @@
+/*-
+ * 
+ * Copyright 2018, 2020  The Jackson Laboratory Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ * @author Matthew Gerring
+ */
+package org.jax.voice.io.reader;
+
+import static org.jax.voice.io.reader.StreamUtil.unzip;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.function.Function;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
+import org.jax.voice.domain.Entity;
+
+/**
+ * 
+ * @author gerrim
+ *
+ * @param <T> Type we are parsing
+ * @param <M> Type of metadata
+ */
+public abstract class AbstractXlsReader<T extends Entity, M> extends AbstractStreamReader<T> {
+
+	private  M meta;
+
+	private int sheetIndex = 0;
+	private int linesProcessed;
+	private Class<T> concreteClass;
+	
+	/**
+	 * Create a stream of domain objects which may be processed
+	 * into a datastructure without holding the data in memory.
+	 * 
+	 * @return stream of type we are parsing.
+	 * @throws ReaderException 
+	 */
+	public Stream<T> stream() throws ReaderException {
+		
+		try(InputStream in = unzip(request.stream(), request.name());
+			HSSFWorkbook wb = new HSSFWorkbook(in)) {
+		    
+		    HSSFSheet sheet = wb.getSheetAt(getSheetIndex());
+		    
+		    Stream<Row> rows = StreamSupport.stream(sheet.spliterator(), false);
+		    this.linesProcessed = 0;
+		    return rows.map(r->create(r))
+		    		   .filter(n->n!=null)
+		    		   .map(n->{
+					    	linesProcessed++;
+					    	return n;
+						});
+		    
+		} catch (Exception e) {
+			throw new ReaderException(e);
+		} finally {
+			try {
+				request.close();
+			} catch (IOException e) {
+				throw new ReaderException(e);
+			}
+		}
+	}
+
+	/**
+	 * Parse the line to type T.
+	 *
+	 * @param line the line
+	 * @return the t
+	 * @throws ReaderException the reader exception
+	 */
+	protected abstract T create(Row row);
+		 
+
+	@Override
+	public <U extends Entity> Function<T, Stream<U>> getDefaultConnector() {
+		return null;
+	}
+
+	@Override
+	public int linesProcessed() {
+		return linesProcessed;
+	}
+
+	@Override
+	public boolean isDataSource() {
+		return request.isFileRequest();
+	}
+
+	@Override
+	public boolean isEmpty() {
+		if (isDataSource()) return false;
+		return request.getStream()!=null;
+	}
+
+	@Override
+	public void close() throws IOException {
+
+	}
+
+	/**
+	 * @return the sheetIndex
+	 */
+	protected int getSheetIndex() {
+		return sheetIndex;
+	}
+
+	/**
+	 * @param sheetIndex the sheetIndex to set
+	 */
+	protected void setSheetIndex(int sheetIndex) {
+		this.sheetIndex = sheetIndex;
+	}
+
+	/**
+	 * @return the concreteClass
+	 */
+	protected Class<T> getConcreteClass() {
+		return concreteClass;
+	}
+
+	/**
+	 * @param concreteClass the concreteClass to set
+	 */
+	protected void setConcreteClass(Class concreteClass) {
+		this.concreteClass = concreteClass;
+	}
+
+	/**
+	 * @return the meta
+	 */
+	protected M getMeta() {
+		return meta;
+	}
+
+	/**
+	 * @param meta the meta to set
+	 */
+	protected void setMeta(M meta) {
+		this.meta = meta;
+	}
+
+}

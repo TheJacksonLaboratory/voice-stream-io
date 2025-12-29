@@ -104,17 +104,17 @@ Other examples see tests in: src/test/java/org/geneweaver/io/reader
 This artifact is indexed on Maven Central:
 
 ``` maven
-<!-- https://mvnrepository.com/artifact/org.geneweaver/gweaver-stream-io -->
+<!-- https://mvnrepository.com/artifact/org.jax.voice/gweaver-stream-io -->
 <dependency>
-    <groupId>org.geneweaver</groupId>
+    <groupId>org.jax.voice</groupId>
     <artifactId>gweaver-stream-io</artifactId>
     <version>1.3.0</version>
 </dependency>
 ```
 
 ``` groovy
-// https://mvnrepository.com/artifact/org.geneweaver/gweaver-stream-io
-implementation group: 'org.geneweaver', name: 'gweaver-stream-io', version: '1.3.0'
+// https://mvnrepository.com/artifact/org.jax.voice/gweaver-stream-io
+implementation group: 'org.jax.voice', name: 'gweaver-stream-io', version: '1.3.0'
 ```
 
 ## Developing

@@ -179,14 +179,14 @@
 		    <configuration>
 		        <jsonLibrary>jackson2</jsonLibrary>
 		        <classes>
-                               <class>org.geneweaver.domain.Located</class>
-                                <class>org.geneweaver.domain.Entity</class>
-                                <class>org.geneweaver.domain.AbstractEntity</class>
-                                <class>org.geneweaver.domain.GeneticEntity</class>
-                                <class>org.geneweaver.domain.Gene</class>
-                                <class>org.geneweaver.domain.Peak</class>
-                                <class>org.geneweaver.domain.NamedEntity</class>
-                                <class>org.geneweaver.domain.Variant</class>
+                               <class>org.jax.voice.domain.Located</class>
+                                <class>org.jax.voice.domain.Entity</class>
+                                <class>org.jax.voice.domain.AbstractEntity</class>
+                                <class>org.jax.voice.domain.GeneticEntity</class>
+                                <class>org.jax.voice.domain.Gene</class>
+                                <class>org.jax.voice.domain.Peak</class>
+                                <class>org.jax.voice.domain.NamedEntity</class>
+                                <class>org.jax.voice.domain.Variant</class>
 		        </classes>
 		        <outputKind>module</outputKind>
 		    </configuration>
@@ -276,7 +276,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>org.geneweaver.io.CLI</mainClass>
+							<mainClass>org.jax.voice.io.CLI</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -326,7 +326,7 @@
 										<exclude>*Exception</exclude>
 
 										<!-- This is tested throughly in geweaver-bulk-import -->
-										<exclude>org.geneweaver.io.connector</exclude>
+										<exclude>org.jax.voice.io.connector</exclude>
 
 									</excludes>
 

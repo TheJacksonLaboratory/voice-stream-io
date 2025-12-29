@@ -14,7 +14,7 @@ gcloud functions deploy file-partition-function \
 --region us-east1 \
 --timeout 540 \
 --source https://source.developers.google.com/projects/geneweaver-test-orthology/repos/bitbucket_geneweaver_variant-orthology-io \
---entry-point org.geneweaver.variant.orthology.function.FilePartitionFunction \
+--entry-point org.jax.voice.variant.orthology.function.FilePartitionFunction \
 --update-env-vars PARITION_BUCKET=variant-orthology-partition-bucket-test \
 --runtime java11 \
 --memory 2048MB \
