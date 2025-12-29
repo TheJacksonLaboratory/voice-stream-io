@@ -5,5 +5,7 @@ runs:
   steps:
     - name: Get test data
       # You must call setup-evn first
-      run: gcloud storage cp -R gs://jax-voice-test-data/* ./voice-test-data/
+      run: |
+        mkdir voice-test-data
+        gcloud storage cp -R gs://jax-voice-test-data/* ./voice-test-data/
       shell: bash
