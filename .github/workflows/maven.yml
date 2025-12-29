@@ -1,0 +1,63 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Maven
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+  id-token: write
+  actions: read
+  security-events: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: BUILD
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/maven
+      - uses: ./.github/actions/setup-env
+        with:
+          jax_cs_registry_github: ${{ secrets.JAX_CS_REGISTRY_GITHUB }}
+      - uses: ./.github/actions/test-data
+
+      - name: Build and test
+        run: |
+          cp extensions.xml ~/.m2/
+          mvn clean package
+          
+      - name: Deploy
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: mvn deploy -Dmaven.javadoc.skip=true
+
+      - name: Upload maven artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: maven-artifacts
+          path: target/*.jar
+      - name: Upload jacoco artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-artifacts
+          path: target/site/jacoco/**
+      - name: Upload schema artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: json-schemas
+          path: src/main/resources/schema/*.json
+      - name: Upload test result artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: target/surefire-reports/**

@@ -1,0 +1,9 @@
+name: Download Test Data
+description: Gets the test data from gcloud bucket
+runs:
+  using: "composite"
+  steps:
+    - name: Get test data
+      # You must call setup-evn first
+      run: gcloud storage cp -R gs://jax-voice-test-data/* ./voice-test-data/
+      shell: bash

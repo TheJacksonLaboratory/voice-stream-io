@@ -1,0 +1,16 @@
+name: Setup Environment
+description: Sets up Google credentials and gcloud
+inputs:
+  jax_cs_registry_github:
+    required: true
+    description: "The base64-encoded Google credentials secret"
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Google Credentials and gcloud
+      run: |
+        echo "${{ inputs.jax_cs_registry_github }}" | base64 --decode > /tmp/cred.json
+        export GOOGLE_APPLICATION_CREDENTIALS=/tmp/cred.json
+        gcloud auth activate-service-account --key-file=/tmp/cred.json
+
+      shell: bash
