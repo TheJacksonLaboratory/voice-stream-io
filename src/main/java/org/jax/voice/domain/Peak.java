@@ -233,7 +233,8 @@ public class Peak  extends NamedEntity implements Located {
 	@Override
 	public String getHeader() {
 		StringBuilder buf = new StringBuilder();
-		String fields = delimify("peakId:ID(Peak-Id)", "species:int",
+		String peakIdName = "peakId:ID(Peak-Id-"+getSpecies()+")";
+		String fields = delimify(peakIdName, "species:int",
 				// TODO Should move featureType and epigenome to int codes then look then up.
 			    "featureType", "epigenome", "start:int", "end:int", "chr", "score:int", "strand", ":LABEL");
 		buf.append(fields);
