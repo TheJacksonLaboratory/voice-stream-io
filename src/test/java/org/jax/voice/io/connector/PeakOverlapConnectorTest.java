@@ -322,7 +322,7 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 		
 		ReaderRequest reader = new ReaderRequest("test", dir.resolve("PeakOverlap-chr1.csv.gz"));
 		reader.setReaderHint("MapCSVReader");
-		assertTrue(ReaderFactory.getReader(reader).stream().count() >= 719); // There are 719 but some randoms might collide.
+		assertTrue("Count was: "+ReaderFactory.getReader(reader).stream().count(), ReaderFactory.getReader(reader).stream().count() >= 719); // There are 719 but some randoms might collide.
 		assertTrue(Files.exists(dir.resolve("PeakOverlap-header.csv")));
 		assertTrue(Files.size(dir.resolve("Variant-chr1.csv.gz"))>100);
 		assertTrue(Files.exists(dir.resolve("Variant-header.csv")));

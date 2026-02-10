@@ -50,6 +50,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class AbstractOverlapConnector<N extends Entity, E extends Entity> implements Connector<N, E>, AutoCloseable, IntersectionCreator {
 
+	private final static Object LOCK = new Object();
 	/**
 	 * You can try with database to run with a restricted memory
 	 * however we normally run this on sumner with 3Tb so we use
@@ -258,34 +259,36 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		Map<String, List<Interval>> byChr = mixedUpIntervals.stream()
 											.collect(Collectors.groupingBy(Interval::chr));
 		
-		for (String chr : byChr.keySet()) {
-			List<Interval> intervals = byChr.get(chr);
-			
-			if (intervals==null || intervals.isEmpty()) continue;
-			
-			Path path = Paths.get(this.basePath+"_intervals."+chr+".ser");
-			path.getParent().toFile().mkdirs();
-			
-			List<Interval> extisting = null;
-			if (Files.exists(path)) {
-				try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(path))) {
-					extisting = (List<Interval>)ois.readObject();
+		synchronized (LOCK) {
+			for (String chr : byChr.keySet()) {
+				List<Interval> intervals = byChr.get(chr);
+				
+				if (intervals==null || intervals.isEmpty()) continue;
+				
+				Path path = Paths.get(this.basePath+"_intervals."+chr+".ser");
+				path.getParent().toFile().mkdirs();
+				
+				List<Interval> extisting = null;
+				if (Files.exists(path)) {
+					try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(path))) {
+						extisting = (List<Interval>)ois.readObject();
+					} catch (Exception e) {
+						logger.error("Cannot load existing intervals for "+chr, e);
+					}
+				}
+				
+				int size = 0;
+				if (intervals!=null) size+=intervals.size();
+				if (extisting!=null) size+=extisting.size();
+				List<Interval> all = new ArrayList<>(size);
+				if (intervals!=null) all.addAll(intervals);
+				if (extisting!=null) all.addAll(extisting);
+				
+				try (ObjectOutputStream ois = new ObjectOutputStream(Files.newOutputStream(path))) {
+					ois.writeObject(all);
 				} catch (Exception e) {
 					logger.error("Cannot load existing intervals for "+chr, e);
 				}
-			}
-			
-			int size = 0;
-			if (intervals!=null) size+=intervals.size();
-			if (extisting!=null) size+=extisting.size();
-			List<Interval> all = new ArrayList<>(size);
-			if (intervals!=null) all.addAll(intervals);
-			if (extisting!=null) all.addAll(extisting);
-			
-			try (ObjectOutputStream ois = new ObjectOutputStream(Files.newOutputStream(path))) {
-				ois.writeObject(all);
-			} catch (Exception e) {
-				logger.error("Cannot load existing intervals for "+chr, e);
 			}
 		}
 	}
@@ -295,30 +298,33 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 * Interval files are expected to be named like: <base>_intervals.<chr>.ser
 	 */
 	private void rewrite() throws IOException {
-		Path path = Paths.get(this.basePath).getParent();
-		List<Path> intervals = Files.list(path)
-								.filter(p -> p.toString().contains(this.basePath+"_intervals."))
-								.filter(p -> p.getFileName().toString().endsWith(".ser"))
-								.toList();
 		
-		for (Path intervalFile : intervals) {
-			String chr = chrFromIntervalFile(intervalFile);
-			if (chr == null) {
-				logger.warn("Cannot determine chromosome from interval file name: {}", intervalFile);
-				continue;
-			}
-
-			try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(intervalFile))) {
-				@SuppressWarnings("unchecked")
-				List<Interval> all = (List<Interval>) ois.readObject();
-				FlatIntervalTree tree = new FlatIntervalTree(all);
-
-				Path treeFile = Paths.get(this.basePath + "_" + chr + ".ser");
-				try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(treeFile))) {
-					oos.writeObject(tree);
+		synchronized (LOCK) {
+			Path path = Paths.get(this.basePath).getParent();
+			List<Path> intervals = Files.list(path)
+									.filter(p -> p.toString().contains(this.basePath+"_intervals."))
+									.filter(p -> p.getFileName().toString().endsWith(".ser"))
+									.toList();
+			
+			for (Path intervalFile : intervals) {
+				String chr = chrFromIntervalFile(intervalFile);
+				if (chr == null) {
+					logger.warn("Cannot determine chromosome from interval file name: {}", intervalFile);
+					continue;
 				}
-			} catch (Exception e) {
-				logger.error("Cannot create tree from intervals file {}", intervalFile, e);
+	
+				try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(intervalFile))) {
+					@SuppressWarnings("unchecked")
+					List<Interval> all = (List<Interval>) ois.readObject();
+					FlatIntervalTree tree = new FlatIntervalTree(all);
+	
+					Path treeFile = Paths.get(this.basePath + "_" + chr + ".ser");
+					try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(treeFile))) {
+						oos.writeObject(tree);
+					}
+				} catch (Exception e) {
+					logger.error("Cannot create tree from intervals file {}", intervalFile, e);
+				}
 			}
 		}
 
@@ -371,7 +377,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	private String 			 activeChr;
 	private FlatIntervalTree activeTree;
 	
-	private Stream<E> streamTree(Variant variant, IPrintStream log) {
+	private synchronized Stream<E> streamTree(Variant variant, IPrintStream log) {
 		
 		if (variant.getChr()==null) {
 			logger.error("Variant has no chromosome, cannot find overlaps: "+variant);

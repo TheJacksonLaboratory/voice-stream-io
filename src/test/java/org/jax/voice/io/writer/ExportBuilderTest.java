@@ -301,8 +301,7 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 					   .setOut(System.out)
 					   .setDir(dir)
 					   .setInputs(copies) 
-					   // We do not use this in the build, should likely remove.
-					   //.setParallelFiles(true)
+					   .setParallelFiles(true)
 					   .setDefaultChunkSize(1000)) {
 				
 				builder.export();
