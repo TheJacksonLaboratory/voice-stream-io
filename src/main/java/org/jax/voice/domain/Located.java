@@ -1,6 +1,9 @@
 package org.jax.voice.domain;
 
+import java.util.Map;
 import java.util.UUID;
+
+import org.jax.voice.domain.interval.Interval;
 
 /**
  * Some entities have a location.
@@ -68,5 +71,9 @@ public interface Located extends IdGenerator {
 				return chr;
 			}
 		};
+	}
+
+	default Interval interval(Map<String, Object> meta) {
+		return new Interval(getStart(), getEnd(), id(), getChr(), meta);
 	}
 }

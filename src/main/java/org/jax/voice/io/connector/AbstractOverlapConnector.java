@@ -2,6 +2,8 @@ package org.jax.voice.io.connector;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +33,8 @@ import org.jax.voice.domain.AbstractEntity;
 import org.jax.voice.domain.Entity;
 import org.jax.voice.domain.Located;
 import org.jax.voice.domain.Variant;
+import org.jax.voice.domain.interval.FlatIntervalTree;
+import org.jax.voice.domain.interval.Interval;
 import org.jax.voice.io.IPrintStream;
 import org.jax.voice.io.reader.ReaderException;
 import org.jax.voice.io.reader.ReaderFactory;
@@ -45,6 +50,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class AbstractOverlapConnector<N extends Entity, E extends Entity> implements Connector<N, E>, AutoCloseable, IntersectionCreator {
 
+	/**
+	 * You can try with database to run with a restricted memory
+	 * however we normally run this on sumner with 3Tb so we use
+	 * memory not database.
+	 */
+	protected OverlapRecordMode mode = OverlapRecordMode.IN_MEMORY;
 	
 	protected static Logger logger = LoggerFactory.getLogger(AbstractOverlapConnector.class);
 	private static ObjectMapper mapper = new ObjectMapper();
@@ -212,15 +223,128 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 				stream = stream.limit(limit.longValue());
 			}
 			
-			long stored = stream.map(loc -> store(loc, prefix, out))
-						        .filter(s->s!=null)
-							    .count();
+			long stored = 0;
+			if (mode == OverlapRecordMode.IN_MEMORY) {
+				
+				// Hopefully this fits in memory...
+				List<Interval> intervals = stream
+						.map(loc->new Line(loc, getMeta(loc)))
+						.map(line->line.loc().interval(line.meta()))
+						.toList();
+				save(intervals, out);
+				stored = intervals.size();
+
+			} else {
+				stored = stream.map(loc -> store(loc, prefix, out))
+				        .filter(s->s!=null)
+					    .count();
+			}
+			
 			added += stored;
 			
-		} 
+		}
+		
+		// TODO Take the mixed up files and make single 
+		// interval tree for each chromosome and save to disk. 
+		if (mode == OverlapRecordMode.IN_MEMORY) {
+			rewrite();
+		}
+		
 		return added;
 	}
 	
+	private void save(List<Interval> mixedUpIntervals, IPrintStream out) throws IOException {
+		
+		Map<String, List<Interval>> byChr = mixedUpIntervals.stream()
+											.collect(Collectors.groupingBy(Interval::chr));
+		
+		for (String chr : byChr.keySet()) {
+			List<Interval> intervals = byChr.get(chr);
+			
+			if (intervals==null || intervals.isEmpty()) continue;
+			
+			Path path = Paths.get(this.basePath+"_intervals."+chr+".ser");
+			path.getParent().toFile().mkdirs();
+			
+			List<Interval> extisting = null;
+			if (Files.exists(path)) {
+				try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(path))) {
+					extisting = (List<Interval>)ois.readObject();
+				} catch (Exception e) {
+					logger.error("Cannot load existing intervals for "+chr, e);
+				}
+			}
+			
+			int size = 0;
+			if (intervals!=null) size+=intervals.size();
+			if (extisting!=null) size+=extisting.size();
+			List<Interval> all = new ArrayList<>(size);
+			if (intervals!=null) all.addAll(intervals);
+			if (extisting!=null) all.addAll(extisting);
+			
+			try (ObjectOutputStream ois = new ObjectOutputStream(Files.newOutputStream(path))) {
+				ois.writeObject(all);
+			} catch (Exception e) {
+				logger.error("Cannot load existing intervals for "+chr, e);
+			}
+		}
+	}
+	
+	/**
+	 * Read all the chromosome-specific interval lists and write interval-tree files.
+	 * Interval files are expected to be named like: <base>_intervals.<chr>.ser
+	 */
+	private void rewrite() throws IOException {
+		Path path = Paths.get(this.basePath).getParent();
+		List<Path> intervals = Files.list(path)
+								.filter(p -> p.toString().contains(this.basePath+"_intervals."))
+								.filter(p -> p.getFileName().toString().endsWith(".ser"))
+								.toList();
+		
+		for (Path intervalFile : intervals) {
+			String chr = chrFromIntervalFile(intervalFile);
+			if (chr == null) {
+				logger.warn("Cannot determine chromosome from interval file name: {}", intervalFile);
+				continue;
+			}
+
+			try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(intervalFile))) {
+				@SuppressWarnings("unchecked")
+				List<Interval> all = (List<Interval>) ois.readObject();
+				FlatIntervalTree tree = new FlatIntervalTree(all);
+
+				Path treeFile = Paths.get(this.basePath + "_" + chr + ".ser");
+				try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(treeFile))) {
+					oos.writeObject(tree);
+				}
+			} catch (Exception e) {
+				logger.error("Cannot create tree from intervals file {}", intervalFile, e);
+			}
+		}
+
+	}
+
+	/**
+	 * Extract chromosome from an interval list filename.
+	 * Expected pattern: *_intervals.<chr>.ser
+	 */
+	private String chrFromIntervalFile(Path intervalFile) {
+		if (intervalFile == null) return null;
+		String name = intervalFile.getFileName().toString();
+		int idx = name.lastIndexOf("_intervals.");
+		if (idx < 0) return null;
+		String tail = name.substring(idx + "_intervals.".length());
+		if (!tail.endsWith(".ser")) return null;
+		tail = tail.substring(0, tail.length() - ".ser".length());
+		String chr = tail.trim();
+		if (chr.isEmpty()) return null;
+		return chr;
+	}
+
+	/**
+	 * For bulk import (which is the usual case) the Session 
+	 * will null from the ExportBuilder.
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public Stream<E> stream(N ent, Session session, IPrintStream log) {
@@ -230,6 +354,69 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		if (!(ent instanceof Variant)) return (Stream<E>) Stream.of(ent);
 		Variant variant = (Variant)ent;
 		
+		try {
+			if (this.mode==OverlapRecordMode.IN_MEMORY) {
+				return streamTree(variant,log);
+			} else {
+				return streamDatabase(variant,log);
+			}
+		} finally {
+			count++;
+		}
+	
+	}
+	
+	// We hold one tree in memory at a time.
+	// We assume that chromosomes come in batches from the same file.
+	private String 			 activeChr;
+	private FlatIntervalTree activeTree;
+	
+	private Stream<E> streamTree(Variant variant, IPrintStream log) {
+		
+		if (variant.getChr()==null) {
+			logger.error("Variant has no chromosome, cannot find overlaps: "+variant);
+			return Stream.empty();
+		}
+		if (!variant.getChr().equals(activeChr)) {
+			activeChr = variant.getChr();
+			try {
+				activeTree = loadTree(activeChr, log);
+			} catch (Exception e) {
+				logger.error("Cannot load tree for "+activeChr, e);
+				activeTree = null;
+			}
+		};
+		
+		if (activeTree==null) return Stream.empty();
+		Collection<E> ret = new LinkedList<>();
+		ret.add((E)variant);
+		
+		List<Interval> overlaps = activeTree.query(variant.getStart(), variant.getEnd());
+		for (Interval interval : overlaps) {
+			
+			Located destination = createIntersectionObject(interval.id(), interval.start(), interval.end());
+
+			if (log!=null && count%frequency==0) {
+				log.println("Example of id ("+getClass().getSimpleName()+") found: "+interval.id());
+			}
+
+			Map<String, Object> meta = interval.meta();
+			ret.add((E)oservice.createOverlap(variant, destination, this, meta));
+		}
+		return ret.stream();
+	}
+
+	private FlatIntervalTree loadTree(String chr, IPrintStream log) throws IOException, ClassNotFoundException {
+		String path = this.basePath+"_"+chr;
+		Path file = Paths.get(path+".ser");
+		if (log!=null) log.println("Loading tree for "+chr+" from file: "+file);
+		try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(file))) {
+			return (FlatIntervalTree)ois.readObject();
+		}
+	}
+
+	private Stream<E> streamDatabase(Variant variant, IPrintStream log) {
+
 		String shardName = oservice.getShardName(variant.getChr(), variant.getStart());
 
 		Collection<Entity> ret = new LinkedList<>();
@@ -273,8 +460,10 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 							log.println("Example of id ("+getClass().getSimpleName()+") found: "+id);
 						}
 
-						Map<String,Object> meta = mapper.readValue(smeta, mapReference);
-						AbstractEntity o = oservice.intersection(variant, createIntersectionObject(id, rlow, rup), this, meta);
+						final Map<String, Object> meta = getMeta(smeta, log);
+						AbstractEntity o = oservice.intersection(variant, 
+										createIntersectionObject(id, rlow, rup), 
+										this, meta);
 						if (o!=null) {
 							o.setChr(variant.getChr());
 							ret.add(o);
@@ -294,12 +483,23 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			}
 	 		
 		}
-		count++;
 		
 		return (Stream<E>) ret.stream();
-	
 	}
-	
+
+	private Map<String, Object> getMeta(String smeta, IPrintStream log) {
+		
+		if (smeta!=null) {
+			if (smeta.isBlank()) return null;
+			try {
+				return mapper.readValue(smeta, mapReference);
+			} catch (JsonProcessingException e) {
+				log.getPrintStream().println();
+			}
+		} 
+		return null;
+	}
+
 	private Object get(ResultSet res, Class<?> idClass2, int i) throws SQLException {
 		return switch (idClass2.getSimpleName()) {
 			case "String"  -> res.getString(i);
@@ -424,8 +624,8 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			stmt.setInt(3,upper);
 			
 			Map<String, Object> meta = getMeta(line);
-			String smeta = mapper.writeValueAsString(meta);
-			stmt.setString(4,smeta);
+			String smeta = meta!=null ? mapper.writeValueAsString(meta) : "";
+			stmt.setString(4, smeta);
 			stmt.execute();
 			
 		} catch (Exception ne) {
@@ -435,7 +635,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	}
 	
 	protected <T extends Located> Map<String, Object> getMeta(T line) {
-		return Collections.emptyMap();
+		return null;
 	}
 	
 	
@@ -711,6 +911,20 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 */
 	public void setStartIndex(Long startIndex) {
 		this.startIndex = startIndex;
+	}
+
+	/**
+	 * @return the mode
+	 */
+	public OverlapRecordMode getMode() {
+		return mode;
+	}
+
+	/**
+	 * @param mode the mode to set
+	 */
+	public void setMode(OverlapRecordMode mode) {
+		this.mode = mode;
 	}
 
 }

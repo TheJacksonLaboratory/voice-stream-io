@@ -59,6 +59,7 @@ public class TranscriptOverlapConnector<N extends Entity, E extends Entity> exte
 			TranscriptOverlap ret = new TranscriptOverlap();
 			ret.setSpecies(Species.code(species));
 			ret.setTranscript(loc);
+			ret.setChr(variant.getChr());
 			ret.setVariant(variant);
 			return (T) ret;
 		}

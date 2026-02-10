@@ -88,6 +88,7 @@ public class EQTLOverlapConnector<N extends Entity, E extends Entity> extends Ab
 			EQTLOverlap ret = new EQTLOverlap();
 			ret.setSpecies(Species.code(species));
 			ret.setGene(loc);
+			ret.setChr(variant.getChr());
 			ret.setVariant(variant);
 			return (T) ret;
 		}

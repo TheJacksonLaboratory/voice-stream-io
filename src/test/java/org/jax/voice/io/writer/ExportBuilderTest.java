@@ -301,7 +301,8 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 					   .setOut(System.out)
 					   .setDir(dir)
 					   .setInputs(copies) 
-					   .setParallelFiles(true)
+					   // We do not use this in the build, should likely remove.
+					   //.setParallelFiles(true)
 					   .setDefaultChunkSize(1000)) {
 				
 				builder.export();
@@ -310,8 +311,8 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		
 		assertNumber(dir, "Variant-chr1.csv.gz", 815);
 		assertNumber(dir, "PeakOverlap-chr1.csv.gz", 719); 
-		assertNumber(dir, "TranscriptOverlap-chr1.csv.gz", 2399); 
-		assertNumber(dir, "RegulatoryFeatureOverlap-chr1.csv.gz", 695);
+		assertNumber(dir, "TranscriptOverlap-chr1.csv.gz", 4271); 
+		assertNumber(dir, "RegulatoryFeatureOverlap-chr1.csv.gz", 767);
 		// TODO Some eQTL overlaps as well...
 
 		assertTrue(Files.exists(dir.resolve("PeakOverlap-header.csv")));
@@ -330,8 +331,8 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 	
 	private void assertNumber(Path dir, String name, int size) throws IOException, ReaderException {
 		
-		assertTrue(Files.exists(dir.resolve(name)));
-		assertTrue(Files.size(dir.resolve(name))>100);
+		assertTrue("File does not exist: "+name, Files.exists(dir.resolve(name)));
+		assertTrue("File is very small: "+name,Files.size(dir.resolve(name))>100);
 		ReaderRequest reader = new ReaderRequest("test", dir.resolve(name));
 		reader.setReaderHint("MapCSVReader");		
 

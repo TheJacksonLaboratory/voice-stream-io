@@ -56,6 +56,7 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 
 	private ChromosomeService cservice = ChromosomeService.getInstance();
 	
+	private static final Object lock = new Object();
 	private static AtomicLong peakIdCounter = null;
 	
 	public static void clearCounting() {
@@ -181,11 +182,9 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	 */
 	public Long createPeakId(String featType, String chr, int start, int end, String tissue) {
 		
-		if (peakIdCounter==null) {
-			synchronized(this) {
-				if (peakIdCounter==null) {
-					peakIdCounter = new AtomicLong(this.request.getStartIndex());
-				}
+		synchronized(lock) {
+			if (peakIdCounter==null) {
+				peakIdCounter = new AtomicLong(this.request.getStartIndex());
 			}
 		}
 		return peakIdCounter.getAndIncrement();

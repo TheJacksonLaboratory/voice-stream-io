@@ -234,12 +234,13 @@ public class PeakOverlapConnector<N extends Entity, E extends Entity> extends Ab
 
 	@Override
 	public <T extends AbstractEntity> T create(Located loc, 
-			Variant variant) {
+												Variant variant) {
 		
 		if (loc instanceof Peak) {
 			PeakOverlap ret = new PeakOverlap();
 			ret.setSpecies(Species.code(species));
 			ret.setPeak(loc);
+			ret.setChr(variant.getChr());
 			ret.setVariant(variant);
 			return (T) ret;
 		} 

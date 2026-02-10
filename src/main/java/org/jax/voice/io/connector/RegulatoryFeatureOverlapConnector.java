@@ -80,6 +80,7 @@ public class RegulatoryFeatureOverlapConnector<N extends Entity, E extends Entit
 			RegulatoryFeatureOverlap ret = new RegulatoryFeatureOverlap();
 			ret.setSpecies(Species.code(species));
 			ret.setRegFeature(loc);
+			ret.setChr(variant.getChr());
 			ret.setVariant(variant);
 			return (T) ret;
 		}
