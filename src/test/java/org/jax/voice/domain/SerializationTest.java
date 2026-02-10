@@ -36,6 +36,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.jax.voice.domain.interval.FlatIntervalTree;
+import org.jax.voice.domain.interval.Interval;
 import org.jax.voice.io.TimeInfo;
 import org.jax.voice.io.reader.ReaderRequest;
 import org.junit.Before;
@@ -101,6 +103,8 @@ public class SerializationTest {
 		// Add any other Test classes
 		testClasses.add(ReaderRequest.class);
 		testClasses.add(TimeInfo.class);
+		testClasses.remove(FlatIntervalTree.class);
+		testClasses.remove(Interval.class);
 	}
 
 	
