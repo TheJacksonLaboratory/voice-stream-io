@@ -178,9 +178,9 @@ public class StepConnectorTest extends AbstractDataFileTest {
 		file = getPath("prod/steps/mm/snp137.txt.gz");
 		testRealParse(testName, file, Variant.class, "rs", 10000L, 100000L);
 		
-		assertTrue(Files.exists(Paths.get("tmp/mouse/Variant_1.mv.db")));
-		assertTrue(Files.exists(Paths.get("tmp/mouse/Gene_15.mv.db")));
-		assertFalse(Files.exists(Paths.get("tmp/mouse/Gene_22.mv.db")));
+		assertTrue(Files.exists(Paths.get("tmp/mouse/Variant_1.ser")));
+		assertTrue(Files.exists(Paths.get("tmp/mouse/Gene_15.ser")));
+		assertFalse(Files.exists(Paths.get("tmp/mouse/Gene_22.ser")));
 	}
 	
 	@Test
@@ -196,8 +196,8 @@ public class StepConnectorTest extends AbstractDataFileTest {
 		file = getPath("prod/steps/hs/snp141.txt.gz");
 		testRealParse(testName, file, Variant.class, "rs", 10000L, 100000L);
 		
-		assertTrue(Files.exists(Paths.get("tmp/human/Variant_1.mv.db")));
-		assertTrue(Files.exists(Paths.get("tmp/human/Gene_22.mv.db")));
+		assertTrue(Files.exists(Paths.get("tmp/human/Variant_1.ser")));
+		assertTrue(Files.exists(Paths.get("tmp/human/Gene_22.ser")));
 	}
 	
 	// NOT FOR UNIT TESTS

@@ -146,23 +146,29 @@ public class FlatIntervalTreeTest {
 		}
 	}
 
-	
+	/**
+	 * Run with -Xmx32g so that we can test intervals without OOM.
+	 * We need about 500mill in one tree in the real build.
+	 * 
+	 * This must pass without a stack overflow if we are to use
+	 * the algorithm for large builds on sumner.
+	 */
 	@Ignore
 	@Test
 	public void upperLimit() {
 
-		int upper = 100_000_000;
+		int upper = 500_000_000;
 		List<Interval> all = new ArrayList<>(upper);
 		
 		// Make it 100mill in size.
 		// with things larger.
 		for (int i = 0; i < upper; i++) {
-			all.add(new Interval(10, 11, "X"+i, "NA", null));
+			all.add(new Interval(i, i+1, "X"+i, "NA", null));
 		}
 		
 		FlatIntervalTree shard = new FlatIntervalTree(all);
-		assertEquals(0, shard.query(0,1).size());
-		assertEquals(upper, shard.query(0,10).size());
+		assertEquals(0, shard.query(upper+10,upper+11).size());
+		assertEquals(2, shard.query(1,1).size());
 
 	}
 	

@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -763,37 +762,60 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		Path dir = Paths.get(this.basePath).getParent();
 		List<Path> files = Files.list(dir)
 				                .filter(Files::isRegularFile)
-				                .filter(p->p.getFileName().toString().toLowerCase().endsWith(".mv.db"))
-				                .collect(Collectors.toList());
+				                .filter(p->{
+				                	if (mode == OverlapRecordMode.IN_MEMORY) {
+				                		return p.getFileName().toString().toLowerCase().endsWith(".ser") && 
+				                				!p.getFileName().toString().contains("_intervals.");
+				                	} else {
+				                		return p.getFileName().toString().toLowerCase().endsWith(".mv.db");
+				                	}
+				                }).collect(Collectors.toList());
 		
 		long size = 0;
 		for (Path path : files) {
-			try (Connection conn = createConnection(path);
-			     Statement tabs = conn.createStatement()) {
-				
-				DatabaseMetaData md = conn.getMetaData();
-				ResultSet rs = md.getTables(null, null, "%", null);
-				List<String> names = new ArrayList<>();
-				while (rs.next()) {
-					String tname = rs.getString(3);
-					if (tname.startsWith(this.tableName)) names.add(tname);
-				}
-				
-				for (String tname : names) {
-					try(Statement stmt = conn.createStatement()) {  
+			size += (mode == OverlapRecordMode.IN_MEMORY)
+					? getIntervalFileSize(path) 
+					: getDatabaseSize(path);
+		}
+		return size;
+	}
+	
+	private long getIntervalFileSize(Path path) throws IOException, ClassNotFoundException {
+		try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(path))) {
+			FlatIntervalTree tree = (FlatIntervalTree)ois.readObject();
+			return tree.size();
+		} 
+	}
+
+	private long getDatabaseSize(Path path) throws SQLException {
 		
-						String sql = "SELECT COUNT(1) FROM "+tname+";";
-						try(ResultSet res = stmt.executeQuery(sql)) {
-							res.next();
-							size += res.getLong(1);
-						}
+		long size = 0;
+
+		try (Connection conn = createConnection(path);
+			 Statement tabs = conn.createStatement()) {
+
+			DatabaseMetaData md = conn.getMetaData();
+			ResultSet rs = md.getTables(null, null, "%", null);
+			List<String> names = new ArrayList<>();
+			while (rs.next()) {
+				String tname = rs.getString(3);
+				if (tname.startsWith(this.tableName)) names.add(tname);
+			}
+
+			for (String tname : names) {
+				try(Statement stmt = conn.createStatement()) {  
+
+					String sql = "SELECT COUNT(1) FROM "+tname+";";
+					try(ResultSet res = stmt.executeQuery(sql)) {
+						res.next();
+						size += res.getLong(1);
 					}
 				}
 			}
 		}
 		return size;
 	}
-	
+
 	private Connection createConnection(Path path) throws SQLException {
 		
 		String spath = path.toString().substring(0, path.toString().toLowerCase().lastIndexOf(".mv.db"));
