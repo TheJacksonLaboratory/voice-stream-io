@@ -2,8 +2,6 @@ package org.jax.voice.io.connector;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,9 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jax.voice.domain.AbstractEntity;
 import org.jax.voice.domain.Entity;
 import org.jax.voice.domain.Located;
@@ -70,7 +71,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	protected Collection<Path> source = new TreeSet<>();
 	
 	// Just done by chromosome
-	protected Map<String,Connection>		   connCache   =  Collections.synchronizedMap(new HashMap<>(23));
+	protected Map<String,Connection>		 connCache   =  Collections.synchronizedMap(new HashMap<>(23));
 
 	// These will get large e.g. ~20k depending on BASE_SIZE
 	protected Map<String,PreparedStatement>  insertCache =  Collections.synchronizedMap(new HashMap<>(1009));
@@ -244,12 +245,6 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			
 		}
 		
-		// TODO Take the mixed up files and make single 
-		// interval tree for each chromosome and save to disk. 
-		if (mode == OverlapRecordMode.IN_MEMORY) {
-			rewrite();
-		}
-		
 		return added;
 	}
 	
@@ -258,92 +253,17 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		Map<String, List<Interval>> byChr = mixedUpIntervals.stream()
 											.collect(Collectors.groupingBy(Interval::chr));
 		
-		synchronized (LOCK) {
-			for (String chr : byChr.keySet()) {
-				List<Interval> intervals = byChr.get(chr);
-				
-				if (intervals==null || intervals.isEmpty()) continue;
-				
-				Path path = Paths.get(this.basePath+"_intervals."+chr+".ser");
-				path.getParent().toFile().mkdirs();
-				
-				List<Interval> extisting = null;
-				if (Files.exists(path)) {
-					try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(path))) {
-						extisting = (List<Interval>)ois.readObject();
-					} catch (Exception e) {
-						logger.error("Cannot load existing intervals for "+chr, e);
-					}
-				}
-				
-				int size = 0;
-				if (intervals!=null) size+=intervals.size();
-				if (extisting!=null) size+=extisting.size();
-				List<Interval> all = new ArrayList<>(size);
-				if (intervals!=null) all.addAll(intervals);
-				if (extisting!=null) all.addAll(extisting);
-				
-				try (ObjectOutputStream ois = new ObjectOutputStream(Files.newOutputStream(path))) {
-					ois.writeObject(all);
-				} catch (Exception e) {
-					logger.error("Cannot load existing intervals for "+chr, e);
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Read all the chromosome-specific interval lists and write interval-tree files.
-	 * Interval files are expected to be named like: <base>_intervals.<chr>.ser
-	 */
-	private void rewrite() throws IOException {
-		
-		synchronized (LOCK) {
-			Path path = Paths.get(this.basePath).getParent();
-			List<Path> intervals = Files.list(path)
-									.filter(p -> p.toString().contains(this.basePath+"_intervals."))
-									.filter(p -> p.getFileName().toString().endsWith(".ser"))
-									.toList();
-			
-			for (Path intervalFile : intervals) {
-				String chr = chrFromIntervalFile(intervalFile);
-				if (chr == null) {
-					logger.warn("Cannot determine chromosome from interval file name: {}", intervalFile);
-					continue;
-				}
-	
-				try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(intervalFile))) {
-					@SuppressWarnings("unchecked")
-					List<Interval> all = (List<Interval>) ois.readObject();
-					FlatIntervalTree tree = new FlatIntervalTree(all);
-	
-					Path treeFile = Paths.get(this.basePath + "_" + chr + ".ser");
-					try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(treeFile))) {
-						oos.writeObject(tree);
-					}
-				} catch (Exception e) {
-					logger.error("Cannot create tree from intervals file {}", intervalFile, e);
-				}
-			}
-		}
+		for (String chr : byChr.keySet()) {
+			List<Interval> intervals = byChr.get(chr);
 
-	}
+			if (intervals==null || intervals.isEmpty()) continue;
 
-	/**
-	 * Extract chromosome from an interval list filename.
-	 * Expected pattern: *_intervals.<chr>.ser
-	 */
-	private String chrFromIntervalFile(Path intervalFile) {
-		if (intervalFile == null) return null;
-		String name = intervalFile.getFileName().toString();
-		int idx = name.lastIndexOf("_intervals.");
-		if (idx < 0) return null;
-		String tail = name.substring(idx + "_intervals.".length());
-		if (!tail.endsWith(".ser")) return null;
-		tail = tail.substring(0, tail.length() - ".ser".length());
-		String chr = tail.trim();
-		if (chr.isEmpty()) return null;
-		return chr;
+			String unc = RandomStringUtils.secure().nextAlphabetic(6);
+			Path path = Paths.get(this.basePath+"_intervals."+chr+"."+unc+".ser");
+			path.getParent().toFile().mkdirs();
+
+			IntervalMarshall.saveIntervals(path, intervals);
+		}
 	}
 
 	/**
@@ -414,10 +334,15 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	private FlatIntervalTree loadTree(String chr, IPrintStream log) throws IOException, ClassNotFoundException {
 		String path = this.basePath+"_"+chr;
 		Path file = Paths.get(path+".ser");
-		if (log!=null) log.println("Loading tree for "+chr+" from file: "+file);
-		try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(file))) {
-			return (FlatIntervalTree)ois.readObject();
+		
+		// If we made it, reload it.
+		if (Files.exists(file)) {
+			if (log!=null) log.println("Loading tree for "+chr+" from file: "+file);
+			return IntervalMarshall.loadTree(file);
 		}
+		
+		// If we have not made it, load all the fragments into one intervals tree.
+		return IntervalMarshall.createTree(file, chr);
 	}
 
 	private Stream<E> streamDatabase(Variant variant, IPrintStream log) {
@@ -774,17 +699,10 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		long size = 0;
 		for (Path path : files) {
 			size += (mode == OverlapRecordMode.IN_MEMORY)
-					? getIntervalFileSize(path) 
+					? IntervalMarshall.getIntervalFileSize(path) 
 					: getDatabaseSize(path);
 		}
 		return size;
-	}
-	
-	private long getIntervalFileSize(Path path) throws IOException, ClassNotFoundException {
-		try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(path))) {
-			FlatIntervalTree tree = (FlatIntervalTree)ois.readObject();
-			return tree.size();
-		} 
 	}
 
 	private long getDatabaseSize(Path path) throws SQLException {

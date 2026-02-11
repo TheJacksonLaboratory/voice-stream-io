@@ -60,16 +60,19 @@ public class StepConnectorTest extends AbstractDataFileTest {
 		Path file = dir.resolve("hg38_2.gtf");
 		StreamReader<Entity> reader = ReaderFactory.getReader(new ReaderRequest(file.getFileName().toString(), file));
 		long size = reader.stream().filter(e->e instanceof Gene).count();
-		testCreate("aFewGenes", dir, 1, Gene.class, size);
+		testCreate("aFewGenes", dir, 1, Gene.class, size, "1");
 	}
 	
 	@Test
 	public void aFewVariants() throws Exception {
 		Path dir = getPath("data/1000/hs_gvf/");
-		testCreate("aFewVariants", dir, 1, Variant.class, 1000);
+		testCreate("aFewVariants", dir, 1, Variant.class, 1000, "19");
 	}
 	
-	private void testCreate(String testName, Path ddir, int fileLimit, Class<? extends Entity> type, long size) throws Exception {
+	private void testCreate(String testName, Path ddir, 
+						int fileLimit, Class<? extends Entity> type, 
+						long size, String chr) throws Exception {
+		
 		Path tdir = Paths.get("./tmp/"+testName);
 		FileUtils.deleteQuietly(tdir.toFile());
 		
@@ -81,6 +84,12 @@ public class StepConnectorTest extends AbstractDataFileTest {
 			
 			Stopwatch timer = Stopwatch.createStarted();
 			func.create(); // Creates indexed database.
+			
+			// The trees are not made until map time now.
+			// Therefore we create them here in order to test that
+			// process
+			IntervalMarshall.createTree(tdir.resolve(type.getSimpleName()+"_"+chr+".ser"), chr);
+			
 			Stopwatch done = timer.stop();
 			long rsize = func.size();
 			System.out.println("Created cache table size "+rsize+" in "+done);
@@ -178,6 +187,12 @@ public class StepConnectorTest extends AbstractDataFileTest {
 		file = getPath("prod/steps/mm/snp137.txt.gz");
 		testRealParse(testName, file, Variant.class, "rs", 10000L, 100000L);
 		
+		// The trees are not made until map time now.
+		// Therefore we create them here in order to test that
+		// process
+		IntervalMarshall.createTree(Paths.get("tmp/mouse/Variant_1.ser"), "1");
+		IntervalMarshall.createTree(Paths.get("tmp/mouse/Gene_15.ser"), "15");
+
 		assertTrue(Files.exists(Paths.get("tmp/mouse/Variant_1.ser")));
 		assertTrue(Files.exists(Paths.get("tmp/mouse/Gene_15.ser")));
 		assertFalse(Files.exists(Paths.get("tmp/mouse/Gene_22.ser")));
@@ -196,6 +211,12 @@ public class StepConnectorTest extends AbstractDataFileTest {
 		file = getPath("prod/steps/hs/snp141.txt.gz");
 		testRealParse(testName, file, Variant.class, "rs", 10000L, 100000L);
 		
+		// The trees are not made until map time now.
+		// Therefore we create them here in order to test that
+		// process
+		IntervalMarshall.createTree(Paths.get("tmp/human/Variant_1.ser"), "1");
+		IntervalMarshall.createTree(Paths.get("tmp/human/Gene_22.ser"), "22");
+
 		assertTrue(Files.exists(Paths.get("tmp/human/Variant_1.ser")));
 		assertTrue(Files.exists(Paths.get("tmp/human/Gene_22.ser")));
 	}
