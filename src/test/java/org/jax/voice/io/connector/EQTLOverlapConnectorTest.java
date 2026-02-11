@@ -4,10 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -116,7 +118,22 @@ public class EQTLOverlapConnectorTest extends AbstractDataFileTest{
 		    long neqtl = conn.create(null, IPrintStream.of(System.out)); 
 			assertEquals(10, neqtl);
 		}
+		
+		checkChromosomeNames(gdir);
 	}
+	
+	private void checkChromosomeNames(Path dir) throws IOException {
+		// Check that there are no Na, nA nor na files. Only NA
+		Optional<Path> found = Files.list(dir)
+		     .filter(p->{
+		    	 return p.getFileName().toString().contains(".Na.") || 
+		    		    p.getFileName().toString().contains(".nA.") || 
+		    		    p.getFileName().toString().contains(".na.");
+		     })
+		     .findAny();
+		assertTrue(found.isEmpty());
+	}
+
 
 	@Test
 	public void eQTLOverlapMouseAgingBone() throws Exception {

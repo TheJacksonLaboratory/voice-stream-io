@@ -74,6 +74,8 @@ public interface Located extends IdGenerator {
 	}
 
 	default Interval interval(Map<String, Object> meta) {
-		return new Interval(getStart(), getEnd(), id(), getChr(), meta);
+		return new Interval(getStart(), getEnd(), id(), 
+							getChr()!=null?getChr().toUpperCase():null,
+							meta);
 	}
 }
