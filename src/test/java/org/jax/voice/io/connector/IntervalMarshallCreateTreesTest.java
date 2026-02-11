@@ -4,12 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.jax.voice.domain.interval.FlatIntervalTree;
@@ -30,7 +32,25 @@ public class IntervalMarshallCreateTreesTest extends AbstractDataFileTest {
 		List<Path> written = IntervalMarshall.createTrees(to);
 		assertNotNull(written);
 		assertEquals(21, written.size());
+		
+		checkChromosomeNames(to);
 	}
+	
+	private void checkChromosomeNames(Path dir) throws IOException {
+		// Check that there are no Na, nA nor na files. Only NA
+		Optional<Path> found = Files.list(dir)
+		     .filter(p->{
+		    	 return p.getFileName().toString().contains(".Na.") || 
+		    		    p.getFileName().toString().contains(".nA.") || 
+		    		    p.getFileName().toString().contains(".na.") ||
+			    	 	p.getFileName().toString().contains("_Na.") || 
+		    		    p.getFileName().toString().contains("_nA.") || 
+		    		    p.getFileName().toString().contains("_na.");
+		     })
+		     .findAny();
+		assertTrue(found.isEmpty());
+	}
+
 
 	@Test
 	public void groupsByTypeAndChrAndWritesTrees() throws Exception {

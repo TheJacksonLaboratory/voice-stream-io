@@ -28,8 +28,9 @@ public class IntervalMarshall {
 	 * @throws IOException 
 	 */
 	@SuppressWarnings("unchecked")
-	public static FlatIntervalTree createTree(Path file, String chr) throws IOException {
+	public static FlatIntervalTree createTree(Path file, String lchr) throws IOException {
 		
+		final String chr = lchr.toUpperCase();
 		Path dir = file.getParent();
 		List<Path> files = Files.list(dir)
 				.filter(p->isIntervalFile(file, p, chr))

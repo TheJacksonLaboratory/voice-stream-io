@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,7 +48,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class AbstractOverlapConnector<N extends Entity, E extends Entity> implements Connector<N, E>, AutoCloseable, IntersectionCreator {
 
-	private final static Object LOCK = new Object();
 	/**
 	 * You can try with database to run with a restricted memory
 	 * however we normally run this on sumner with 3Tb so we use
