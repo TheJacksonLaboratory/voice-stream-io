@@ -175,6 +175,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 							}
 						} catch (IOException ne) {
 							logger.error("Cannot check for older ignored files in dir {}", path.getParent());
+							System.err.println("Skipping file due to error during walk: " + path + " - " + ne.getMessage());
 						}
 					}
 
@@ -183,7 +184,8 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 					source.add(path);
 					return FileVisitResult.CONTINUE;
 				} catch (Exception e) {
-					logger.warn("Skipping file due to error during walk: {}", path, e);
+					logger.error("Skipping file due to error during walk: {}", path, e);
+					System.err.println("Skipping file due to error during walk: " + path + " - " + e.getMessage());
 					return FileVisitResult.CONTINUE;
 				}
 			}
@@ -193,6 +195,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 				// Don't abort the whole run if one file can't be accessed.
 				if (exc instanceof java.nio.file.NoSuchFileException) {
 					logger.warn("Skipping missing file during walk: {}", file);
+					System.err.println("Skipping missing file during walk: " + file + " - " + exc.getMessage());
 					return FileVisitResult.CONTINUE;
 				}
 				logger.warn("Cannot access file during walk: {}", file, exc);
