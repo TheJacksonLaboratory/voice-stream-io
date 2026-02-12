@@ -2,9 +2,12 @@ package org.jax.voice.io.connector;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -129,47 +132,74 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	/**
 	 * Adds all the bed.gz files to be cached recursively.
 	 * Stopping if the limit is reached (reduces total files for testing).
+	 *
+	 * Hardened for very large/racey file systems: Files.walk() can throw
+	 * UncheckedIOException(NoSuchFileException) if a file disappears between
+	 * discovery and attribute read. We skip those and keep walking.
+	 *
 	 * @param dir
 	 * @param limit
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	Collection<Path> addAll(Path dir, int limit) throws IOException {
-		
-		Files.walk(dir).forEach(path->{
-			if (!Files.isRegularFile(path)) {
-				logger.debug(path+" is not a regular file and will not be used!");
-				return;
-			}
-			
-			boolean isOkay = fileFilters.isEmpty();
-			for (String filter : this.fileFilters) {
-				if (path.getFileName().toString().toLowerCase().endsWith(filter)) {
-					isOkay = true;
-					break;
-				}
-			}
-			if (!isOkay) return;
-			
-			if (limit>0 && source.size()>limit) return; // Do not add things after limit reached.
-			
-			if (isNewestInDirectoryByName()) {
-				
+
+		Files.walkFileTree(dir, new SimpleFileVisitor<>() {
+			@Override
+			public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) {
 				try {
-					List<Path> peers = new ArrayList<>(Files.list(path.getParent()).toList());
-					Collections.sort(peers);
-					Path last = peers.get(peers.size()-1);
-					if (!Files.isSameFile(path, last)) {
-						return; // Do not add older files.
+					if (path == null) return FileVisitResult.CONTINUE;
+					if (!Files.isRegularFile(path)) {
+						logger.debug(path + " is not a regular file and will not be used!");
+						return FileVisitResult.CONTINUE;
 					}
-				} catch (IOException ne) {
-					logger.error("Cannot check for older ignored files in dir {}", path.getParent());
+
+					boolean isOkay = fileFilters.isEmpty();
+					for (String filter : fileFilters) {
+						if (path.getFileName().toString().toLowerCase().endsWith(filter)) {
+							isOkay = true;
+							break;
+						}
+					}
+					if (!isOkay) return FileVisitResult.CONTINUE;
+
+					// Stop adding after limit is reached.
+					if (limit > 0 && source.size() > limit) return FileVisitResult.TERMINATE;
+
+					if (isNewestInDirectoryByName()) {
+						try (Stream<Path> ls = Files.list(path.getParent())) {
+							List<Path> peers = new ArrayList<>(ls.toList());
+							Collections.sort(peers);
+							Path last = peers.get(peers.size() - 1);
+							if (!Files.isSameFile(path, last)) {
+								return FileVisitResult.CONTINUE; // Do not add older files.
+							}
+						} catch (IOException ne) {
+							logger.error("Cannot check for older ignored files in dir {}", path.getParent());
+						}
+					}
+
+					// The paths can have duplicates, especially for mouse.
+					// We must take the newer one.
+					source.add(path);
+					return FileVisitResult.CONTINUE;
+				} catch (Exception e) {
+					logger.warn("Skipping file due to error during walk: {}", path, e);
+					return FileVisitResult.CONTINUE;
 				}
 			}
-			
-			// The paths can have duplicates, especially for mouse. 
-			// We must take the newer one.
-			source.add(path);
+
+			@Override
+			public FileVisitResult visitFileFailed(Path file, IOException exc) {
+				// Don't abort the whole run if one file can't be accessed.
+				if (exc instanceof java.nio.file.NoSuchFileException) {
+					logger.warn("Skipping missing file during walk: {}", file);
+					return FileVisitResult.CONTINUE;
+				}
+				logger.warn("Cannot access file during walk: {}", file, exc);
+				return FileVisitResult.CONTINUE;
+			}
 		});
+
 		return source;
 	}
 	
