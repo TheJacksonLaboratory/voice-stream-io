@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 import org.jax.voice.domain.interval.FlatIntervalTree;
 import org.jax.voice.domain.interval.Interval;
+import org.jax.voice.io.IPrintStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,6 +87,10 @@ public class IntervalMarshall {
 		} 
 	}
 
+	public static List<Path> createTrees(Path dir) throws ClassNotFoundException, IOException {
+		return createTrees(dir, IPrintStream.of(System.out));
+	}
+	
 	/**
 	 * Create all the trees from the interval files.
 	 *
@@ -101,7 +106,7 @@ public class IntervalMarshall {
 	 * @throws IOException 
 	 * @throws ClassNotFoundException 
 	 */
-	public static List<Path> createTrees(Path dir) throws IOException, ClassNotFoundException {
+	public static List<Path> createTrees(Path dir, IPrintStream out) throws IOException, ClassNotFoundException {
 		if (dir == null) {
 			throw new IllegalArgumentException("dir cannot be null");
 		}
@@ -110,6 +115,8 @@ public class IntervalMarshall {
 		}
 
 		final Pattern shardPattern = Pattern.compile("^([A-Za-z]+)_intervals\\.(\\d+|X|Y|M|NA)\\.[a-zA-Z]{6}\\.ser$");
+
+		out.println("Reading files in "+dir);
 
 		// Keep insertion order for stable/log-friendly processing.
 		final Map<String, List<Path>> groups = new LinkedHashMap<>();
@@ -123,9 +130,11 @@ public class IntervalMarshall {
 		});
 
 		if (groups.isEmpty()) {
-			logger.info("No interval shard files found in {}", dir);
+			out.println("No interval shard files found in "+dir);
 			return null;
 		}
+		
+		out.println("Making trees for "+dir);
 
 		List<Path> outputFiles = new LinkedList<>();
 		for (Map.Entry<String, List<Path>> entry : groups.entrySet()) {
@@ -135,20 +144,25 @@ public class IntervalMarshall {
 			List<Path> shardFiles = entry.getValue();
 
 			Path outFile = dir.resolve(type + "_" + chr + ".ser");
-			logger.info("Creating tree {} from {} shard file(s)", outFile.getFileName(), shardFiles.size());
+			String msg = String.format("Creating tree %s from %s shard file(s)", outFile.getFileName(), shardFiles.size());
+			out.println(msg);
 
 			List<Interval> intervals = new LinkedList<>();
 			for (Path shard : shardFiles) {
 				try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(shard))) {
 					@SuppressWarnings("unchecked")
 					List<Interval> shardIntervals = (List<Interval>) ois.readObject();
-					if (shardIntervals != null) intervals.addAll(shardIntervals);
+					if (shardIntervals != null) {
+						out.println("Loaded "+shard.getFileName());
+						intervals.addAll(shardIntervals);
+					}
 				}
 			}
 
 			FlatIntervalTree tree = new FlatIntervalTree(intervals);
 			try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(outFile))) {
 				oos.writeObject(tree);
+				out.println("Wrote "+outFile.getFileName());
 				outputFiles.add(outFile);
 			}
 		}
