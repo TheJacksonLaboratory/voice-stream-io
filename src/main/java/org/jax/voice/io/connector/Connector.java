@@ -56,7 +56,7 @@ public interface Connector<I extends Entity, T extends Entity> extends Function<
 	 * @return Stream of connections including the original entity.
 	 */
 	default Stream<T> stream(I entity) {
-		return stream(entity, null);
+		return stream(entity, null, IPrintStream.of(System.out));
 	}
 
 	/**
@@ -68,7 +68,7 @@ public interface Connector<I extends Entity, T extends Entity> extends Function<
 	 * @return Stream of connections including the original entity.
 	 */
 	default Stream<T> stream(I ent, Session session) {
-		return stream(ent, session, null);
+		return stream(ent, session, IPrintStream.of(System.out));
 	}
 	
 	/**

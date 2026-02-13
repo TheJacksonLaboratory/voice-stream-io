@@ -24,6 +24,18 @@ import org.slf4j.LoggerFactory;
 public class IntervalMarshall {
 
 	private static final Logger logger = LoggerFactory.getLogger(IntervalMarshall.class);
+	
+	/**
+	 * Used in unit tests to make the tree for a given set.
+	 * @param file
+	 * @param lchr
+	 * @return
+	 * @throws IOException
+	 */
+	public static FlatIntervalTree createTree(Path file, String lchr) throws IOException {
+		return createTree(file, lchr, IPrintStream.of(System.out));
+	}
+	
 	/**
 	 * Used in unit tests to make the tree for a given set.
 	 * @param dir
@@ -32,7 +44,9 @@ public class IntervalMarshall {
 	 * @throws IOException 
 	 */
 	@SuppressWarnings("unchecked")
-	public static FlatIntervalTree createTree(Path file, String lchr) throws IOException {
+	public static FlatIntervalTree createTree(Path file, String lchr,  IPrintStream log) throws IOException {
+		
+		log.println("Creating tree for "+file.getFileName());
 		
 		final String chr = lchr.toUpperCase();
 		Path dir = file.getParent();

@@ -209,7 +209,7 @@ public class ExportBuilder implements AutoCloseable {
 			Stream<Entity> stream = reader.stream();
 			for (Function<Entity, Stream<Entity>> c : conns) {
 				boolean isConnector = (c instanceof Connector<Entity, Entity>);
-				if (isVerbose() && isConnector) {
+				if (isConnector) {
 					Connector<Entity, Entity> conn = (Connector<Entity, Entity>)c;
 					stream = stream.flatMap(g->conn.stream(g, null, getOut()));
 				} else {

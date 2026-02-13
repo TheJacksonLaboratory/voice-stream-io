@@ -41,23 +41,25 @@ public final class FlatIntervalTree implements Serializable {
         this.starts = new int[n];
         this.ends   = new int[n];
         this.maxEnd = new int[n];
-        this.payload = intervals.toArray(new Interval[n]);
+        this.payload = n>0 ? intervals.toArray(new Interval[n]) : new Interval[0];
 
-        // Load arrays
-        for (int i = 0; i < n; i++) {
-        	Interval c = payload[i];
-            starts[i] = c.start();
-            ends[i]   = c.end();
-        }
-
-        // Sort by start using parallel sort for speed
-        parallelSortByStart();
-
-        // Build prefix maxEnd array
-        int runningMax = 0;
-        for (int i = 0; i < n; i++) {
-            runningMax = Math.max(runningMax, ends[i]);
-            maxEnd[i] = runningMax;
+        if (n > 0) {
+	        // Load arrays
+	        for (int i = 0; i < n; i++) {
+	        	Interval c = payload[i];
+	            starts[i] = c.start();
+	            ends[i]   = c.end();
+	        }
+	
+	        // Sort by start using parallel sort for speed
+	        parallelSortByStart();
+	
+	        // Build prefix maxEnd array
+	        int runningMax = 0;
+	        for (int i = 0; i < n; i++) {
+	            runningMax = Math.max(runningMax, ends[i]);
+	            maxEnd[i] = runningMax;
+	        }
         }
     }
 

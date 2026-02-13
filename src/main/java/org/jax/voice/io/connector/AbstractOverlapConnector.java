@@ -304,6 +304,8 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	@Override
 	public Stream<E> stream(N ent, Session session, IPrintStream log) {
 		
+		if (log==null) log = IPrintStream.of(System.out);
+		
 		// Other streams may run through this connector, but
 		// if they send other objects, we return them.
 		if (!(ent instanceof Variant)) return (Stream<E>) Stream.of(ent);
@@ -321,32 +323,22 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	
 	}
 	
-	// We hold one tree in memory at a time.
-	// We assume that chromosomes come in batches from the same file.
-	private String 			 activeChr;
-	private FlatIntervalTree activeTree;
+	private Map<String,FlatIntervalTree> treeCache = new HashMap<>();
 	
+	@SuppressWarnings("unchecked")
 	private synchronized Stream<E> streamTree(Variant variant, IPrintStream log) {
 		
 		if (variant.getChr()==null) {
-			logger.error("Variant has no chromosome, cannot find overlaps: "+variant);
-			return Stream.empty();
+			log.println("Variant has no chromosome, cannot find overlaps: "+variant);
+			return Stream.of((E)variant);
 		}
-		if (!variant.getChr().equals(activeChr)) {
-			activeChr = variant.getChr();
-			try {
-				activeTree = loadTree(activeChr, log);
-			} catch (Exception e) {
-				logger.error("Cannot load tree for "+activeChr, e);
-				activeTree = null;
-			}
-		};
 		
-		if (activeTree==null) return Stream.empty();
+		String chr = variant.getChr().toUpperCase();
+		FlatIntervalTree tree = treeCache.computeIfAbsent(chr, k->loadTree(chr, log));
 		Collection<E> ret = new LinkedList<>();
 		ret.add((E)variant);
 		
-		List<Interval> overlaps = activeTree.query(variant.getStart(), variant.getEnd());
+		List<Interval> overlaps = tree.query(variant.getStart(), variant.getEnd());
 		for (Interval interval : overlaps) {
 			
 			Located destination = createIntersectionObject(interval.id(), interval.start(), interval.end());
@@ -361,18 +353,28 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		return ret.stream();
 	}
 
-	private FlatIntervalTree loadTree(String chr, IPrintStream log) throws IOException, ClassNotFoundException {
+	private FlatIntervalTree loadTree(String chr, IPrintStream log) {
 		String path = this.basePath+"_"+chr;
 		Path file = Paths.get(path+".ser");
 		
 		// If we made it, reload it.
 		if (Files.exists(file)) {
-			if (log!=null) log.println("Loading tree for "+chr+" from file: "+file);
-			return IntervalMarshall.loadTree(file);
+			log.println("Loading tree for "+chr+" from file: "+file);
+			try {
+				return IntervalMarshall.loadTree(file);
+			} catch (ClassNotFoundException | IOException e) {
+				log.println("Error loading tree for "+chr+" from file: "+file+" - "+e.getMessage());
+			}
 		}
 		
 		// If we have not made it, load all the fragments into one intervals tree.
-		return IntervalMarshall.createTree(file, chr);
+		log.println("WARNING: Making tree which should not happen during streaming!");
+		try {
+			return IntervalMarshall.createTree(file, chr, log);
+		} catch (IOException e) {
+			log.println("Error loading tree for "+chr+" from file: "+file+" - "+e.getMessage());
+		}
+		return null;
 	}
 
 	private Stream<E> streamDatabase(Variant variant, IPrintStream log) {
@@ -774,6 +776,8 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 
 	public void close() throws SQLException {
 		
+		treeCache.clear();
+
 		for (String shard : insertCache.keySet()) {
 			Statement stmt = insertCache.get(shard);
 			stmt.close();
@@ -789,6 +793,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			conn.close();
 		}
 		connCache.clear();
+		
 	}
 
 	/**
