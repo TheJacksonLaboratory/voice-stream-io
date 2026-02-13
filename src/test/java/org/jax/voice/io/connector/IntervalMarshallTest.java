@@ -16,10 +16,11 @@ import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.jax.voice.domain.interval.FlatIntervalTree;
 import org.jax.voice.domain.interval.Interval;
+import org.jax.voice.io.IPrintStream;
 import org.jax.voice.io.reader.AbstractDataFileTest;
 import org.junit.Test;
 
-public class IntervalMarshallCreateTreesTest extends AbstractDataFileTest {
+public class IntervalMarshallTest extends AbstractDataFileTest {
 	
 	@Test
 	public void testDir() throws Exception {
@@ -123,4 +124,19 @@ public class IntervalMarshallCreateTreesTest extends AbstractDataFileTest {
 			return (FlatIntervalTree) ois.readObject();
 		}
 	}
+	
+	@Test
+	public void makeTrees() throws Exception {
+		Path from = getPath("data/tree");
+		Path to   = Paths.get("./tmp/makeTree/");
+		FileUtils.deleteQuietly(to.toFile());
+		to.toFile().mkdirs();
+		
+		List<Path> written = IntervalMarshall.createTrees(from, to, IPrintStream.of(System.out));
+		assertNotNull(written);
+		assertEquals(1, written.size());
+		
+	}
+	
+
 }

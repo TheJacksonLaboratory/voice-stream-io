@@ -9,6 +9,9 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -88,9 +91,19 @@ public class IntervalMarshall {
 	}
 
 	public static List<Path> createTrees(Path dir) throws ClassNotFoundException, IOException {
-		return createTrees(dir, IPrintStream.of(System.out));
+		return createTrees(dir, dir, IPrintStream.of(System.out));
 	}
 	
+	public static List<Path> createTrees(Path dir, IPrintStream out) throws ClassNotFoundException, IOException {
+		return createTrees(dir, dir, out);
+	}
+	
+	private static ExecutorService executor;
+	static {
+		int par = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
+		executor = Executors.newFixedThreadPool(par);
+	}
+
 	/**
 	 * Create all the trees from the interval files.
 	 *
@@ -106,67 +119,93 @@ public class IntervalMarshall {
 	 * @throws IOException 
 	 * @throws ClassNotFoundException 
 	 */
-	public static List<Path> createTrees(Path dir, IPrintStream out) throws IOException, ClassNotFoundException {
-		if (dir == null) {
-			throw new IllegalArgumentException("dir cannot be null");
-		}
-		if (!Files.isDirectory(dir)) {
-			throw new IllegalArgumentException("Not a directory: " + dir);
-		}
-
-		final Pattern shardPattern = Pattern.compile("^([A-Za-z]+)_intervals\\.(\\d+|X|Y|M|NA)\\.[a-zA-Z]{6}\\.ser$");
-
-		out.println("Reading files in "+dir);
-
-		// Keep insertion order for stable/log-friendly processing.
-		final Map<String, List<Path>> groups = new LinkedHashMap<>();
-		Files.list(dir).filter(Files::isRegularFile).forEach(p -> {
-			Matcher m = shardPattern.matcher(p.getFileName().toString());
-			if (!m.matches()) return;
-			String type = m.group(1);
-			String chr = m.group(2);
-			String key = type + "\t" + chr;
-			groups.computeIfAbsent(key, k -> new LinkedList<>()).add(p);
-		});
-
-		if (groups.isEmpty()) {
-			out.println("No interval shard files found in "+dir);
-			return null;
-		}
+	public static List<Path> createTrees(Path dir, Path outDir, IPrintStream out) throws IOException, ClassNotFoundException {
 		
-		out.println("Making trees for "+dir);
+		try {
+			if (dir == null) {
+				throw new IllegalArgumentException("dir cannot be null");
+			}
+			if (!Files.isDirectory(dir)) {
+				throw new IllegalArgumentException("Not a directory: " + dir);
+			}
+	
+			final Pattern shardPattern = Pattern.compile("^([A-Za-z]+)_intervals\\.(\\d+|X|Y|M|NA)\\.[a-zA-Z]{6}\\.ser$");
+	
+			out.println("Reading files in "+dir);
+	
+			// Keep insertion order for stable/log-friendly processing.
+			final Map<String, List<Path>> groups = new LinkedHashMap<>();
+			Files.list(dir).filter(Files::isRegularFile).forEach(p -> {
+				Matcher m = shardPattern.matcher(p.getFileName().toString());
+				if (!m.matches()) return;
+				String type = m.group(1);
+				String chr = m.group(2);
+				String key = type + "\t" + chr;
+				groups.computeIfAbsent(key, k -> new LinkedList<>()).add(p);
+			});
+	
+			if (groups.isEmpty()) {
+				out.println("No interval shard files found in "+dir);
+				return null;
+			}
+			
+			out.println("Making trees for "+dir);
+	
+			List<Future<Path>> outputFiles = new LinkedList<>();
+			for (Map.Entry<String, List<Path>> entry : groups.entrySet()) {
+				outputFiles.add(executor.submit(
+						()->treeForChromosome(entry.getKey(), entry.getValue(), outDir, out))
+					);
+			}
+			
+			return outputFiles.stream().map(f -> {
+				try {
+					return f.get();
+				} catch (Exception e) {
+					out.println("Error creating tree: " + e.getMessage());
+					e.printStackTrace(out.getPrintStream());
+					return null;
+				}
+			}).filter(p -> p != null).toList();
+			
+		} catch (Exception e) {
+			out.println(e.getMessage());
+			e.printStackTrace(out.getPrintStream());
+			throw e;
+		}
+	}
+	
+	private static Path treeForChromosome(String key, List<Path> files, Path outDir, IPrintStream out) throws IOException, ClassNotFoundException {
+		
+		String[] parts = key.split("\t", 2);
+		String type = parts[0];
+		String chr = parts[1];
 
-		List<Path> outputFiles = new LinkedList<>();
-		for (Map.Entry<String, List<Path>> entry : groups.entrySet()) {
-			String[] parts = entry.getKey().split("\t", 2);
-			String type = parts[0];
-			String chr = parts[1];
-			List<Path> shardFiles = entry.getValue();
+		Path outFile = outDir.resolve(type + "_" + chr + ".ser");
+		String msg = String.format("Creating tree %s from %s shard file(s)", outFile.getFileName(), files.size());
+		out.println(msg);
 
-			Path outFile = dir.resolve(type + "_" + chr + ".ser");
-			String msg = String.format("Creating tree %s from %s shard file(s)", outFile.getFileName(), shardFiles.size());
-			out.println(msg);
-
-			List<Interval> intervals = new LinkedList<>();
-			for (Path shard : shardFiles) {
-				try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(shard))) {
-					@SuppressWarnings("unchecked")
-					List<Interval> shardIntervals = (List<Interval>) ois.readObject();
-					if (shardIntervals != null) {
-						out.println("Loaded "+shard.getFileName());
-						intervals.addAll(shardIntervals);
-					}
+		// This will be ~10 mill in size.
+		List<Interval> intervals = new LinkedList<>();
+		for (Path shard : files) {
+			try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(shard))) {
+				@SuppressWarnings("unchecked")
+				List<Interval> shardIntervals = (List<Interval>) ois.readObject();
+				if (shardIntervals != null) {
+					out.println("Loaded "+shard.getFileName());
+					intervals.addAll(shardIntervals);
 				}
 			}
-
-			FlatIntervalTree tree = new FlatIntervalTree(intervals);
-			try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(outFile))) {
-				oos.writeObject(tree);
-				out.println("Wrote "+outFile.getFileName());
-				outputFiles.add(outFile);
-			}
 		}
-		return outputFiles;
+
+		out.println("Making tree ");
+		FlatIntervalTree tree = new FlatIntervalTree(intervals);
+		try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(outFile))) {
+			oos.writeObject(tree);
+			out.println("Wrote "+outFile.getFileName());
+		}
+		return outFile;
+		
 	}
 
 }

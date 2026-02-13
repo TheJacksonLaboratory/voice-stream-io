@@ -25,6 +25,12 @@ public final class FlatIntervalTree implements Serializable {
 
     // Optional: payload handle for the caller
     private final Interval[] payload;
+    
+    private static final ForkJoinPool sortPool;
+    static {
+    	int par = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
+    	sortPool = new ForkJoinPool(par);
+    }
 
     /**
      * Constructs a shard from a list of intervals.
@@ -35,14 +41,13 @@ public final class FlatIntervalTree implements Serializable {
         this.starts = new int[n];
         this.ends   = new int[n];
         this.maxEnd = new int[n];
-        this.payload = (Interval[]) new Interval[n];
+        this.payload = intervals.toArray(new Interval[n]);
 
         // Load arrays
         for (int i = 0; i < n; i++) {
-        	Interval c = intervals.get(i);
+        	Interval c = payload[i];
             starts[i] = c.start();
             ends[i]   = c.end();
-            payload[i] = c;
         }
 
         // Sort by start using parallel sort for speed
@@ -99,7 +104,7 @@ public final class FlatIntervalTree implements Serializable {
         for (int i = 0; i < n; i++) idx[i] = i;
 
         // Parallel sort indices by starts[] key
-        ForkJoinPool.commonPool().invoke(new SortTask(idx, starts, 0, n));
+        sortPool.invoke(new SortTask(idx, starts, 0, n));
 
         // Apply permutation to all arrays
         int[] newStarts = new int[n];
