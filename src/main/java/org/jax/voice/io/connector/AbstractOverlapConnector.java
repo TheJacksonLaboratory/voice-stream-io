@@ -26,10 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.jax.voice.domain.AbstractEntity;
 import org.jax.voice.domain.Entity;
 import org.jax.voice.domain.Located;
@@ -288,11 +288,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 
 			if (intervals==null || intervals.isEmpty()) continue;
 
-			String unc = RandomStringUtils.secure().nextAlphabetic(6);
-			Path path = Paths.get(this.basePath+"_intervals."+chr+"."+unc+".ser");
-			path.getParent().toFile().mkdirs();
-
-			IntervalMarshall.saveIntervals(path, intervals);
+			IntervalMarshall.saveIntervals(this.basePath, chr, intervals, out);
 		}
 	}
 
@@ -323,10 +319,10 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	
 	}
 	
-	private Map<String,FlatIntervalTree> treeCache = new HashMap<>();
+	private Map<String,FlatIntervalTree> treeCache = new ConcurrentHashMap<>();
 	
 	@SuppressWarnings("unchecked")
-	private synchronized Stream<E> streamTree(Variant variant, IPrintStream log) {
+	private Stream<E> streamTree(Variant variant, IPrintStream log) {
 		
 		if (variant.getChr()==null) {
 			log.println("Variant has no chromosome, cannot find overlaps: "+variant);
@@ -334,48 +330,36 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		}
 		
 		String chr = variant.getChr().toUpperCase();
-		FlatIntervalTree tree = treeCache.computeIfAbsent(chr, k->loadTree(chr, log));
-		Collection<E> ret = new LinkedList<>();
-		ret.add((E)variant);
-		
-		List<Interval> overlaps = tree.query(variant.getStart(), variant.getEnd());
-		for (Interval interval : overlaps) {
+		synchronized(chr.intern()) {
+			FlatIntervalTree tree = treeCache.get(chr);
+			Collection<E> ret = new LinkedList<>();
+			ret.add((E)variant);
+			if (tree==null) {
+			    try {
+					tree = IntervalMarshall.loadTree(this.basePath, chr, log);
+				} catch (Exception e) {
+					logger.error("Cannot load tree for "+chr+" from file: "+this.basePath+" - "+e.getMessage(), e);
+					return ret.stream();
+				}
+				treeCache.put(chr, tree);
+			}
 			
-			Located destination = createIntersectionObject(interval.id(), interval.start(), interval.end());
-
-			if (log!=null && count%frequency==0) {
-				log.println("Example of id ("+getClass().getSimpleName()+") found: "+interval.id());
+			List<Interval> overlaps = tree.query(variant.getStart(), variant.getEnd());
+			for (Interval interval : overlaps) {
+				
+				Located destination = createIntersectionObject(interval.id(), interval.start(), interval.end());
+	
+				if (log!=null && count%frequency==0) {
+					log.println("Example of id ("+getClass().getSimpleName()+") found: "+interval.id());
+				}
+	
+				Map<String, Object> meta = interval.meta();
+				ret.add((E)oservice.createOverlap(variant, destination, this, meta));
 			}
-
-			Map<String, Object> meta = interval.meta();
-			ret.add((E)oservice.createOverlap(variant, destination, this, meta));
+			return ret.stream();
 		}
-		return ret.stream();
 	}
 
-	private FlatIntervalTree loadTree(String chr, IPrintStream log) {
-		String path = this.basePath+"_"+chr;
-		Path file = Paths.get(path+".ser");
-		
-		// If we made it, reload it.
-		if (Files.exists(file)) {
-			log.println("Loading tree for "+chr+" from file: "+file);
-			try {
-				return IntervalMarshall.loadTree(file);
-			} catch (ClassNotFoundException | IOException e) {
-				log.println("Error loading tree for "+chr+" from file: "+file+" - "+e.getMessage());
-			}
-		}
-		
-		// If we have not made it, load all the fragments into one intervals tree.
-		log.println("WARNING: Making tree which should not happen during streaming!");
-		try {
-			return IntervalMarshall.createTree(file, chr, log);
-		} catch (IOException e) {
-			log.println("Error loading tree for "+chr+" from file: "+file+" - "+e.getMessage());
-		}
-		return null;
-	}
 
 	private Stream<E> streamDatabase(Variant variant, IPrintStream log) {
 

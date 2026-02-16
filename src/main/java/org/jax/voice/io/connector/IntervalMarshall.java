@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jax.voice.domain.interval.FlatIntervalTree;
 import org.jax.voice.domain.interval.Interval;
 import org.jax.voice.io.IPrintStream;
@@ -32,8 +34,8 @@ public class IntervalMarshall {
 	 * @return
 	 * @throws IOException
 	 */
-	public static FlatIntervalTree createTree(Path file, String lchr) throws IOException {
-		return createTree(file, lchr, IPrintStream.of(System.out));
+	public static FlatIntervalTree createTree(Path file, String chr) throws IOException {
+		return createTree(file, chr, IPrintStream.of(System.out));
 	}
 	
 	/**
@@ -85,16 +87,74 @@ public class IntervalMarshall {
 		return false;
 	}
 	
+	public static FlatIntervalTree loadTree(String basePath, String chr, IPrintStream log) throws Exception {
+		
+		chr = chr.toUpperCase();
+		String path = basePath+"_"+chr;
+		
+		synchronized(path.intern()) {
+			
+			Path file = Paths.get(path+".ser");
+
+			// If we made it, reload it.
+			if (Files.exists(file)) {
+				log.println("Loading tree for "+chr+" from file: "+file);
+				try {
+					return IntervalMarshall.loadTree(file);
+				} catch (ClassNotFoundException | IOException e) {
+					log.println("Error loading tree for "+chr+" from file: "+file+" - "+e.getMessage());
+					throw e;
+				}
+			}
+			
+			// If we have not made it, load all the fragments into one intervals tree.
+			log.println("WARNING: Making tree which should not happen during streaming!");
+			try {
+				return IntervalMarshall.createTree(file, chr, log);
+			} catch (IOException e) {
+				log.println("Error loading tree for "+chr+" from file: "+file+" - "+e.getMessage());
+				throw e;
+			}
+		}
+	}
+
 	public static FlatIntervalTree loadTree(Path file) throws IOException, ClassNotFoundException {
 		try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(file))) {
 			return (FlatIntervalTree)ois.readObject();
 		}
 	}
 
-	public static void saveIntervals(Path path, List<Interval> intervals) throws IOException {
+	static void saveIntervals(Path path, List<Interval> intervals) throws IOException {
+		
+		path.getParent().toFile().mkdirs();
 		try (ObjectOutputStream ois = new ObjectOutputStream(Files.newOutputStream(path))) {
 			ois.writeObject(intervals);
 		}
+
+	}
+	
+
+	public static void saveIntervals(String basePath, String chr, List<Interval> intervals, IPrintStream out) throws IOException {
+		
+		chr = chr.toUpperCase();
+		String unc = RandomStringUtils.secure().nextAlphabetic(6);
+		Path path = Paths.get(basePath+"_intervals."+chr+"."+unc+".ser");
+
+		// In the unlikely event that the file already exists, 
+		// look for one not taken. This is still not entirely
+		// concurrent safe but should be good enough for our use case.
+		while (Files.exists(path)) {
+			// Unlikley but not impossible
+			out.println("WARNING: "+path.getFileName()+" exists");
+			unc = RandomStringUtils.secure().nextAlphabetic(6);
+			path = Paths.get(basePath+"_intervals."+chr+"."+unc+".ser");
+		}
+		
+		// This is still not entirely thread safe because two threads could
+		// generate the same random string at the same time, but the odds of that are astronomically 
+		// low and this is only used in one off build from which the logs can be checked.
+		
+		saveIntervals(path, intervals);
 	}
 
 	public static long getIntervalFileSize(Path path) throws IOException, ClassNotFoundException {
@@ -117,6 +177,8 @@ public class IntervalMarshall {
 		int par = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
 		executor = Executors.newFixedThreadPool(par);
 	}
+
+	private static final Pattern shardPattern = Pattern.compile("^([A-Za-z]+)_intervals\\.(\\d+|X|Y|M|NA)\\.([a-zA-Z]{6})\\.ser$");
 
 	/**
 	 * Create all the trees from the interval files.
@@ -142,8 +204,6 @@ public class IntervalMarshall {
 			if (!Files.isDirectory(dir)) {
 				throw new IllegalArgumentException("Not a directory: " + dir);
 			}
-	
-			final Pattern shardPattern = Pattern.compile("^([A-Za-z]+)_intervals\\.(\\d+|X|Y|M|NA)\\.[a-zA-Z]{6}\\.ser$");
 	
 			out.println("Reading files in "+dir);
 	
