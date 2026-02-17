@@ -165,11 +165,11 @@ public class IntervalMarshall {
 	}
 
 	public static List<Path> createTrees(Path dir) throws ClassNotFoundException, IOException {
-		return createTrees(dir, dir, IPrintStream.of(System.out));
+		return createTrees(dir, dir, IPrintStream.of(System.out), true);
 	}
 	
-	public static List<Path> createTrees(Path dir, IPrintStream out) throws ClassNotFoundException, IOException {
-		return createTrees(dir, dir, out);
+	public static List<Path> createTrees(Path dir, IPrintStream out, boolean delete) throws ClassNotFoundException, IOException {
+		return createTrees(dir, dir, out, delete);
 	}
 	
 	private static ExecutorService executor;
@@ -195,7 +195,7 @@ public class IntervalMarshall {
 	 * @throws IOException 
 	 * @throws ClassNotFoundException 
 	 */
-	public static List<Path> createTrees(Path dir, Path outDir, IPrintStream out) throws IOException, ClassNotFoundException {
+	public static List<Path> createTrees(Path dir, Path outDir, IPrintStream out, boolean delete) throws IOException, ClassNotFoundException {
 		
 		try {
 			if (dir == null) {
@@ -228,7 +228,8 @@ public class IntervalMarshall {
 			List<Future<Path>> outputFiles = new LinkedList<>();
 			for (Map.Entry<String, List<Path>> entry : groups.entrySet()) {
 				outputFiles.add(executor.submit(
-						()->treeForChromosome(entry.getKey(), entry.getValue(), outDir, out))
+						()->treeForChromosome(entry.getKey(), entry.getValue(), 
+												outDir, out, delete))
 					);
 			}
 			
@@ -249,7 +250,9 @@ public class IntervalMarshall {
 		}
 	}
 	
-	private static Path treeForChromosome(String key, List<Path> files, Path outDir, IPrintStream out) throws IOException, ClassNotFoundException {
+	private static Path treeForChromosome(String key, List<Path> files, 
+											Path outDir, IPrintStream out, 
+											boolean delete) throws IOException, ClassNotFoundException {
 		
 		String[] parts = key.split("\t", 2);
 		String type = parts[0];
@@ -269,6 +272,9 @@ public class IntervalMarshall {
 					out.println("Loaded "+shard.getFileName());
 					intervals.addAll(shardIntervals);
 				}
+			}
+			if (delete) {
+				Files.delete(shard);
 			}
 		}
 

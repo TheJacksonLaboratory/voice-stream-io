@@ -132,9 +132,10 @@ public class IntervalMarshallTest extends AbstractDataFileTest {
 		FileUtils.deleteQuietly(to.toFile());
 		to.toFile().mkdirs();
 		
-		List<Path> written = IntervalMarshall.createTrees(from, to, IPrintStream.of(System.out));
+		List<Path> written = IntervalMarshall.createTrees(from, to, IPrintStream.of(System.out), true);
 		assertNotNull(written);
 		assertEquals(1, written.size());
+		assertEquals(1, Files.list(written.get(0).getParent()).count());
 		
 	}
 	
