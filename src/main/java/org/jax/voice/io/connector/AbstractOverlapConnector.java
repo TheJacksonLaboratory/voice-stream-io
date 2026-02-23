@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -115,9 +116,10 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		this.idClass = idClass;
 	}
 
-	public void add(Path hFile) throws FileNotFoundException {
+	public Path add(Path hFile) throws FileNotFoundException {
 		if (!Files.exists(hFile)) throw new FileNotFoundException(hFile.toString());
 		this.source.add(hFile);
+		return hFile;
 	}
 
 	/**
@@ -209,6 +211,13 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	public long create() throws SQLException, ReaderException, IOException {
 		return create(null, IPrintStream.of(System.out));
 	}
+	
+	/**
+	 * Do not set the recorder during a full build or
+	 * memory will be exhausted. It is for testing to 
+	 * see the objects as they are processed.
+	 */
+	private Consumer<Located> recorder;
 
 	/**
 	 * Call this method to create a cache of the files which we have added.
@@ -218,6 +227,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 * @throws ReaderException
 	 * @throws IOException
 	 */
+	@SuppressWarnings("unchecked")
 	public final <T extends Located> long create(String prefix, IPrintStream out) throws SQLException, ReaderException, IOException {
 
 		if (source==null || source.isEmpty()) throw new IllegalArgumentException();
@@ -254,8 +264,15 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 				stream = stream.limit(limit.longValue());
 			}
 			
+			if (recorder!=null) {
+				stream = stream.peek(l->recorder.accept((T)l));
+			}
+			
 			long stored = 0;
-			if (mode == OverlapRecordMode.IN_MEMORY) {
+			if (mode == OverlapRecordMode.DRY_RUN) {
+				stored = stream.count();
+			
+			} else if (mode == OverlapRecordMode.IN_MEMORY) {
 				
 				// Hopefully this fits in memory...
 				List<Interval> intervals = stream
@@ -361,6 +378,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	}
 
 
+	@SuppressWarnings("unchecked")
 	private Stream<E> streamDatabase(Variant variant, IPrintStream log) {
 
 		String shardName = oservice.getShardName(variant.getChr(), variant.getStart());
@@ -890,6 +908,22 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 */
 	public void setMode(OverlapRecordMode mode) {
 		this.mode = mode;
+	}
+
+	/**
+	 * @return the recorder
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Located> Consumer<T> getRecorder() {
+		return (Consumer<T>)recorder;
+	}
+
+	/**
+	 * @param recorder the recorder to set
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Located> void setRecorder(Consumer<T> recorder) {
+		this.recorder = (Consumer<Located>)recorder;
 	}
 
 }

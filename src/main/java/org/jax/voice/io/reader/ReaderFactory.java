@@ -41,7 +41,7 @@ import org.apache.commons.io.FilenameUtils;
 public class ReaderFactory {
 
 	
-	public static final Pattern chrFilePattern = Pattern.compile("^([A-Za-z]+)-chr(\\d+|X|Y|M|NA).csv.gz$");
+	public static final Pattern chrFilePattern = Pattern.compile("^([A-Za-z]+)-chr(\\d+|X|Y|M|NA|nA).csv.gz$");
 
 	/** The Constant classes. */
 	private static final Map<Object, Object> classes;

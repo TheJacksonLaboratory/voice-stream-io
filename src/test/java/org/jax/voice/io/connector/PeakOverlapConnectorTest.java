@@ -10,16 +10,20 @@ import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.jax.voice.domain.Entity;
+import org.jax.voice.domain.Peak;
 import org.jax.voice.domain.PeakOverlap;
 import org.jax.voice.domain.Variant;
 import org.jax.voice.io.reader.AbstractDataFileTest;
+import org.jax.voice.io.reader.BedReader;
 import org.jax.voice.io.reader.ReaderFactory;
 import org.jax.voice.io.reader.ReaderRequest;
 import org.jax.voice.io.reader.StreamReader;
@@ -356,5 +360,68 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 			assertTrue(added.stream().allMatch(p->p.getFileName().toString().endsWith("20210107.bed.gz")));
 		}
 	}
+
+	
+	@Test
+	public void sameIdsGenerated() throws Exception {
+		
+		Path dir = Paths.get("./tmp/some_peaks");
+		FileUtils.deleteQuietly(dir.toFile());
+		dir.toFile().mkdirs();
+		
+		// You can run with more to check the ids better but it
+		// takes a long time.
+		// Path beds = getPath("data/bed_peaks/homo_sapiens/");
+		Path beds = getPath("data/bed_peaks/homo_sapiens/A549");
+		
+		// I think the pff is null in the build.
+		String pff = null;
+
+		// Both iterations of the peaks must
+		// generate exactly the same ids.
+		List<Path> added = new ArrayList<>();
+		List<Peak> opeaks = new ArrayList<>();
+		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("Homo sapiens", "peaks")) {
+			
+			conn.setStartIndex(10000L);
+			conn.setLocation(dir);
+			conn.setPeakFeatureFilter(pff); // May be null in which case we get them all.
+			added.addAll(conn.addAll(beds));
+			conn.setRecorder(p->opeaks.add((Peak)p));
+			
+			// This runs faster and is okay for this test.
+			conn.setMode(OverlapRecordMode.DRY_RUN);
+			
+			conn.create();
+		}
+		
+		BedReader.clearCounting();
+		
+		List<Peak> ipeaks = new ArrayList<>();
+		for (Path in : added) {
+			
+			ReaderRequest req = new ReaderRequest("Homo sapiens", in);
+			req.setStartIndex(10000L);
+			
+			StreamReader<Peak> reader = ReaderFactory.getReader(req);
+			reader.setChunkSize(1000);
+
+			reader.stream()
+					.filter(p->PeakOverlapConnector.filter(p,pff))
+					.peek(p->ipeaks.add(p))
+					.count();
+
+		}
+		
+		assertEquals(opeaks.size(), ipeaks.size());
+		
+		Iterator<Peak> oop = opeaks.iterator();
+		Iterator<Peak> iop = ipeaks.iterator();
+		
+		while(oop.hasNext() && iop.hasNext()) {
+			assertEquals(oop.next(), iop.next());
+		}
+	}
+
 
 }

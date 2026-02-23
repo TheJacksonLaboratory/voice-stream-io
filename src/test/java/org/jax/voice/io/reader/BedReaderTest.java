@@ -38,6 +38,7 @@ import org.jax.voice.domain.Peak;
 import org.jax.voice.domain.Peak.Strand;
 import org.jax.voice.domain.Species;
 import org.jax.voice.domain.Track;
+import org.jax.voice.io.connector.PeakOverlapConnector;
 import org.junit.Test;
 
 public class BedReaderTest extends AbstractDataFileTest {

@@ -150,6 +150,11 @@ public class IntervalMarshall {
 			path = Paths.get(basePath+"_intervals."+chr+"."+unc+".ser");
 		}
 		
+		String finalChr = chr;
+		boolean notMatching = intervals.stream()
+				.anyMatch(i->!finalChr.equals(i.chr()));
+		if (notMatching) throw new IllegalArgumentException("Intervals do not all match chr "+chr);
+				
 		// This is still not entirely thread safe because two threads could
 		// generate the same random string at the same time, but the odds of that are astronomically 
 		// low and this is only used in one off build from which the logs can be checked.
@@ -268,6 +273,11 @@ public class IntervalMarshall {
 			try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(shard))) {
 				@SuppressWarnings("unchecked")
 				List<Interval> shardIntervals = (List<Interval>) ois.readObject();
+				
+				boolean notMatching = intervals.stream()
+						.anyMatch(i->!chr.equals(i.chr()));
+				if (notMatching) throw new IllegalArgumentException("Intervals do not all match chr "+chr);
+
 				if (shardIntervals != null) {
 					out.println("Loaded "+shard.getFileName());
 					intervals.addAll(shardIntervals);

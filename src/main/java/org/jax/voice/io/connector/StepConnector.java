@@ -51,6 +51,7 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 		super("Mus musculus");
 		clazz  = null;
 		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
+		setMode(OverlapRecordMode.DATABASE); // We only want to link to steps if they overlap the variant.
 	}
 
 	/**
@@ -59,6 +60,7 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 	 */
 	public StepConnector(String species,Class<?> clazz) {
 		this(species,clazz, clazz.getSimpleName()); // Or variants, we have to process both.
+		setMode(OverlapRecordMode.DATABASE); // We only want to link to steps if they overlap the variant.
 	}
 
 	/**
@@ -71,6 +73,7 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 		this.clazz = clazz;
 		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
 		setFileName(databaseFileName);
+		setMode(OverlapRecordMode.DATABASE); // We only want to link to steps if they overlap the variant.
 	}
 	
 	/**
