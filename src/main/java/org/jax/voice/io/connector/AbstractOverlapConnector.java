@@ -186,6 +186,8 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 					// We must take the newer one.
 					if (getPathFilter().test(path)) {
 						source.add(path);
+					} else {
+						logger.debug("Skipping file that did not pass path filter: {}", path);
 					}
 					return FileVisitResult.CONTINUE;
 					
