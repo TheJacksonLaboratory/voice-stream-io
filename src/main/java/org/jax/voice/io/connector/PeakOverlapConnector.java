@@ -1,6 +1,7 @@
 package org.jax.voice.io.connector;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,6 +52,8 @@ public class PeakOverlapConnector<N extends Entity, E extends Entity> extends Ab
 	private boolean allowNoTissue = Boolean.parseBoolean(System.getProperty("org.jax.voice.io.connector.ALLOW_NOTISSUE_IN_PEAKID", "true"));
 	
 	private String peakFeatureFilter = null;
+	
+	private Path tissueList;
 	
 	public PeakOverlapConnector() {
 		this("Homo sapiens", "peaks");
@@ -245,6 +249,48 @@ public class PeakOverlapConnector<N extends Entity, E extends Entity> extends Ab
 			return (T) ret;
 		} 
 		throw new IllegalArgumentException("Cannot intersect with "+loc);
+	}
+	
+	protected Predicate<Path> getPathFilter() {
+		if (tissueList==null) return super.getPathFilter();
+		if (!Files.exists(tissueList)) return super.getPathFilter();
+		
+		try {
+			List<String> tissues = Files.lines(tissueList)
+										.map(String::trim)	
+										.filter(t -> !t.isBlank())
+										.filter(t -> !t.startsWith("#"))
+										.map(t -> "/"+t+"/")
+										.toList();
+			return p -> {
+				String fileName = p.toString();
+				for (String tissue : tissues) {
+					if (fileName.contains(tissue)) return true;
+				}
+				return false;
+			};
+		} catch (IOException e) {
+			logger.error("Error reading tissue list "+tissueList, e);
+			return super.getPathFilter();
+		}
+	}
+
+	/**
+	 * 
+	 * @return the tissueList
+	 */
+	public Path getTissueList() {
+		return tissueList;
+	}
+
+	/**
+	 * Set the tissue list before calling addAll because
+	 * the list is used to filter the peaks as they are added. 
+	 * If the list is not set, then all peaks are added.
+	 * @param tissueList the tissueList to set
+	 */
+	public void setTissueList(Path tissueList) {
+		this.tissueList = tissueList;
 	}
 
 }

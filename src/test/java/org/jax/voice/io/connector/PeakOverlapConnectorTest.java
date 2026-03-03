@@ -423,5 +423,30 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 		}
 	}
 
+	
+	@Test
+	public void checkCDIsFilteredOut() throws Exception {
+		
+		Path dir = getPath("data/bed_peaks/homo_sapiens");
+		assertTrue(Files.exists(dir));
 
+		try (PeakOverlapConnector<Variant, Entity> pc = new PeakOverlapConnector<>("Homo sapiens", "peaks")) {
+			Collection<Path> added = pc.addAll(dir);
+			assertEquals(6, added.size());
+			assertEquals(2, added.stream().filter(p->p.toString().contains("/A549/")).count());
+			assertEquals(4, added.stream().filter(p->p.toString().contains("/CD")).count());
+		}
+		
+		Path tl = Paths.get("src/test/resources/hs_tl.csv");
+		
+		try (PeakOverlapConnector<Variant, Entity> pc = new PeakOverlapConnector<>("Homo sapiens", "peaks")) {
+			pc.setTissueList(tl);
+			Collection<Path> added = pc.addAll(dir);
+			assertEquals(2, added.size());
+			assertEquals(2, added.stream().filter(p->p.toString().contains("/A549/")).count());
+			assertEquals(0, added.stream().filter(p->p.toString().contains("/CD")).count());
+		}
+
+	}
+	
 }

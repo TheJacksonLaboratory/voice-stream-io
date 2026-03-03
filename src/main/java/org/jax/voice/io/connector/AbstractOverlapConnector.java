@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -183,8 +184,11 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 
 					// The paths can have duplicates, especially for mouse.
 					// We must take the newer one.
-					source.add(path);
+					if (getPathFilter().test(path)) {
+						source.add(path);
+					}
 					return FileVisitResult.CONTINUE;
+					
 				} catch (Exception e) {
 					logger.error("Skipping file due to error during walk: {}", path, e);
 					System.err.println("Skipping file due to error during walk: " + path + " - " + e.getMessage());
@@ -206,6 +210,15 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		});
 
 		return source;
+	}
+	
+	/**
+	 * Override to provide a filter for the files to be added.
+	 * This is used in addAll() to filter the files to be added.
+	 * @return the filter 
+	 */
+	protected Predicate<Path> getPathFilter() {
+		return path->true;
 	}
 	
 	public long create() throws SQLException, ReaderException, IOException {
