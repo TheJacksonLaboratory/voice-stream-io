@@ -1,0 +1,152 @@
+# 1 = essential 
+# 2 = important
+# 3 = include if space
+# 4 = not needed
+astrocyte,"Astrocytes (brain, unspecified region)",1
+astrocyte_cerebellum,Cerebellar astrocytes,1
+astrocyte_spinal_cord,Spinal cord astrocytes,1
+bipolar_neuron,Bipolar neurons,1
+brain_1,Brain (bulk; replicate 1),1
+germinal_matrix,Brain germinal matrix (fetal),1
+H1_hESC_2,H1 human embryonic stem cells,1
+H1_hESC_3,H1 human embryonic stem cells,1
+H9_1,H9 human embryonic stem cells,1
+H9_2,H9 human embryonic stem cells,1
+HUES48,Human embryonic stem cell line HUES48,1
+HUES6,Human embryonic stem cell line HUES6,1
+HUES64,Human embryonic stem cell line HUES64,1
+iPS_15b,Induced pluripotent stem cell line (15b),1
+iPS_20b,Induced pluripotent stem cell line (20b),1
+iPS_DF_19_11,Induced pluripotent stem cell line DF 19‑11,1
+iPS_DF_6_9,Induced pluripotent stem cell line DF 6‑9,1
+neuron,Neurons (generic),1
+neurosphere_C,,1
+neurosphere_GE,,1
+NPC_1,Neural progenitor cells,1
+NPC_2,Neural progenitor cells,1
+NPC_3,Neural progenitor cells,1
+PFSK_1,Primitive neuroectodermal tumor (posterior fossa) line,1
+UCSF_4,Induced pluripotent stem cell line (UCSF‑4),1
+adrenal_gland,Adrenal gland,2
+endocrine_pancreas,Endocrine pancreas / islets,2
+endodermal,Endodermal cells (germ‑layer derivatives),2
+hepatocyte,Primary hepatocytes,2
+HUVEC,Human umbilical vein endothelial cells,2
+HUVEC_prol_CB,Human umbilical vein endothelial cells,2
+kidney,Kidney,2
+large_intestine,Large intestine / colon,2
+M0_CB,Macrophages M0 (cord blood),2
+M0_VB,Macrophages M0 (venous blood),2
+M1_CB,Macrophages M1 (cord blood),2
+M1_VB,Macrophages M1 (venous blood),2
+M2_CB,Macrophages M2 (cord blood),2
+M2_VB,Macrophages M2 (venous blood),2
+Panc1,Pancreatic ductal adenocarcinoma cell line,2
+pancreas,Pancreas (bulk),2
+pancreas_2,Pancreas (replicate 2),2
+placenta,Placenta,2
+sigmoid_colon,Sigmoid colon,2
+small_intestine_1,,2
+small_intestine_2,,2
+stomach_1,Stomach (replicate 1),2
+stomach_2,Stomach (replicate 2),2
+thymus_1,,2
+thymus_2,,2
+transverse_colon,,2
+trophoblast,Placental trophoblasts,2
+amnion,Placental amnion,3
+aorta,,3
+cardiac_muscle,Heart muscle (myocardium),3
+EPC_VB,Endothelial progenitor cells (venous blood),3
+esophagus,Esophagus,3
+heart,Heart (whole tissue),3
+HSMM,Human skeletal muscle myoblasts,3
+IMR_90,Fetal lung fibroblasts,3
+left_ventricle,Heart—left ventricle,3
+leg_muscle,Skeletal muscle (leg),3
+MSC,Mesenchymal stromal/stem cells,3
+MSC_VB,Mesenchymal stromal/stem cells (VB donor),3
+psoas_muscle,Skeletal muscle (psoas),3
+right_atrium,,3
+right_ventricle,,3
+A549,Lung alveolar epithelial adenocarcinoma cell line,1
+A673,Ewing sarcoma cell line,4
+B,B lymphocytes (unspecified subset),4
+B_PB,B cells (peripheral blood),4
+CD14_monocyte_1,,4
+CD14_monocyte_PB,,4
+CD38__naive_B_CB,,4
+CD38__naive_B_VB,,4
+CD4_ab_T,,4
+CD4_ab_T_CB,,4
+CD4_ab_T_PB_1,,4
+CD4_ab_T_PB_2,,4
+CD4_ab_T_Th,,4
+CD4_ab_T_VB,,4
+CD4_CD25_ab_Treg_PB,,4
+CD8_ab_T_CB,,4
+CD8_ab_T_PB,,4
+CD8_ab_T_VB,,4
+CM_CD4_ab_T_VB,,4
+CMP_CD4_1,,4
+CMP_CD4_2,,4
+CMP_CD4_3,,4
+dermal_fibroblast,Dermal fibroblasts,4
+DND_41,T‑cell acute lymphoblastic leukemia (T‑ALL) line,4
+EB_CB,Erythroblasts (cord blood),4
+EM_CD4_ab_T_PB,Effector‑memory CD4 αβ T cells (peripheral blood),4
+EM_CD8_ab_T_VB,Effector‑memory CD8 αβ T cells (venous blood),4
+eosinophil_VB,,4
+foreskin_fibroblast_1,,4
+foreskin_fibroblast_2,,4
+foreskin_keratinocyte_1,,4
+foreskin_keratinocyte_2,,4
+foreskin_melanocyte_1,,4
+foreskin_melanocyte_2,,4
+GM10847,EBV‑transformed lymphoblastoid cell line (LCL),4
+GM12878,EBV‑LCL (B cell),4
+GM12891,EBV‑LCL (B cell),4
+GM12892,EBV‑LCL (B cell),4
+GM15510,EBV‑LCL (B cell),4
+GM18505,EBV‑LCL (B cell),4
+GM18526,EBV‑LCL (B cell),4
+GM18951,EBV‑LCL (B cell),4
+GM19099,EBV‑LCL (B cell),4
+GM19193,EBV‑LCL (B cell),4
+HCT116,Colorectal carcinoma cell line,4
+HeLa_S3,Cervical adenocarcinoma (HeLa S3),4
+HepG2,Hepatocellular carcinoma cell line,4
+Hu__Fe_,Possibly “Human fetal [tissue/cells]” or “human feeder”,4
+K562,Chronic myelogenous leukemia / erythroleukemia,4
+Karpas_422,Diffuse large B‑cell lymphoma cell line,4
+keratinocyte,Epidermal keratinocytes,4
+lung_1,Lung (replicate 1),4
+lung_2,Lung (replicate 2),4
+mammary_epithelial_1,,4
+mammary_epithelial_2,,4
+mammary_myoepithelial,,4
+MCF_7,Breast adenocarcinoma cell line,4
+MM_1S,Multiple myeloma (plasma cell) line,4
+monocyte_CB,,4
+monocyte_VB,,4
+mononuclear_PB,,4
+myotube,Multinucleated skeletal myotubes,4
+naive_B_To,Naïve B cells (tonsil),4
+naive_B_VB,Naïve B cells (venous blood),4
+neutro_myelocyte,,4
+neutrophil_CB,,4
+neutrophil_PB,,4
+neutrophil_VB,,4
+NHLF,Normal human lung fibroblasts,4
+NK_PB,,4
+osteoblast,,4
+ovary,,4
+PC_3,Prostate adenocarcinoma cell line,4
+PC_9,,4
+SK_N_,SK‑N neuroblastoma (unspecified subtype),4
+SK_N_SH_RA,SK‑N‑SH neuroblastoma ± retinoic acid,4
+spleen,Spleen,4
+T,T lymphocytes (unspecified),4
+T_PB,T cells (peripheral blood),4
+Th17,T helper 17 cells,4
+trunk_muscle,,4

@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -437,7 +438,7 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 			assertEquals(4, added.stream().filter(p->p.toString().contains("/CD")).count());
 		}
 		
-		Path tl = Paths.get("src/test/resources/hs_tl.csv");
+		Path tl = Paths.get("src/test/resources/hs_tissue_A549_higher.csv");
 		
 		try (PeakOverlapConnector<Variant, Entity> pc = new PeakOverlapConnector<>("Homo sapiens", "peaks")) {
 			pc.setTissueList(tl);
@@ -445,6 +446,71 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 			assertEquals(2, added.size());
 			assertEquals(2, added.stream().filter(p->p.toString().contains("/A549/")).count());
 			assertEquals(0, added.stream().filter(p->p.toString().contains("/CD")).count());
+			
+			
+			Predicate<Path> tester = pc.getPathFilter();
+			// 1
+			assertTrue(tester.test(Paths.get("/test/A549/test/")));
+			assertTrue(tester.test(Paths.get("/test/brain_1/test/")));
+			// 2
+			assertTrue(tester.test(Paths.get("/test/M0_CB/test/")));
+			assertTrue(tester.test(Paths.get("/test/M0_VB/test/")));
+			// 3
+			assertTrue(tester.test(Paths.get("/test/HSMM/test/")));
+			assertTrue(tester.test(Paths.get("/test/left_ventricle/test/")));
+			// 4
+			assertFalse(tester.test(Paths.get("/test/foreskin_melanocyte_1/test/")));
+			assertFalse(tester.test(Paths.get("/test/T_PB/test/")));
+
+			
+			pc.setTissueLevel(4);
+			tester = pc.getPathFilter();
+			
+			// 1
+			assertTrue(tester.test(Paths.get("/test/A549/test/")));
+			assertTrue(tester.test(Paths.get("/test/brain_1/test/")));
+			// 2
+			assertTrue(tester.test(Paths.get("/test/M0_CB/test/")));
+			assertTrue(tester.test(Paths.get("/test/M0_VB/test/")));
+			// 3
+			assertTrue(tester.test(Paths.get("/test/HSMM/test/")));
+			assertTrue(tester.test(Paths.get("/test/left_ventricle/test/")));
+			// 4
+			assertTrue(tester.test(Paths.get("/test/foreskin_melanocyte_1/test/")));
+			assertTrue(tester.test(Paths.get("/test/T_PB/test/")));
+
+			pc.setTissueLevel(2);
+			tester = pc.getPathFilter();
+			
+			// 1
+			assertTrue(tester.test(Paths.get("/test/A549/test/")));
+			assertTrue(tester.test(Paths.get("/test/brain_1/test/")));
+			// 2
+			assertTrue(tester.test(Paths.get("/test/M0_CB/test/")));
+			assertTrue(tester.test(Paths.get("/test/M0_VB/test/")));
+			// 3
+			assertFalse(tester.test(Paths.get("/test/HSMM/test/")));
+			assertFalse(tester.test(Paths.get("/test/left_ventricle/test/")));
+			// 4
+			assertFalse(tester.test(Paths.get("/test/foreskin_melanocyte_1/test/")));
+			assertFalse(tester.test(Paths.get("/test/T_PB/test/")));
+
+			pc.setTissueLevel(1);
+			tester = pc.getPathFilter();
+			
+			// 1
+			assertTrue(tester.test(Paths.get("/test/A549/test/")));
+			assertTrue(tester.test(Paths.get("/test/brain_1/test/")));
+			// 2
+			assertFalse(tester.test(Paths.get("/test/M0_CB/test/")));
+			assertFalse(tester.test(Paths.get("/test/M0_VB/test/")));
+			// 3
+			assertFalse(tester.test(Paths.get("/test/HSMM/test/")));
+			assertFalse(tester.test(Paths.get("/test/left_ventricle/test/")));
+			// 4
+			assertFalse(tester.test(Paths.get("/test/foreskin_melanocyte_1/test/")));
+			assertFalse(tester.test(Paths.get("/test/T_PB/test/")));
+
 		}
 
 	}
