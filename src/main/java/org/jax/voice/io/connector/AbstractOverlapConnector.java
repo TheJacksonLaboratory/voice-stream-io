@@ -459,6 +459,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 				
 	 		} catch (Exception ne) {
 				logger.warn("Cannot map "+variant, ne);
+				ne.printStackTrace(System.err);
 			}
 	 		
 		}
@@ -565,6 +566,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			if (!ubshardName.equals(lshardName)) storeBase(ubshardName, line, prefix, out);
 			return line;
 		} catch (Exception ne) {
+			ne.printStackTrace(System.err);
 			out.println("Trying to process "+line+" failed: "+ne.getMessage());
 			try {
 				out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(line));
@@ -608,7 +610,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			stmt.execute();
 			
 		} catch (Exception ne) {
-			ne.printStackTrace();
+			ne.printStackTrace(System.err);
 			throw new RuntimeException(ne);
 		}
 	}

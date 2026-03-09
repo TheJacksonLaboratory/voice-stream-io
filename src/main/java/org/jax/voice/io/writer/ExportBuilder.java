@@ -125,6 +125,7 @@ public class ExportBuilder implements AutoCloseable {
 			}
 		} catch (Exception ne) {
 			errors.add(ne);
+			ne.printStackTrace(System.err);
 			throw ne;
 		}
 	}

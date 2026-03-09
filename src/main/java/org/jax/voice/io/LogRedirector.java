@@ -106,7 +106,7 @@ public class LogRedirector implements IPrintStream {
 			}
 		
 		} catch (Exception ne) {
-			ne.printStackTrace();
+			ne.printStackTrace(System.err);
 			
 		} finally {
 			
