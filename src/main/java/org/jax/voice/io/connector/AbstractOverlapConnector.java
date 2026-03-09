@@ -691,7 +691,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		if (chr==null) return null;
 		String path = this.basePath+"_"+chr;
 		if (out!=null) out.println("New database connection to file: "+path);
-		String uri = "jdbc:h2:"+path+";mode=MySQL";
+		String uri = "jdbc:h2:"+path+";mode=MySQL;AUTO_SERVER=TRUE";
 		if (readOnly) uri = uri+";ACCESS_MODE_DATA=r";
 		return DriverManager.getConnection(uri,"sa","");
 	}
