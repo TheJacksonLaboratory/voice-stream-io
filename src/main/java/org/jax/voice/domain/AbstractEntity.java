@@ -128,6 +128,7 @@ public abstract class AbstractEntity implements Entity {
 		try {
 			return toCsv();
 		} catch (Exception ne) {
+			ne.printStackTrace(System.err);
 			return super.toString();
 		}
 	}

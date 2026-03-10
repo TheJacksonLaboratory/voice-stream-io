@@ -166,6 +166,7 @@ public class EQTLFunction<N extends EQTL, E extends EQTL> implements Function<N,
 				samples.stream().forEach(s->roughMap.put(new TissueKey(s), s));
 			} catch (Exception ne) {
 				logger.error("Cannot parse sample attributes!", ne);
+				ne.printStackTrace(System.err);
 			}
 		}
 		Sample sample = roughMap.get(new TissueKey(t.getTissueName()));

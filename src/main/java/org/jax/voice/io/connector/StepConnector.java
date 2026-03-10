@@ -187,6 +187,7 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 	 			throw runtime;
 	 		} catch (Exception ne) {
 				logger.warn("Cannot map "+loc, ne);
+				ne.printStackTrace(System.err);
 			}
 		}
 		

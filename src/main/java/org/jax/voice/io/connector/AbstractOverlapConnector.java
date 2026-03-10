@@ -689,9 +689,12 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		
 		chr = cservice.getChromosome(chr);
 		if (chr==null) return null;
-		String path = this.basePath+"_"+chr;
+		String spath = this.basePath+"_"+chr;
+		Path path = Paths.get(spath).toAbsolutePath().normalize();
+		path.getParent().toFile().mkdirs();
+		
 		if (out!=null) out.println("New database connection to file: "+path);
-		String uri = "jdbc:h2:"+path+";mode=MySQL;AUTO_SERVER=TRUE";
+		String uri = "jdbc:h2:"+path.toString()+";mode=MySQL;AUTO_SERVER=TRUE;FILE_LOCK=FS";
 		if (readOnly) uri = uri+";ACCESS_MODE_DATA=r";
 		return DriverManager.getConnection(uri,"sa","");
 	}
