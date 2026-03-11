@@ -363,7 +363,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			return Stream.of((E)variant);
 		}
 		
-		String chr = variant.getChr().toUpperCase();
+		String chr = cservice.getChromosome(variant.getChr());
 		synchronized(chr.intern()) {
 			FlatIntervalTree tree = treeCache.get(chr);
 			Collection<E> ret = new LinkedList<>();
@@ -398,7 +398,8 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	@SuppressWarnings("unchecked")
 	private Stream<E> streamDatabase(Variant variant, IPrintStream log) {
 
-		String shardName = oservice.getShardName(variant.getChr(), variant.getStart());
+		String chr = cservice.getChromosome(variant.getChr());
+		String shardName = oservice.getShardName(chr, variant.getStart());
 
 		Collection<Entity> ret = new LinkedList<>();
 		ret.add(variant);
@@ -409,7 +410,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		
 		if (shardName!=null) {
 	 		try {
-				PreparedStatement lookup = getSelectStatement(variant.getChr(), shardName, log);
+				PreparedStatement lookup = getSelectStatement(chr, shardName, log);
 				if (lookup==null) { // Not all peaks have reasonable chromosomes.
 					return (Stream<E>) ret.stream();
 				}
@@ -446,7 +447,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 										createIntersectionObject(id, rlow, rup), 
 										this, meta);
 						if (o!=null) {
-							o.setChr(variant.getChr());
+							o.setChr(chr);
 							ret.add(o);
 							usedIds.add(id);
 							
@@ -548,7 +549,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		try {
 			int lower = Math.min(line.getStart(), line.getEnd());
 			int upper = Math.max(line.getStart(), line.getEnd());
-			String chr = line.getChr();
+			String chr = cservice.getChromosome(line.getChr());
 			String lshardName = oservice.getShardName(chr, lower);
 			if (lshardName==null) {
 				String msg = "Could not find shard for "+chr;
@@ -584,7 +585,8 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		
 		if (shardName==null) return;
 		try {
-			PreparedStatement stmt = getInsertStatement(line.getChr(), shardName, out);
+			String chr = cservice.getChromosome(line.getChr());
+			PreparedStatement stmt = getInsertStatement(chr, shardName, out);
 			if (stmt==null) return; // Not all peaks have reasonable chromosomes.
 			
 			// Put the key in, lower case if string.
@@ -708,6 +710,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		
 		chr = cservice.getChromosome(chr);
 		if (chr==null) return null;
+		
 		String spath = this.basePath+"_"+chr;
 		Path path = Paths.get(spath).toAbsolutePath().normalize();
 		path.getParent().toFile().mkdirs();
