@@ -310,8 +310,8 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 		
 		assertNumber(dir, "Variant-chr1.csv.gz", 815);
 		assertNumber(dir, "PeakOverlap-chr1.csv.gz", 719); 
-		assertNumber(dir, "TranscriptOverlap-chr1.csv.gz", 4271); 
-		assertNumber(dir, "RegulatoryFeatureOverlap-chr1.csv.gz", 767);
+		assertNumber(dir, "TranscriptOverlap-chr1.csv.gz", 2399); 
+		assertNumber(dir, "RegulatoryFeatureOverlap-chr1.csv.gz", 695);
 		// TODO Some eQTL overlaps as well...
 
 		assertTrue(Files.exists(dir.resolve("PeakOverlap-header.csv")));

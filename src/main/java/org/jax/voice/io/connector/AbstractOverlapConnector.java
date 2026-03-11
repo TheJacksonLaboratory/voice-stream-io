@@ -58,7 +58,8 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 * however we normally run this on sumner with 3Tb so we use
 	 * memory not database.
 	 */
-	protected OverlapRecordMode mode = OverlapRecordMode.IN_MEMORY;
+	protected OverlapRecordMode mode = OverlapRecordMode.valueOf(System.getenv().getOrDefault("OVERLAP_RECORD_MODE", 
+																		OverlapRecordMode.DATABASE.name()));
 	
 	protected static Logger logger = LoggerFactory.getLogger(AbstractOverlapConnector.class);
 	private static ObjectMapper mapper = new ObjectMapper();
@@ -567,9 +568,9 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			return line;
 		} catch (Exception ne) {
 			ne.printStackTrace(System.err);
-			out.println("Trying to process "+line+" failed: "+ne.getMessage());
+			if (out!=null) out.println("Trying to process "+line+" failed: "+ne.getMessage());
 			try {
-				out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(line));
+				if (out!=null) out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(line));
 			} catch (JsonProcessingException e) {
 				e.printStackTrace();
 			}
@@ -700,7 +701,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		}
 		
 		if (out!=null) out.println("New database connection to file: "+path);
-		String uri = "jdbc:h2:"+path.toString()+";mode=MySQL;AUTO_SERVER=TRUE";
+		String uri = "jdbc:h2:"+path.toString()+";mode=MySQL";
 		if (readOnly) uri = uri+";ACCESS_MODE_DATA=r";
 		return DriverManager.getConnection(uri,"sa","");
 	}
