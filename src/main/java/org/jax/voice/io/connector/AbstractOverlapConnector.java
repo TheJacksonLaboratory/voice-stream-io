@@ -32,6 +32,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.h2.jdbc.JdbcSQLSyntaxErrorException;
 import org.jax.voice.domain.AbstractEntity;
 import org.jax.voice.domain.Entity;
 import org.jax.voice.domain.Located;
@@ -622,6 +623,10 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	
 	
 	private PreparedStatement getInsertStatement(String chr, String shardName, IPrintStream out) throws Exception {
+		
+		// Double check chr is standardized and valid.
+		chr = cservice.getChromosome(chr);
+		
 		Connection conn = getConnection(chr, false, out);
 		if (conn==null) return null;
 		PreparedStatement stmt = insertCache.get(shardName);
@@ -658,6 +663,9 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	
 	protected synchronized PreparedStatement getSelectStatement(String chr, String shardName, IPrintStream out) throws Exception {
 		
+		// Double check chr is standardized and valid.
+		chr = cservice.getChromosome(chr);
+
 		String name = Thread.currentThread().getName();
 		String cacheKey = name+"/"+fileName+"/"+shardName;
 		PreparedStatement stmt = selectCache.get(cacheKey);
@@ -669,7 +677,14 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			// Does (a,b) bisect (lower,upper)?
 			// (a <= upper) && (lower <= b);
 			String sql = "SELECT entityId, lower, upper, meta FROM "+tableName+shardName+" WHERE (?<=upper AND lower<=?);";
-			stmt = conn.prepareStatement(sql);
+			try {
+				stmt = conn.prepareStatement(sql);
+			} catch (JdbcSQLSyntaxErrorException jsee) {
+				String msg = "Cannot find table "+tableName+shardName+" on chromosome "+chr+".";
+				logger.error(msg);
+				System.err.println(msg);
+				return null;
+			}
 			selectCache.put(cacheKey, stmt);
 		} 
 		return stmt;
@@ -677,6 +692,9 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 
 	protected Connection getConnection(String chr, boolean readOnly, IPrintStream out) throws Exception {
 		
+		// Double check chr is standardized and valid.
+		chr = cservice.getChromosome(chr);
+
 		String connKey = fileName+"/"+chr;
 		Connection ret = connCache.get(connKey);
 		if (ret == null) {
