@@ -715,15 +715,19 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		Path path = Paths.get(spath).toAbsolutePath().normalize();
 		path.getParent().toFile().mkdirs();
 		
-		if (Files.exists(path)) {
-			if (out!=null) out.println("Deleting existing database file: "+path);
-			System.err.println("Deleting existing database file: "+path);
-			Files.delete(path);
+		String uri = "jdbc:h2:"+path.toString()+";mode=MySQL";
+		Path dbFile = Paths.get(path.toString() + ".mv.db"); 
+
+		if (readOnly && Files.exists(dbFile)) {
+			uri += ";ACCESS_MODE_DATA=r";
+		} else if (Files.exists(dbFile)) {
+			if (out!=null) out.println("Deleting existing database file: "+dbFile);
+			System.err.println("Deleting existing database file: "+dbFile);
+			Files.delete(dbFile);
 		}
 		
-		if (out!=null) out.println("New database connection to file: "+path);
-		String uri = "jdbc:h2:"+path.toString()+";mode=MySQL";
-		if (readOnly) uri = uri+";ACCESS_MODE_DATA=r";
+		if (out!=null) out.println("Database connection to file: "+path);
+		
 		return DriverManager.getConnection(uri,"sa","");
 	}
 
