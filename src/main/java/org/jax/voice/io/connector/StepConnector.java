@@ -123,7 +123,7 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 		Located end = Located.at(step.getChr2(), step.getStart2(), step.getEnd2());		
 		Set<String> rsIds = lookup(end, Variant.class, "rs", log);
 		
-		if (geneIds.isEmpty() || rsIds.isEmpty()) {
+		if (geneIds==null || geneIds.isEmpty() || rsIds==null || rsIds.isEmpty()) {
 			return null;
 		}
 		return expand(step, geneIds, rsIds);
