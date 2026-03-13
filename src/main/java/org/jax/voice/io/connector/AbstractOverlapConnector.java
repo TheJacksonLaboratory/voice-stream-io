@@ -716,14 +716,8 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		path.getParent().toFile().mkdirs();
 		
 		String uri = "jdbc:h2:"+path.toString()+";mode=MySQL";
-		Path dbFile = Paths.get(path.toString() + ".mv.db"); 
-
-		if (readOnly && Files.exists(dbFile)) {
+		if (readOnly) {
 			uri += ";ACCESS_MODE_DATA=r";
-		} else if (Files.exists(dbFile)) {
-			if (out!=null) out.println("Deleting existing database file: "+dbFile);
-			System.err.println("Deleting existing database file: "+dbFile);
-			Files.delete(dbFile);
 		}
 		
 		if (out!=null) out.println("Database connection to file: "+path);
@@ -784,6 +778,8 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		
 		long size = 0;
 		for (Path path : files) {
+			if (!Files.exists(path)) continue;
+			if (Files.size(path)<100) continue; // Ignore tiny files which are probably empty databases
 			size += (mode == OverlapRecordMode.IN_MEMORY)
 					? IntervalMarshall.getIntervalFileSize(path) 
 					: getDatabaseSize(path);

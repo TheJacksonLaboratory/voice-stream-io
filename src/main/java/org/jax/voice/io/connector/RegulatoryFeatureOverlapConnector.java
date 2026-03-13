@@ -45,7 +45,7 @@ public class RegulatoryFeatureOverlapConnector<N extends Entity, E extends Entit
 	 */
 	public RegulatoryFeatureOverlapConnector(String species, String databaseFileName) {
 		super(species);
-		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
+		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGFEAT_REGIONS"));
 		setFileName(databaseFileName);
 		setFileFilters(".gff.gz", ".gff");
 		setNewestInDirectoryByName(true);

@@ -67,7 +67,7 @@ public class PeakOverlapConnector<N extends Entity, E extends Entity> extends Ab
 	 */
 	public PeakOverlapConnector(String species, String databaseFileName) {
 		super(species, Long.class);
-		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
+		setTableName(System.getProperty("gweaver.mappingdb.tableName","PEAK_REGIONS"));
 		setFileName(databaseFileName);
 		setFileFilters(".bed.gz", ".bed");
 		setNewestInDirectoryByName(true);
