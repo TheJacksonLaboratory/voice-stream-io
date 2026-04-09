@@ -639,15 +639,15 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 				if(idClass==String.class) {
 					idColumn = "entityId CHARACTER(128) NOT NULL, ";
 				} else if (idClass==Long.class || idClass==Integer.class) {
-					idColumn = "entityId BIGINT NOT NULL UNIQUE, ";
+					idColumn = "entityId BIGINT NOT NULL, ";
 				} else {
 					throw new IllegalArgumentException("Cannot use id class "+idClass);
 				}
 
 				String sql =  "CREATE TABLE IF NOT EXISTS " + tableName+shardName + 
 						" (id BIGINT NOT NULL AUTO_INCREMENT, " + 
-						// Important UNIQUE means there is an index and
-						// that the later lookup will be fast.
+						// entityId is the application-assigned peak id. It is not required to be
+						// unique within H2 since the same peak can appear in multiple shards.
 						idColumn +
 						" lower INTEGER," +
 						" upper INTEGER," +
