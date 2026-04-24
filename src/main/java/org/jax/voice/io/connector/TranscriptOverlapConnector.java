@@ -27,7 +27,7 @@ public class TranscriptOverlapConnector<N extends Entity, E extends Entity> exte
 	 */
 	public TranscriptOverlapConnector(String species, String databaseFileName) {
 		super(species);
-		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
+		setTableName(System.getProperty("gweaver.mappingdb.tableName","TRANS_REGIONS"));
 		setFileName(databaseFileName);
 		setFileFilters(".gtf.gz", ".gtf");
 	}
@@ -59,6 +59,7 @@ public class TranscriptOverlapConnector<N extends Entity, E extends Entity> exte
 			TranscriptOverlap ret = new TranscriptOverlap();
 			ret.setSpecies(Species.code(species));
 			ret.setTranscript(loc);
+			ret.setChr(variant.getChr());
 			ret.setVariant(variant);
 			return (T) ret;
 		}

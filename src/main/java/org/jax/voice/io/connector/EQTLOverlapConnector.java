@@ -32,7 +32,7 @@ public class EQTLOverlapConnector<N extends Entity, E extends Entity> extends Ab
 	 */
 	public EQTLOverlapConnector(String species, String databaseFileName) {
 		super(species);
-		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
+		setTableName(System.getProperty("gweaver.mappingdb.tableName","EQTL_REGIONS"));
 		setFileName(databaseFileName);
 		setFileFilters(".csv.gz", ".csv");
 	}
@@ -88,6 +88,7 @@ public class EQTLOverlapConnector<N extends Entity, E extends Entity> extends Ab
 			EQTLOverlap ret = new EQTLOverlap();
 			ret.setSpecies(Species.code(species));
 			ret.setGene(loc);
+			ret.setChr(variant.getChr());
 			ret.setVariant(variant);
 			return (T) ret;
 		}

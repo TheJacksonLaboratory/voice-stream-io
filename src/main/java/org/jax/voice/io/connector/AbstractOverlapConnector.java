@@ -2,9 +2,12 @@ package org.jax.voice.io.connector;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -23,13 +26,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.h2.jdbc.JdbcSQLSyntaxErrorException;
 import org.jax.voice.domain.AbstractEntity;
 import org.jax.voice.domain.Entity;
 import org.jax.voice.domain.Located;
 import org.jax.voice.domain.Variant;
+import org.jax.voice.domain.interval.FlatIntervalTree;
+import org.jax.voice.domain.interval.Interval;
 import org.jax.voice.io.IPrintStream;
 import org.jax.voice.io.reader.ReaderException;
 import org.jax.voice.io.reader.ReaderFactory;
@@ -45,6 +54,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class AbstractOverlapConnector<N extends Entity, E extends Entity> implements Connector<N, E>, AutoCloseable, IntersectionCreator {
 
+	/**
+	 * You can try with database to run with a restricted memory
+	 * however we normally run this on sumner with 3Tb so we use
+	 * memory not database.
+	 */
+	protected OverlapRecordMode mode = OverlapRecordMode.valueOf(System.getenv().getOrDefault("OVERLAP_RECORD_MODE", 
+																		OverlapRecordMode.DATABASE.name()));
 	
 	protected static Logger logger = LoggerFactory.getLogger(AbstractOverlapConnector.class);
 	private static ObjectMapper mapper = new ObjectMapper();
@@ -59,7 +75,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	protected Collection<Path> source = new TreeSet<>();
 	
 	// Just done by chromosome
-	protected Map<String,Connection>		   connCache   =  Collections.synchronizedMap(new HashMap<>(23));
+	protected Map<String,Connection>		 connCache   =  Collections.synchronizedMap(new HashMap<>(23));
 
 	// These will get large e.g. ~20k depending on BASE_SIZE
 	protected Map<String,PreparedStatement>  insertCache =  Collections.synchronizedMap(new HashMap<>(1009));
@@ -103,9 +119,10 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		this.idClass = idClass;
 	}
 
-	public void add(Path hFile) throws FileNotFoundException {
+	public Path add(Path hFile) throws FileNotFoundException {
 		if (!Files.exists(hFile)) throw new FileNotFoundException(hFile.toString());
 		this.source.add(hFile);
+		return hFile;
 	}
 
 	/**
@@ -120,53 +137,104 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	/**
 	 * Adds all the bed.gz files to be cached recursively.
 	 * Stopping if the limit is reached (reduces total files for testing).
+	 *
+	 * Hardened for very large/racey file systems: Files.walk() can throw
+	 * UncheckedIOException(NoSuchFileException) if a file disappears between
+	 * discovery and attribute read. We skip those and keep walking.
+	 *
 	 * @param dir
 	 * @param limit
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	Collection<Path> addAll(Path dir, int limit) throws IOException {
-		
-		Files.walk(dir).forEach(path->{
-			if (!Files.isRegularFile(path)) {
-				logger.debug(path+" is not a regular file and will not be used!");
-				return;
-			}
-			
-			boolean isOkay = fileFilters.isEmpty();
-			for (String filter : this.fileFilters) {
-				if (path.getFileName().toString().toLowerCase().endsWith(filter)) {
-					isOkay = true;
-					break;
-				}
-			}
-			if (!isOkay) return;
-			
-			if (limit>0 && source.size()>limit) return; // Do not add things after limit reached.
-			
-			if (isNewestInDirectoryByName()) {
-				
+
+		Files.walkFileTree(dir, new SimpleFileVisitor<>() {
+			@Override
+			public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) {
 				try {
-					List<Path> peers = new ArrayList<>(Files.list(path.getParent()).toList());
-					Collections.sort(peers);
-					Path last = peers.get(peers.size()-1);
-					if (!Files.isSameFile(path, last)) {
-						return; // Do not add older files.
+					if (path == null) return FileVisitResult.CONTINUE;
+					if (!Files.isRegularFile(path)) {
+						logger.debug(path + " is not a regular file and will not be used!");
+						return FileVisitResult.CONTINUE;
 					}
-				} catch (IOException ne) {
-					logger.error("Cannot check for older ignored files in dir {}", path.getParent());
+
+					boolean isOkay = fileFilters.isEmpty();
+					for (String filter : fileFilters) {
+						if (path.getFileName().toString().toLowerCase().endsWith(filter)) {
+							isOkay = true;
+							break;
+						}
+					}
+					if (!isOkay) return FileVisitResult.CONTINUE;
+
+					// Stop adding after limit is reached.
+					if (limit > 0 && source.size() > limit) return FileVisitResult.TERMINATE;
+
+					if (isNewestInDirectoryByName()) {
+						try (Stream<Path> ls = Files.list(path.getParent())) {
+							List<Path> peers = new ArrayList<>(ls.toList());
+							Collections.sort(peers);
+							Path last = peers.get(peers.size() - 1);
+							if (!Files.isSameFile(path, last)) {
+								return FileVisitResult.CONTINUE; // Do not add older files.
+							}
+						} catch (IOException ne) {
+							logger.error("Cannot check for older ignored files in dir {}", path.getParent());
+							System.err.println("Skipping file due to error during walk: " + path + " - " + ne.getMessage());
+						}
+					}
+
+					// The paths can have duplicates, especially for mouse.
+					// We must take the newer one.
+					if (getPathFilter().test(path)) {
+						source.add(path);
+					} else {
+						logger.debug("Skipping file that did not pass path filter: {}", path);
+					}
+					return FileVisitResult.CONTINUE;
+					
+				} catch (Exception e) {
+					logger.error("Skipping file due to error during walk: {}", path, e);
+					System.err.println("Skipping file due to error during walk: " + path + " - " + e.getMessage());
+					return FileVisitResult.CONTINUE;
 				}
 			}
-			
-			// The paths can have duplicates, especially for mouse. 
-			// We must take the newer one.
-			source.add(path);
+
+			@Override
+			public FileVisitResult visitFileFailed(Path file, IOException exc) {
+				// Don't abort the whole run if one file can't be accessed.
+				if (exc instanceof java.nio.file.NoSuchFileException) {
+					logger.warn("Skipping missing file during walk: {}", file);
+					System.err.println("Skipping missing file during walk: " + file + " - " + exc.getMessage());
+					return FileVisitResult.CONTINUE;
+				}
+				logger.warn("Cannot access file during walk: {}", file, exc);
+				return FileVisitResult.CONTINUE;
+			}
 		});
+
 		return source;
+	}
+	
+	/**
+	 * Override to provide a filter for the files to be added.
+	 * This is used in addAll() to filter the files to be added.
+	 * @return the filter 
+	 */
+	protected Predicate<Path> getPathFilter() {
+		return path->true;
 	}
 	
 	public long create() throws SQLException, ReaderException, IOException {
 		return create(null, IPrintStream.of(System.out));
 	}
+	
+	/**
+	 * Do not set the recorder during a full build or
+	 * memory will be exhausted. It is for testing to 
+	 * see the objects as they are processed.
+	 */
+	private Consumer<Located> recorder;
 
 	/**
 	 * Call this method to create a cache of the files which we have added.
@@ -176,6 +244,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 * @throws ReaderException
 	 * @throws IOException
 	 */
+	@SuppressWarnings("unchecked")
 	public final <T extends Located> long create(String prefix, IPrintStream out) throws SQLException, ReaderException, IOException {
 
 		if (source==null || source.isEmpty()) throw new IllegalArgumentException();
@@ -212,25 +281,125 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 				stream = stream.limit(limit.longValue());
 			}
 			
-			long stored = stream.map(loc -> store(loc, prefix, out))
-						        .filter(s->s!=null)
-							    .count();
+			if (recorder!=null) {
+				stream = stream.peek(l->recorder.accept((T)l));
+			}
+			
+			long stored = 0;
+			if (mode == OverlapRecordMode.DRY_RUN) {
+				stored = stream.count();
+			
+			} else if (mode == OverlapRecordMode.IN_MEMORY) {
+				
+				// Hopefully this fits in memory...
+				List<Interval> intervals = stream
+						.map(loc->new Line(loc, getMeta(loc)))
+						.map(line->line.loc().interval(line.meta()))
+						.toList();
+				save(intervals, out);
+				stored = intervals.size();
+
+			} else {
+				stored = stream.map(loc -> store(loc, prefix, out))
+				        .filter(s->s!=null)
+					    .count();
+			}
+			
 			added += stored;
 			
-		} 
+		}
+		
 		return added;
 	}
 	
+	private void save(List<Interval> mixedUpIntervals, IPrintStream out) throws IOException {
+		
+		Map<String, List<Interval>> byChr = mixedUpIntervals.stream()
+											.collect(Collectors.groupingBy(Interval::chr));
+		
+		for (String chr : byChr.keySet()) {
+			List<Interval> intervals = byChr.get(chr);
+
+			if (intervals==null || intervals.isEmpty()) continue;
+
+			IntervalMarshall.saveIntervals(this.basePath, chr, intervals, out);
+		}
+	}
+
+	/**
+	 * For bulk import (which is the usual case) the Session 
+	 * will null from the ExportBuilder.
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public Stream<E> stream(N ent, Session session, IPrintStream log) {
+		
+		if (log==null) log = IPrintStream.of(System.out);
 		
 		// Other streams may run through this connector, but
 		// if they send other objects, we return them.
 		if (!(ent instanceof Variant)) return (Stream<E>) Stream.of(ent);
 		Variant variant = (Variant)ent;
 		
-		String shardName = oservice.getShardName(variant.getChr(), variant.getStart());
+		try {
+			if (this.mode==OverlapRecordMode.IN_MEMORY) {
+				return streamTree(variant,log);
+			} else {
+				return streamDatabase(variant,log);
+			}
+		} finally {
+			count++;
+		}
+	
+	}
+	
+	private Map<String,FlatIntervalTree> treeCache = new ConcurrentHashMap<>();
+	
+	@SuppressWarnings("unchecked")
+	private Stream<E> streamTree(Variant variant, IPrintStream log) {
+		
+		if (variant.getChr()==null) {
+			log.println("Variant has no chromosome, cannot find overlaps: "+variant);
+			return Stream.of((E)variant);
+		}
+		
+		String chr = cservice.getChromosome(variant.getChr());
+		synchronized(chr.intern()) {
+			FlatIntervalTree tree = treeCache.get(chr);
+			Collection<E> ret = new LinkedList<>();
+			ret.add((E)variant);
+			if (tree==null) {
+			    try {
+					tree = IntervalMarshall.loadTree(this.basePath, chr, log);
+				} catch (Exception e) {
+					logger.error("Cannot load tree for "+chr+" from file: "+this.basePath+" - "+e.getMessage(), e);
+					return ret.stream();
+				}
+				treeCache.put(chr, tree);
+			}
+			
+			List<Interval> overlaps = tree.query(variant.getStart(), variant.getEnd());
+			for (Interval interval : overlaps) {
+				
+				Located destination = createIntersectionObject(interval.id(), interval.start(), interval.end());
+	
+				if (log!=null && count%frequency==0) {
+					log.println("Example of id ("+getClass().getSimpleName()+") found: "+interval.id());
+				}
+	
+				Map<String, Object> meta = interval.meta();
+				ret.add((E)oservice.createOverlap(variant, destination, this, meta));
+			}
+			return ret.stream();
+		}
+	}
+
+
+	@SuppressWarnings("unchecked")
+	private Stream<E> streamDatabase(Variant variant, IPrintStream log) {
+
+		String chr = cservice.getChromosome(variant.getChr());
+		String shardName = oservice.getShardName(chr, variant.getStart());
 
 		Collection<Entity> ret = new LinkedList<>();
 		ret.add(variant);
@@ -241,7 +410,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		
 		if (shardName!=null) {
 	 		try {
-				PreparedStatement lookup = getSelectStatement(variant.getChr(), shardName, log);
+				PreparedStatement lookup = getSelectStatement(chr, shardName, log);
 				if (lookup==null) { // Not all peaks have reasonable chromosomes.
 					return (Stream<E>) ret.stream();
 				}
@@ -273,10 +442,12 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 							log.println("Example of id ("+getClass().getSimpleName()+") found: "+id);
 						}
 
-						Map<String,Object> meta = mapper.readValue(smeta, mapReference);
-						AbstractEntity o = oservice.intersection(variant, createIntersectionObject(id, rlow, rup), this, meta);
+						final Map<String, Object> meta = getMeta(smeta, log);
+						AbstractEntity o = oservice.intersection(variant, 
+										createIntersectionObject(id, rlow, rup), 
+										this, meta);
 						if (o!=null) {
-							o.setChr(variant.getChr());
+							o.setChr(chr);
 							ret.add(o);
 							usedIds.add(id);
 							
@@ -291,15 +462,27 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 				
 	 		} catch (Exception ne) {
 				logger.warn("Cannot map "+variant, ne);
+				ne.printStackTrace(System.err);
 			}
 	 		
 		}
-		count++;
 		
 		return (Stream<E>) ret.stream();
-	
 	}
-	
+
+	private Map<String, Object> getMeta(String smeta, IPrintStream log) {
+		
+		if (smeta!=null) {
+			if (smeta.isBlank()) return null;
+			try {
+				return mapper.readValue(smeta, mapReference);
+			} catch (JsonProcessingException e) {
+				log.getPrintStream().println();
+			}
+		} 
+		return null;
+	}
+
 	private Object get(ResultSet res, Class<?> idClass2, int i) throws SQLException {
 		return switch (idClass2.getSimpleName()) {
 			case "String"  -> res.getString(i);
@@ -366,7 +549,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		try {
 			int lower = Math.min(line.getStart(), line.getEnd());
 			int upper = Math.max(line.getStart(), line.getEnd());
-			String chr = line.getChr();
+			String chr = cservice.getChromosome(line.getChr());
 			String lshardName = oservice.getShardName(chr, lower);
 			if (lshardName==null) {
 				String msg = "Could not find shard for "+chr;
@@ -386,9 +569,10 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			if (!ubshardName.equals(lshardName)) storeBase(ubshardName, line, prefix, out);
 			return line;
 		} catch (Exception ne) {
-			out.println("Trying to process "+line+" failed: "+ne.getMessage());
+			ne.printStackTrace(System.err);
+			if (out!=null) out.println("Trying to process "+line+" failed: "+ne.getMessage());
 			try {
-				out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(line));
+				if (out!=null) out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(line));
 			} catch (JsonProcessingException e) {
 				e.printStackTrace();
 			}
@@ -401,7 +585,8 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		
 		if (shardName==null) return;
 		try {
-			PreparedStatement stmt = getInsertStatement(line.getChr(), shardName, out);
+			String chr = cservice.getChromosome(line.getChr());
+			PreparedStatement stmt = getInsertStatement(chr, shardName, out);
 			if (stmt==null) return; // Not all peaks have reasonable chromosomes.
 			
 			// Put the key in, lower case if string.
@@ -424,22 +609,26 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			stmt.setInt(3,upper);
 			
 			Map<String, Object> meta = getMeta(line);
-			String smeta = mapper.writeValueAsString(meta);
-			stmt.setString(4,smeta);
+			String smeta = meta!=null ? mapper.writeValueAsString(meta) : "";
+			stmt.setString(4, smeta);
 			stmt.execute();
 			
 		} catch (Exception ne) {
-			ne.printStackTrace();
+			ne.printStackTrace(System.err);
 			throw new RuntimeException(ne);
 		}
 	}
 	
 	protected <T extends Located> Map<String, Object> getMeta(T line) {
-		return Collections.emptyMap();
+		return null;
 	}
 	
 	
 	private PreparedStatement getInsertStatement(String chr, String shardName, IPrintStream out) throws Exception {
+		
+		// Double check chr is standardized and valid.
+		chr = cservice.getChromosome(chr);
+		
 		Connection conn = getConnection(chr, false, out);
 		if (conn==null) return null;
 		PreparedStatement stmt = insertCache.get(shardName);
@@ -450,15 +639,15 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 				if(idClass==String.class) {
 					idColumn = "entityId CHARACTER(128) NOT NULL, ";
 				} else if (idClass==Long.class || idClass==Integer.class) {
-					idColumn = "entityId BIGINT NOT NULL UNIQUE, ";
+					idColumn = "entityId BIGINT NOT NULL, ";
 				} else {
 					throw new IllegalArgumentException("Cannot use id class "+idClass);
 				}
 
 				String sql =  "CREATE TABLE IF NOT EXISTS " + tableName+shardName + 
 						" (id BIGINT NOT NULL AUTO_INCREMENT, " + 
-						// Important UNIQUE means there is an index and
-						// that the later lookup will be fast.
+						// entityId is the application-assigned peak id. It is not required to be
+						// unique within H2 since the same peak can appear in multiple shards.
 						idColumn +
 						" lower INTEGER," +
 						" upper INTEGER," +
@@ -476,6 +665,9 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	
 	protected synchronized PreparedStatement getSelectStatement(String chr, String shardName, IPrintStream out) throws Exception {
 		
+		// Double check chr is standardized and valid.
+		chr = cservice.getChromosome(chr);
+
 		String name = Thread.currentThread().getName();
 		String cacheKey = name+"/"+fileName+"/"+shardName;
 		PreparedStatement stmt = selectCache.get(cacheKey);
@@ -487,7 +679,14 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			// Does (a,b) bisect (lower,upper)?
 			// (a <= upper) && (lower <= b);
 			String sql = "SELECT entityId, lower, upper, meta FROM "+tableName+shardName+" WHERE (?<=upper AND lower<=?);";
-			stmt = conn.prepareStatement(sql);
+			try {
+				stmt = conn.prepareStatement(sql);
+			} catch (JdbcSQLSyntaxErrorException jsee) {
+				String msg = "Cannot find table "+tableName+shardName+" on chromosome "+chr+".";
+				logger.error(msg);
+				System.err.println(msg);
+				return null;
+			}
 			selectCache.put(cacheKey, stmt);
 		} 
 		return stmt;
@@ -495,6 +694,9 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 
 	protected Connection getConnection(String chr, boolean readOnly, IPrintStream out) throws Exception {
 		
+		// Double check chr is standardized and valid.
+		chr = cservice.getChromosome(chr);
+
 		String connKey = fileName+"/"+chr;
 		Connection ret = connCache.get(connKey);
 		if (ret == null) {
@@ -508,10 +710,18 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		
 		chr = cservice.getChromosome(chr);
 		if (chr==null) return null;
-		String path = this.basePath+"_"+chr;
-		if (out!=null) out.println("New database connection to file: "+path);
-		String uri = "jdbc:h2:"+path+";mode=MySQL";
-		if (readOnly) uri = uri+";ACCESS_MODE_DATA=r";
+		
+		String spath = this.basePath+"_"+chr;
+		Path path = Paths.get(spath).toAbsolutePath().normalize();
+		path.getParent().toFile().mkdirs();
+		
+		String uri = "jdbc:h2:"+path.toString()+";mode=MySQL";
+		if (readOnly) {
+			uri += ";ACCESS_MODE_DATA=r";
+		}
+		
+		if (out!=null) out.println("Database connection to file: "+path);
+		
 		return DriverManager.getConnection(uri,"sa","");
 	}
 
@@ -557,37 +767,55 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 		Path dir = Paths.get(this.basePath).getParent();
 		List<Path> files = Files.list(dir)
 				                .filter(Files::isRegularFile)
-				                .filter(p->p.getFileName().toString().toLowerCase().endsWith(".mv.db"))
-				                .collect(Collectors.toList());
+				                .filter(p->{
+				                	if (mode == OverlapRecordMode.IN_MEMORY) {
+				                		return p.getFileName().toString().toLowerCase().endsWith(".ser") && 
+				                				!p.getFileName().toString().contains("_intervals.");
+				                	} else {
+				                		return p.getFileName().toString().toLowerCase().endsWith(".mv.db");
+				                	}
+				                }).collect(Collectors.toList());
 		
 		long size = 0;
 		for (Path path : files) {
-			try (Connection conn = createConnection(path);
-			     Statement tabs = conn.createStatement()) {
-				
-				DatabaseMetaData md = conn.getMetaData();
-				ResultSet rs = md.getTables(null, null, "%", null);
-				List<String> names = new ArrayList<>();
-				while (rs.next()) {
-					String tname = rs.getString(3);
-					if (tname.startsWith(this.tableName)) names.add(tname);
-				}
-				
-				for (String tname : names) {
-					try(Statement stmt = conn.createStatement()) {  
+			if (!Files.exists(path)) continue;
+			if (Files.size(path)<100) continue; // Ignore tiny files which are probably empty databases
+			size += (mode == OverlapRecordMode.IN_MEMORY)
+					? IntervalMarshall.getIntervalFileSize(path) 
+					: getDatabaseSize(path);
+		}
+		return size;
+	}
+
+	private long getDatabaseSize(Path path) throws SQLException {
 		
-						String sql = "SELECT COUNT(1) FROM "+tname+";";
-						try(ResultSet res = stmt.executeQuery(sql)) {
-							res.next();
-							size += res.getLong(1);
-						}
+		long size = 0;
+
+		try (Connection conn = createConnection(path);
+			 Statement tabs = conn.createStatement()) {
+
+			DatabaseMetaData md = conn.getMetaData();
+			ResultSet rs = md.getTables(null, null, "%", null);
+			List<String> names = new ArrayList<>();
+			while (rs.next()) {
+				String tname = rs.getString(3);
+				if (tname.startsWith(this.tableName)) names.add(tname);
+			}
+
+			for (String tname : names) {
+				try(Statement stmt = conn.createStatement()) {  
+
+					String sql = "SELECT COUNT(1) FROM "+tname+";";
+					try(ResultSet res = stmt.executeQuery(sql)) {
+						res.next();
+						size += res.getLong(1);
 					}
 				}
 			}
 		}
 		return size;
 	}
-	
+
 	private Connection createConnection(Path path) throws SQLException {
 		
 		String spath = path.toString().substring(0, path.toString().toLowerCase().lastIndexOf(".mv.db"));
@@ -598,6 +826,8 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 
 	public void close() throws SQLException {
 		
+		treeCache.clear();
+
 		for (String shard : insertCache.keySet()) {
 			Statement stmt = insertCache.get(shard);
 			stmt.close();
@@ -613,6 +843,7 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 			conn.close();
 		}
 		connCache.clear();
+		
 	}
 
 	/**
@@ -711,6 +942,36 @@ public abstract class AbstractOverlapConnector<N extends Entity, E extends Entit
 	 */
 	public void setStartIndex(Long startIndex) {
 		this.startIndex = startIndex;
+	}
+
+	/**
+	 * @return the mode
+	 */
+	public OverlapRecordMode getMode() {
+		return mode;
+	}
+
+	/**
+	 * @param mode the mode to set
+	 */
+	public void setMode(OverlapRecordMode mode) {
+		this.mode = mode;
+	}
+
+	/**
+	 * @return the recorder
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Located> Consumer<T> getRecorder() {
+		return (Consumer<T>)recorder;
+	}
+
+	/**
+	 * @param recorder the recorder to set
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Located> void setRecorder(Consumer<T> recorder) {
+		this.recorder = (Consumer<Located>)recorder;
 	}
 
 }

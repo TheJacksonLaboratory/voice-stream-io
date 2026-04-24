@@ -56,10 +56,13 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 
 	private ChromosomeService cservice = ChromosomeService.getInstance();
 	
-	private static AtomicLong peakIdCounter = null;
+	private static final Object lock = new Object();
+	private static volatile AtomicLong peakIdCounter = null;
 	
 	public static void clearCounting() {
-		peakIdCounter = null;
+		synchronized(lock) {
+			peakIdCounter = null;
+		}
 	}
 	
 	/**
@@ -78,11 +81,13 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 		// external commands can control the value from which the
 		// counter starts and we can ingest human and mouse at the
 		// same time for instance.
-		if (peakIdCounter==null) {
-			Long start = this.request!=null && this.request.getStartIndex()!=null 
-					   ? this.request.getStartIndex() 
-					   : 0L;
-			peakIdCounter = new AtomicLong(start);
+		synchronized(lock) {
+			if (peakIdCounter==null) {
+				Long start = this.request!=null && this.request.getStartIndex()!=null 
+						   ? this.request.getStartIndex() 
+						   : 0L;
+				peakIdCounter = new AtomicLong(start);
+			}
 		}
 		return this;
 	}
@@ -181,11 +186,12 @@ public class BedReader<N extends NamedEntity> extends LineIteratorReader<N> {
 	 */
 	public Long createPeakId(String featType, String chr, int start, int end, String tissue) {
 		
-		if (peakIdCounter==null) {
-			synchronized(this) {
-				if (peakIdCounter==null) {
-					peakIdCounter = new AtomicLong(this.request.getStartIndex());
-				}
+		synchronized(lock) {
+			if (peakIdCounter==null) {
+				long startVal = this.request!=null && this.request.getStartIndex()!=null
+						      ? this.request.getStartIndex()
+						      : 0L;
+				peakIdCounter = new AtomicLong(startVal);
 			}
 		}
 		return peakIdCounter.getAndIncrement();

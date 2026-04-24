@@ -10,16 +10,21 @@ import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.jax.voice.domain.Entity;
+import org.jax.voice.domain.Peak;
 import org.jax.voice.domain.PeakOverlap;
 import org.jax.voice.domain.Variant;
 import org.jax.voice.io.reader.AbstractDataFileTest;
+import org.jax.voice.io.reader.BedReader;
 import org.jax.voice.io.reader.ReaderFactory;
 import org.jax.voice.io.reader.ReaderRequest;
 import org.jax.voice.io.reader.StreamReader;
@@ -322,7 +327,7 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 		
 		ReaderRequest reader = new ReaderRequest("test", dir.resolve("PeakOverlap-chr1.csv.gz"));
 		reader.setReaderHint("MapCSVReader");
-		assertTrue(ReaderFactory.getReader(reader).stream().count() >= 719); // There are 719 but some randoms might collide.
+		assertTrue("Count was: "+ReaderFactory.getReader(reader).stream().count(), ReaderFactory.getReader(reader).stream().count() >= 719); // There are 719 but some randoms might collide.
 		assertTrue(Files.exists(dir.resolve("PeakOverlap-header.csv")));
 		assertTrue(Files.size(dir.resolve("Variant-chr1.csv.gz"))>100);
 		assertTrue(Files.exists(dir.resolve("Variant-header.csv")));
@@ -357,4 +362,157 @@ public class PeakOverlapConnectorTest extends AbstractDataFileTest{
 		}
 	}
 
+	
+	@Test
+	public void sameIdsGenerated() throws Exception {
+		
+		Path dir = Paths.get("./tmp/some_peaks");
+		FileUtils.deleteQuietly(dir.toFile());
+		dir.toFile().mkdirs();
+		
+		// You can run with more to check the ids better but it
+		// takes a long time.
+		// Path beds = getPath("data/bed_peaks/homo_sapiens/");
+		Path beds = getPath("data/bed_peaks/homo_sapiens/A549");
+		
+		// I think the pff is null in the build.
+		String pff = null;
+
+		// Both iterations of the peaks must
+		// generate exactly the same ids.
+		List<Path> added = new ArrayList<>();
+		List<Peak> opeaks = new ArrayList<>();
+		try (PeakOverlapConnector<Variant, Entity> conn = new PeakOverlapConnector<>("Homo sapiens", "peaks")) {
+			
+			conn.setStartIndex(10000L);
+			conn.setLocation(dir);
+			conn.setPeakFeatureFilter(pff); // May be null in which case we get them all.
+			added.addAll(conn.addAll(beds));
+			conn.setRecorder(p->opeaks.add((Peak)p));
+			
+			// This runs faster and is okay for this test.
+			conn.setMode(OverlapRecordMode.DRY_RUN);
+			
+			conn.create();
+		}
+		
+		BedReader.clearCounting();
+		
+		List<Peak> ipeaks = new ArrayList<>();
+		for (Path in : added) {
+			
+			ReaderRequest req = new ReaderRequest("Homo sapiens", in);
+			req.setStartIndex(10000L);
+			
+			StreamReader<Peak> reader = ReaderFactory.getReader(req);
+			reader.setChunkSize(1000);
+
+			reader.stream()
+					.filter(p->PeakOverlapConnector.filter(p,pff))
+					.peek(p->ipeaks.add(p))
+					.count();
+
+		}
+		
+		assertEquals(opeaks.size(), ipeaks.size());
+		
+		Iterator<Peak> oop = opeaks.iterator();
+		Iterator<Peak> iop = ipeaks.iterator();
+		
+		while(oop.hasNext() && iop.hasNext()) {
+			assertEquals(oop.next(), iop.next());
+		}
+	}
+
+	
+	@Test
+	public void checkCDIsFilteredOut() throws Exception {
+		
+		Path dir = getPath("data/bed_peaks/homo_sapiens");
+		assertTrue(Files.exists(dir));
+
+		try (PeakOverlapConnector<Variant, Entity> pc = new PeakOverlapConnector<>("Homo sapiens", "peaks")) {
+			Collection<Path> added = pc.addAll(dir);
+			assertEquals(6, added.size());
+			assertEquals(2, added.stream().filter(p->p.toString().contains("/A549/")).count());
+			assertEquals(4, added.stream().filter(p->p.toString().contains("/CD")).count());
+		}
+		
+		Path tl = Paths.get("src/test/resources/hs_tissue_A549_higher.csv");
+		
+		try (PeakOverlapConnector<Variant, Entity> pc = new PeakOverlapConnector<>("Homo sapiens", "peaks")) {
+			pc.setTissueList(tl);
+			Collection<Path> added = pc.addAll(dir);
+			assertEquals(2, added.size());
+			assertEquals(2, added.stream().filter(p->p.toString().contains("/A549/")).count());
+			assertEquals(0, added.stream().filter(p->p.toString().contains("/CD")).count());
+			
+			
+			Predicate<Path> tester = pc.getPathFilter();
+			// 1
+			assertTrue(tester.test(Paths.get("/test/A549/test/")));
+			assertTrue(tester.test(Paths.get("/test/brain_1/test/")));
+			// 2
+			assertTrue(tester.test(Paths.get("/test/M0_CB/test/")));
+			assertTrue(tester.test(Paths.get("/test/M0_VB/test/")));
+			// 3
+			assertTrue(tester.test(Paths.get("/test/HSMM/test/")));
+			assertTrue(tester.test(Paths.get("/test/left_ventricle/test/")));
+			// 4
+			assertFalse(tester.test(Paths.get("/test/foreskin_melanocyte_1/test/")));
+			assertFalse(tester.test(Paths.get("/test/T_PB/test/")));
+
+			
+			pc.setTissueLevel(4);
+			tester = pc.getPathFilter();
+			
+			// 1
+			assertTrue(tester.test(Paths.get("/test/A549/test/")));
+			assertTrue(tester.test(Paths.get("/test/brain_1/test/")));
+			// 2
+			assertTrue(tester.test(Paths.get("/test/M0_CB/test/")));
+			assertTrue(tester.test(Paths.get("/test/M0_VB/test/")));
+			// 3
+			assertTrue(tester.test(Paths.get("/test/HSMM/test/")));
+			assertTrue(tester.test(Paths.get("/test/left_ventricle/test/")));
+			// 4
+			assertTrue(tester.test(Paths.get("/test/foreskin_melanocyte_1/test/")));
+			assertTrue(tester.test(Paths.get("/test/T_PB/test/")));
+
+			pc.setTissueLevel(2);
+			tester = pc.getPathFilter();
+			
+			// 1
+			assertTrue(tester.test(Paths.get("/test/A549/test/")));
+			assertTrue(tester.test(Paths.get("/test/brain_1/test/")));
+			// 2
+			assertTrue(tester.test(Paths.get("/test/M0_CB/test/")));
+			assertTrue(tester.test(Paths.get("/test/M0_VB/test/")));
+			// 3
+			assertFalse(tester.test(Paths.get("/test/HSMM/test/")));
+			assertFalse(tester.test(Paths.get("/test/left_ventricle/test/")));
+			// 4
+			assertFalse(tester.test(Paths.get("/test/foreskin_melanocyte_1/test/")));
+			assertFalse(tester.test(Paths.get("/test/T_PB/test/")));
+
+			pc.setTissueLevel(1);
+			tester = pc.getPathFilter();
+			
+			// 1
+			assertTrue(tester.test(Paths.get("/test/A549/test/")));
+			assertTrue(tester.test(Paths.get("/test/brain_1/test/")));
+			// 2
+			assertFalse(tester.test(Paths.get("/test/M0_CB/test/")));
+			assertFalse(tester.test(Paths.get("/test/M0_VB/test/")));
+			// 3
+			assertFalse(tester.test(Paths.get("/test/HSMM/test/")));
+			assertFalse(tester.test(Paths.get("/test/left_ventricle/test/")));
+			// 4
+			assertFalse(tester.test(Paths.get("/test/foreskin_melanocyte_1/test/")));
+			assertFalse(tester.test(Paths.get("/test/T_PB/test/")));
+
+		}
+
+	}
+	
 }

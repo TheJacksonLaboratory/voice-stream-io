@@ -1,6 +1,7 @@
 package org.jax.voice.io.connector;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,6 +53,9 @@ public class PeakOverlapConnector<N extends Entity, E extends Entity> extends Ab
 	
 	private String peakFeatureFilter = null;
 	
+	private Path tissueList;
+	private int tissueLevel=3;
+	
 	public PeakOverlapConnector() {
 		this("Homo sapiens", "peaks");
 	}
@@ -62,7 +67,7 @@ public class PeakOverlapConnector<N extends Entity, E extends Entity> extends Ab
 	 */
 	public PeakOverlapConnector(String species, String databaseFileName) {
 		super(species, Long.class);
-		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
+		setTableName(System.getProperty("gweaver.mappingdb.tableName","PEAK_REGIONS"));
 		setFileName(databaseFileName);
 		setFileFilters(".bed.gz", ".bed");
 		setNewestInDirectoryByName(true);
@@ -234,16 +239,107 @@ public class PeakOverlapConnector<N extends Entity, E extends Entity> extends Ab
 
 	@Override
 	public <T extends AbstractEntity> T create(Located loc, 
-			Variant variant) {
+											Variant variant) {
 		
 		if (loc instanceof Peak) {
 			PeakOverlap ret = new PeakOverlap();
 			ret.setSpecies(Species.code(species));
 			ret.setPeak(loc);
+			ret.setChr(variant.getChr());
 			ret.setVariant(variant);
 			return (T) ret;
 		} 
 		throw new IllegalArgumentException("Cannot intersect with "+loc);
+	}
+
+	// Split on commas that are not inside double-quotes.
+	// Good enough for "one record per line" CSV (no embedded newlines).
+	private static final Pattern CSV_SPLIT_COMMA_OUTSIDE_QUOTES =
+			Pattern.compile(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+
+	private static String csvUnquote(String s) {
+		if (s == null) return null;
+		s = s.trim();
+		if (s.length() >= 2 && s.startsWith("\"") && s.endsWith("\"")) {
+			s = s.substring(1, s.length() - 1);
+			// CSV escaping for quotes is doubled quotes: "" -> "
+			s = s.replace("\"\"", "\"");
+		}
+		return s;
+	}
+
+	private static String[] splitCsvLineLoose(String line) {
+		// Preserve trailing empties, since some rows might omit optional columns.
+		String[] parts = CSV_SPLIT_COMMA_OUTSIDE_QUOTES.split(line, -1);
+		for (int i = 0; i < parts.length; i++) {
+			parts[i] = csvUnquote(parts[i]);
+		}
+		return parts;
+	}
+	
+	protected Predicate<Path> cachedPathFilter=null;
+	
+	protected Predicate<Path> getPathFilter() {
+		
+		if (cachedPathFilter!=null) return cachedPathFilter;
+		if (tissueList==null) return super.getPathFilter();
+		if (!Files.exists(tissueList)) return super.getPathFilter();
+		
+		try {
+			List<String> tissues = Files.lines(tissueList)
+									.map(String::trim)	
+									.filter(t -> !t.isBlank())
+									.filter(t -> !t.startsWith("#"))
+									// Some lines use quotes e.g. astrocyte,"Astrocytes (brain, unspecified region)",1
+									.map(PeakOverlapConnector::splitCsvLineLoose)
+									.filter(sa -> Integer.parseInt(sa[2]) <= tissueLevel)
+									.map(sa -> "/"+sa[0]+"/")
+									.toList();
+			cachedPathFilter = p -> {
+				String fileName = p.toString();
+				for (String tissue : tissues) {
+					if (fileName.contains(tissue)) return true;
+				}
+				return false;
+			};
+			return cachedPathFilter;
+		} catch (IOException e) {
+			logger.error("Error reading tissue list "+tissueList, e);
+			return super.getPathFilter();
+		}
+	}
+
+	/**
+	 * 
+	 * @return the tissueList
+	 */
+	public Path getTissueList() {
+		return tissueList;
+	}
+
+	/**
+	 * Set the tissue list before calling addAll because
+	 * the list is used to filter the peaks as they are added. 
+	 * If the list is not set, then all peaks are added.
+	 * @param tissueList the tissueList to set
+	 */
+	public void setTissueList(Path tissueList) {
+		this.tissueList = tissueList;
+	}
+
+	/**
+	 * @return the tissueLevel
+	 */
+	public int getTissueLevel() {
+		return tissueLevel;
+	}
+
+	/**
+	 * @param tissueLevel the tissueLevel to set
+	 */
+	public void setTissueLevel(int tissueLevel) {
+		this.tissueLevel = tissueLevel;
+		this.cachedPathFilter=null;
 	}
 
 }

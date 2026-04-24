@@ -50,7 +50,8 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 	public StepConnector() {
 		super("Mus musculus");
 		clazz  = null;
-		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
+		setTableName(System.getProperty("gweaver.mappingdb.tableName","STEP_REGIONS"));
+		setMode(OverlapRecordMode.DATABASE); // We only want to link to steps if they overlap the variant.
 	}
 
 	/**
@@ -59,6 +60,7 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 	 */
 	public StepConnector(String species,Class<?> clazz) {
 		this(species,clazz, clazz.getSimpleName()); // Or variants, we have to process both.
+		setMode(OverlapRecordMode.DATABASE); // We only want to link to steps if they overlap the variant.
 	}
 
 	/**
@@ -69,8 +71,9 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 	public StepConnector(String species, Class<?> clazz, String databaseFileName) {
 		super(species);
 		this.clazz = clazz;
-		setTableName(System.getProperty("gweaver.mappingdb.tableName","REGIONS"));
+		setTableName(System.getProperty("gweaver.mappingdb.tableName","STEP_REGIONS"));
 		setFileName(databaseFileName);
+		setMode(OverlapRecordMode.DATABASE); // We only want to link to steps if they overlap the variant.
 	}
 	
 	/**
@@ -120,7 +123,7 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 		Located end = Located.at(step.getChr2(), step.getStart2(), step.getEnd2());		
 		Set<String> rsIds = lookup(end, Variant.class, "rs", log);
 		
-		if (geneIds.isEmpty() || rsIds.isEmpty()) {
+		if (geneIds==null || geneIds.isEmpty() || rsIds==null || rsIds.isEmpty()) {
 			return null;
 		}
 		return expand(step, geneIds, rsIds);
@@ -184,6 +187,7 @@ public class StepConnector extends AbstractOverlapConnector<Step,Contact>  {
 	 			throw runtime;
 	 		} catch (Exception ne) {
 				logger.warn("Cannot map "+loc, ne);
+				ne.printStackTrace(System.err);
 			}
 		}
 		

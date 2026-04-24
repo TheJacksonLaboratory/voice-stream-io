@@ -60,10 +60,23 @@ public class OverlapService {
 		if (!intersects) return null;
 		
 		T relationship = creator.create(loc, variant);
-		BeanMap map = new BeanMap(relationship);
-		map.putAll(meta);
+		if (meta!=null) {
+			BeanMap map = new BeanMap(relationship);
+			map.putAll(meta);
+		}
 		return relationship;
 	}		
+	
+	public <T extends AbstractEntity> T createOverlap(Variant variant, Located dest, 
+														IntersectionCreator creator, 
+															Map<String,Object> meta) {
+		T relationship = creator.create(dest, variant);
+		if (meta!=null) {
+			BeanMap map = new BeanMap(relationship);
+			map.putAll(meta);
+		}
+		return relationship;
+	}
 	
 	/**
 	 * Get the base of the location which is used for sharding.

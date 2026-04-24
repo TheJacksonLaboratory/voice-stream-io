@@ -165,7 +165,7 @@ public class HomologFunction<N extends HomologGene, E extends HomologGene> exten
 				stmt.execute();
 			}
 		} catch (Exception ne) {
-			ne.printStackTrace();
+			ne.printStackTrace(System.err);
 			throw new RuntimeException(ne);
 		}
 	}

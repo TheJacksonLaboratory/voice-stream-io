@@ -40,9 +40,11 @@ public class ChromosomeService {
 	public String getChromosome(String chr) {
 		
 		if (chr == null) return null;
-		if (chrCache.containsKey(chr)) return chrCache.get(chr);
-		if (chr.isBlank()) return null;
 		chr = chr.toLowerCase();
+		if (chrCache.containsKey(chr)) {
+			return chrCache.get(chr);
+		}
+		if (chr.isBlank()) return null;
 		
 		if (Boolean.getBoolean("strict")) {
 			Matcher matcher = strictChromPattern.matcher(chr);

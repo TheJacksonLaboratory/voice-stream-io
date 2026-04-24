@@ -330,8 +330,8 @@ public class ExportBuilderTest extends AbstractDataFileTest {
 	
 	private void assertNumber(Path dir, String name, int size) throws IOException, ReaderException {
 		
-		assertTrue(Files.exists(dir.resolve(name)));
-		assertTrue(Files.size(dir.resolve(name))>100);
+		assertTrue("File does not exist: "+name, Files.exists(dir.resolve(name)));
+		assertTrue("File is very small: "+name,Files.size(dir.resolve(name))>100);
 		ReaderRequest reader = new ReaderRequest("test", dir.resolve(name));
 		reader.setReaderHint("MapCSVReader");		
 

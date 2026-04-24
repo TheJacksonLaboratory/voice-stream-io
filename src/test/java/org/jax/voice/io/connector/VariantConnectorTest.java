@@ -60,7 +60,7 @@ public class VariantConnectorTest extends AbstractDataFileTest {
 		LineIteratorReader<Variant> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/1000/hs_gvf/homo_sapiens_incl_consequences_2.gvf")));
 		List<Entity> found = reader.stream().flatMap(v->connector.stream(v)).collect(Collectors.toList());
 		
-		assertEquals(6860, found.size());
+		assertEquals(6014, found.size());
 		assertEquals(1000, reader.linesProcessed());
 	}
 
@@ -75,7 +75,7 @@ public class VariantConnectorTest extends AbstractDataFileTest {
 		LineIteratorReader<Variant> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/1000/mm_gvf/mus_musculus_incl_consequences_2.gvf")));
 		List<Entity> found = reader.stream().flatMap(v->connector.stream(v)).collect(Collectors.toList());
 		
-		assertEquals(1286, found.size());
+		assertEquals(1285, found.size());
 		assertEquals(1000, reader.linesProcessed());
 	}
 
@@ -90,7 +90,7 @@ public class VariantConnectorTest extends AbstractDataFileTest {
 		LineIteratorReader<Variant> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/gz/homo_sapiens_incl_consequences_2.gvf.gz")));
 		List<Entity> found = reader.stream().flatMap(v->connector.stream(v, null)).collect(Collectors.toList());
 		
-		assertEquals(6860, found.size());
+		assertEquals(6014, found.size());
 		assertEquals(1000, reader.linesProcessed());
 	}
 
@@ -107,7 +107,7 @@ public class VariantConnectorTest extends AbstractDataFileTest {
 			LineIteratorReader<Variant> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", in, "consequences_2.gvf.gz"));
 			List<Entity> found = reader.stream().flatMap(v->connector.stream(v)).collect(Collectors.toList());
 			
-			assertEquals(6860, found.size());
+			assertEquals(6014, found.size());
 			assertEquals(1000, reader.linesProcessed());
 		}
 	}
@@ -124,7 +124,7 @@ public class VariantConnectorTest extends AbstractDataFileTest {
 		Function<Variant, Stream<Entity>> def = reader.getDefaultConnector();
 		List<Entity> found = reader.stream().flatMap(v->def.apply(v)).collect(Collectors.toList());
 		
-		assertEquals(6860, found.size());
+		assertEquals(6014, found.size());
 		assertEquals(1000, reader.linesProcessed());
 	}
 
@@ -154,7 +154,7 @@ public class VariantConnectorTest extends AbstractDataFileTest {
 		LineIteratorReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/1000/hs_gvf/homo_sapiens_incl_consequences_2.gvf")));
 		List<Entity> found = reader.stream().parallel().flatMap(v->connector.stream(v)).collect(Collectors.toList());
 		
-		assertEquals(6860, found.size());
+		assertEquals(6014, found.size());
 		assertEquals(1000, reader.linesProcessed());
 	}
 
@@ -169,7 +169,7 @@ public class VariantConnectorTest extends AbstractDataFileTest {
 		LineIteratorReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/1000/mm_gvf/mus_musculus_incl_consequences_2.gvf")));
 		List<Entity> found = reader.stream().parallel().flatMap(v->connector.stream(v)).collect(Collectors.toList());
 		
-		assertEquals(1286, found.size());
+		assertEquals(1285, found.size());
 		assertEquals(1000, reader.linesProcessed());
 	}
 	
@@ -199,7 +199,7 @@ public class VariantConnectorTest extends AbstractDataFileTest {
 		
 		LineIteratorReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/gz/homo_sapiens_incl_consequences_1.gvf.gz")));
 		long count = reader.stream().flatMap(v->connector.stream(v)).count();
-		assertEquals(7367093, count);
+		assertEquals(6214445, count);
 		assertEquals(872993, reader.linesProcessed());
 	}
 
@@ -213,7 +213,7 @@ public class VariantConnectorTest extends AbstractDataFileTest {
 		
 		LineIteratorReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("data/gz/mus_musculus_incl_consequences_1.gvf.gz")));
 		long count = reader.stream().flatMap(v->connector.stream(v)).count();
-		assertEquals(6648629, count);
+		assertEquals(5616343, count);
 		assertEquals(1726211, reader.linesProcessed());
 	}
 	
@@ -227,7 +227,7 @@ public class VariantConnectorTest extends AbstractDataFileTest {
 		
 		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Homo sapiens", getFile("data/zip/hs_gvf/homo_sapiens_incl_consequences_1.gvf.zip")));
 		long count = reader.stream().parallel().flatMap(v->connector.stream(v)).count();
-		assertEquals(7367093, count);
+		assertEquals(6214445, count);
 		assertEquals(872993, reader.linesProcessed());
 	}
 
@@ -241,7 +241,7 @@ public class VariantConnectorTest extends AbstractDataFileTest {
 		
 		StreamReader<GeneticEntity> reader = ReaderFactory.getReader(new ReaderRequest("Mus musculus", getFile("data/zip/mm_gvf/mus_musculus_incl_consequences_1.gvf.zip")));
 		long count = reader.stream().parallel().flatMap(v->connector.stream(v)).count();
-		assertEquals(6648629, count);
+		assertEquals(5616343, count);
 		assertEquals(1726211, reader.linesProcessed());
 	}
 	

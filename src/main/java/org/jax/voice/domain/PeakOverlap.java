@@ -30,7 +30,7 @@ public class PeakOverlap extends AbstractEntity {
 		StringBuilder buf = new StringBuilder();
 		buf.append(":START_ID(Rs-Id-"+getSpecies()+")");
 		buf.append(getDelimiter());
-		buf.append(":END_ID(Peak-Id)");
+		buf.append(":END_ID(Peak-Id-"+getSpecies()+")");
 		buf.append(getDelimiter());
 		buf.append(":TYPE");
 		return buf.toString();

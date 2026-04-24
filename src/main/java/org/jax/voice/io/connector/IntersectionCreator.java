@@ -17,5 +17,4 @@ public interface IntersectionCreator {
 	 */
 	<T extends AbstractEntity> T create(Located loc, Variant variant);
 
-	
 }
