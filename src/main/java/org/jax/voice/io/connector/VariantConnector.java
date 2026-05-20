@@ -83,16 +83,17 @@ public class VariantConnector<N extends GeneticEntity, E extends Entity> impleme
 			if (v.getVariantEffect()==null || v.getVariantEffect().isEmpty()) {
 				return (Stream<E>) Stream.of(v);
 			}
-			Map<String,VariantEffect> ve = v.getVariantEffect().stream()
+			Collection<VariantEffect> ve = v.getVariantEffect()
+					.stream()
 					.filter(e->e!=null)
 					.filter(e->e.getFeatureId()!=null)
 					.filter(e->!e.getFeatureId().trim().isBlank())
 					.map(e->{e.setVariant(v); return e;})
-					.collect(Collectors.toMap(e->e.getFeatureId(), e->e, (a, b) -> a));
+					.collect(Collectors.toSet());
 
 			Collection<Entity> ret = new LinkedList<>();
 			ret.add(v);
-			ret.addAll(ve.values());
+			ret.addAll(ve);
 			return (Stream<E>) ret.stream();
 
 		} finally {
@@ -197,8 +198,7 @@ public class VariantConnector<N extends GeneticEntity, E extends Entity> impleme
 		// Try not to do filtering unless we have to, it's slow.
 		if (!filters.isEmpty()) {
 			Collection<Transcript> transcripts = session.loadAll(Transcript.class, filters);
-			Map<String, Transcript> tmap = transcripts.stream()
-					.collect(Collectors.toMap(t->t.getTranscriptId(), t->t, (a, b) -> a));
+			Map<String, Transcript> tmap = transcripts.stream().collect(Collectors.toMap(t->t.getTranscriptId(), t->t));
 
 			// Add the filtered Transcripts to the cache with a soft reference.
 			it = tmap.keySet().iterator();
