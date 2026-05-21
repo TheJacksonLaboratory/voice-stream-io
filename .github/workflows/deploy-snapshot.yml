@@ -1,0 +1,23 @@
+name: Deploy Snapshot
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy-snapshot:
+    runs-on: ubuntu-latest
+    environment: BUILD
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/maven
+      - uses: ./.github/actions/setup-env
+        with:
+          jax_cs_registry_github: ${{ secrets.JAX_CS_REGISTRY_GITHUB }}
+      - name: Deploy SNAPSHOT to Maven
+        run: |
+          cp extensions.xml ~/.m2/
+          mvn deploy -Dmaven.javadoc.skip=true -DskipTests=true -Djacoco.skip=true -DdeployJax=true -DperformRelease=false

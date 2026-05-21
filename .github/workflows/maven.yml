@@ -13,10 +13,6 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-  workflow_dispatch:
-    # Manual trigger: run from any PR branch to publish <version>-SNAPSHOT to Maven.
-    # The build job must pass before the deploy-snapshot job runs.
-    # Do not trigger on master — the push event handles the release deploy there.
 
 permissions:
   contents: read
@@ -68,18 +64,3 @@ jobs:
           name: test-results
           path: target/surefire-reports/**
 
-  deploy-snapshot:
-    needs: build
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    environment: BUILD
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/maven
-      - uses: ./.github/actions/setup-env
-        with:
-          jax_cs_registry_github: ${{ secrets.JAX_CS_REGISTRY_GITHUB }}
-      - name: Deploy SNAPSHOT to Maven
-        run: |
-          cp extensions.xml ~/.m2/
-          mvn deploy -Dmaven.javadoc.skip=true -DskipTests=true -Djacoco.skip=true -DdeployJax=true -DperformRelease=false
