@@ -37,6 +37,13 @@ public final class LMSchema {
     /** uint32 vid (BE) → rsId (UTF-8 bytes). */
     public static final String DBI_VID_TO_RSID = "vid_to_rsid";
 
+    /**
+     * uint32 vid (BE) → 8 bytes: start:i32 BE || end:i32 BE. Genomic position of the
+     * variant. Optional — older LMDB envs built before schema 4.0.1 will not have this
+     * DBI, so readers must use {@code tryOpenDbi} and tolerate its absence.
+     */
+    public static final String DBI_VID_TO_POSITION = "vid_to_position";
+
     /** uint32 peakId (BE) → packed 10-byte {@link PeakMeta} record. */
     public static final String DBI_PEAK_META = "peak_meta";
 
