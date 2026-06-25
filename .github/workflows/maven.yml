@@ -36,10 +36,12 @@ jobs:
         run: |
           cp extensions.xml ~/.m2/
           mvn clean package
-          
-      - name: Deploy
+
+      - name: Deploy release to Maven (master only)
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: mvn deploy -Dmaven.javadoc.skip=true -DskipTests=true -Djacoco.skip=true -DdeployJax=true -DperformRelease=false 
+        run: |
+          mvn versions:set -DremoveSnapshot=true -DgenerateBackupPoms=false
+          mvn deploy -Dmaven.javadoc.skip=true -DskipTests=true -Djacoco.skip=true -DdeployJax=true -DperformRelease=false
 
       - name: Upload maven artifacts
         uses: actions/upload-artifact@v4
@@ -61,3 +63,4 @@ jobs:
         with:
           name: test-results
           path: target/surefire-reports/**
+
